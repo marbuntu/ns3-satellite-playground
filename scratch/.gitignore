@@ -1,6 +1,7 @@
 # Ignore everything on scratch by default, except the provided examples
-/*
+#/*
 !.gitignore
 
 !packet-length-test
+!
 !CMakeLists.txt
