@@ -23,12 +23,12 @@ typedef struct {
 
 
 
-static void generate_packet(simparams_t *params)
-{
-    Ptr<MobilityModel> sat0 = params->constellation->getSatellite(10);
+// static void generate_packet(simparams_t *params)
+// {
+//     Ptr<MobilityModel> sat0 = params->constellation->getSatellite(10);
 
-    std::cout << sat0->GetVelocity().GetLength() << "\n";
-}
+//     std::cout << sat0->GetVelocity().GetLength() << "\n";
+// }
 
 
 
