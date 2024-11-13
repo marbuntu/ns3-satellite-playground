@@ -50,3 +50,4 @@ cmake-build-release/
 
 # Ignore local cache used by e.g. clangd
 .cache/
+*.txt
