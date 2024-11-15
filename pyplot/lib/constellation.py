@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import matplotlib.patches as pat
+import matplotlib as mpl
 
 
 class Satellite:
@@ -141,22 +142,22 @@ class ConstellationPlot():
     def load_const(self):
         Ni = 0
 
-        for n in range(1,1+self.No):
-            orb = np.loadtxt(f"./data/{self._pref}-orb{n}.txt")
-            self.coords[Ni:Ni+self.Ns,0] = orb[:,0]
-            self.coords[Ni:Ni+self.Ns,1] = orb[:,1]
+        pos = np.loadtxt(f"./data/{self._pref}/sat-pos.txt")
+        self.coords[:,0] = pos[:,0]
+        self.coords[:,1] = pos[:,1]
 
-            Ni += self.Ns
-            print(Ni)
-            # lats = orb[:,1]
-            # lons = orb[:,0]
+        # for n in range(1,1+self.No):
+        #     orb = np.loadtxt(f"./data/{self._pref}-orb{n}.txt")
+        #     self.coords[Ni:Ni+self.Ns,0] = orb[:,0]
+        #     self.coords[Ni:Ni+self.Ns,1] = orb[:,1]
 
-        print(self.coords)
+        #     Ni += self.Ns
 
 
     def get_earth_basemap(self, projection : str = 'ortho') -> Basemap:
-        plt.figure(figsize=(12, 12))
-        map = Basemap(projection=projection,lat_0=35,lon_0=40,resolution='l')
+        #plt.figure(figsize=(8, 8))
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+        map = Basemap(projection=projection,lat_0=40,lon_0=40,resolution='l', ax=axs[0])
         # draw coastlines, country boundaries, fill continents.
         map.drawcoastlines(linewidth=0.25)
         map.drawcountries(linewidth=0.25)
@@ -167,27 +168,47 @@ class ConstellationPlot():
         map.drawmeridians(np.arange(0,360,30))
         map.drawparallels(np.arange(-90,90,30))
 
-        return map
+        map2 = Basemap(projection=projection,lat_0=-40,lon_0=-80,resolution='l', ax=axs[1])
+        # draw coastlines, country boundaries, fill continents.
+        map2.drawcoastlines(linewidth=0.25)
+        map2.drawcountries(linewidth=0.25)
+        map2.fillcontinents(color='ivory',lake_color='azure')
+        # draw the edge of the map projection region (the projection limb)
+        map2.drawmapboundary(fill_color='azure')
+        # draw lat/lon grid lines every 30 degrees.
+        map2.drawmeridians(np.arange(0,360,30))
+        map2.drawparallels(np.arange(-90,90,30))
+
+        return (map, map2)
 
 
-    def plot_global_traffic(self, traffic, filename, projection : str = 'ortho'):
+    def plot_global_traffic(self, traffic, filename, PS : int = 1, projection : str = 'ortho'):
 
-        map = self.get_earth_basemap(projection=projection)
         lats = self.coords[:,1]
         lons = self.coords[:,0]
 
-        x, y = map(lats, lons)
-        map.scatter(x, y, marker='h', color='purple', alpha=.6)
-    
-        dif_x = x[1:] - x[:-1]
-        dif_y = y[1:] - y[:-1]
+        data = np.where(traffic > 0, traffic, 1)
+        data = np.log2(data)
+        norm = mpl.colors.Normalize(vmin=0.9*np.min(data[data.nonzero()]), vmax=np.max(data))
+        cmap = mpl.colormaps['jet'] #plt.cm.RdPu # cm.colormaps['plasma']
+        colors = cmap(norm(data)) # / np.max(traffic))
 
-        print(traffic.shape)
-        for r in range(traffic.shape[1]):
-            for n in np.where(traffic[r,:] > 0)[0]:
-                lt = [x[r], x[n]]
-                ln = [y[r], y[n]]
-                map.plot(lt, ln, 'b')
+        for map in self.get_earth_basemap(projection=projection):
+
+            x, y = map(lats, lons)
+            map.scatter(x, y, marker='h', color='purple', alpha=.6)
+            map.scatter(x[PS], y[PS], marker='X', color='darkred', s=100, alpha=.9)
+        
+            # dif_x = x[1:] - x[:-1]
+            # dif_y = y[1:] - y[:-1]
+
+
+            for r in range(traffic.shape[1]):
+                for n in np.where(traffic[r,:] > 0)[0]:
+                    lt = [x[r], x[n]]
+                    ln = [y[r], y[n]]
+                    color = colors[r,n]
+                    map.plot(lt, ln, color=color, alpha=.7)
 
         #map.quiver(x[:-1], y[:-1], dif_x, dif_y, alpha=.7, color="blue")
 
@@ -197,6 +218,7 @@ class ConstellationPlot():
 
 
         #plt.title('contour lines over filled continent background')
+
         plt.savefig(f"./img/global-{filename}-plot.jpg")
         plt.close()
 

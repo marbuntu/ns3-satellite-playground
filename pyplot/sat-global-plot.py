@@ -10,6 +10,7 @@ import numpy as np
 # ortho
 
 def get_earth_basemap() -> Basemap:
+    
     map = Basemap(projection='ortho',lat_0=35,lon_0=40,resolution='l')
     # draw coastlines, country boundaries, fill continents.
     map.drawcoastlines(linewidth=0.25)
@@ -44,18 +45,21 @@ for cst in C_names:
 
     map = get_earth_basemap()
 
-    for n in range(1,1+N_orbs):
-        orb = np.loadtxt(f"./data/{cst}-orb{n}.txt")
-        lats = orb[:,1]
-        lons = orb[:,0]
-
-        x, y = map(lats, lons)
-        map.scatter(x, y, marker='h', color='purple', alpha=.6, label = f"Orb {n}")
+    # for n in range(1,1+N_orbs):
+    #     orb = np.loadtxt(f"./data/{cst}-orb{n}.txt")
     
-        dif_x = x[1:] - x[:-1]
-        dif_y = y[1:] - y[:-1]
+    orb = np.loadtxt("./data/sat-pos.txt")
 
-        map.quiver(x[:-1], y[:-1], dif_x, dif_y, alpha=.7, color="blue")
+    lats = orb[:,1]
+    lons = orb[:,0]
+
+    x, y = map(lats, lons)
+    map.scatter(x, y, marker='h', color='purple', alpha=.6)# label = f"Orb {n}")
+
+    dif_x = x[1:] - x[:-1]
+    dif_y = y[1:] - y[:-1]
+
+    map.quiver(x[:-1], y[:-1], dif_x, dif_y, alpha=.7, color="blue")
 
     #map.quiver(x[0], y[0],(x[1]-x[0]), (y[1]-y[0]))
         #plt.arrow(x[0], y[0], (x[1]-x[0]), (y[1]-y[0]),  head_width=15, head_length=10, overhang=.2, color="blue", alpha=.9, length_includes_head=True)

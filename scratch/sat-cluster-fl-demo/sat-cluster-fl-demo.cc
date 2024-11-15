@@ -36,31 +36,31 @@ static double get_crit_distance(double altitude)
 }
 
 
-static size_t find_shortest_right(orbid_t orb, Ptr<Node> sat)
-{
-    Ptr<MobilityModel> mob1 = sat->GetObject<MobilityModel>();
-    double min_dist = 0;
-    size_t min_arg = 0;
+// static size_t find_shortest_right(orbid_t orb, Ptr<Node> sat)
+// {
+//     Ptr<MobilityModel> mob1 = sat->GetObject<MobilityModel>();
+//     double min_dist = 0;
+//     size_t min_arg = 0;
 
-    for (satid_t sid : SatelliteNodeTag::SatsByOrbit(orb))
-    {
-        Ptr<Node> dst = SatelliteNodeTag::GetSatellite(sid);
-        Ptr<MobilityModel> mob2 = dst->GetObject<MobilityModel>();
+//     for (satid_t sid : SatelliteNodeTag::SatsByOrbit(orb))
+//     {
+//         Ptr<Node> dst = SatelliteNodeTag::GetSatellite(sid);
+//         Ptr<MobilityModel> mob2 = dst->GetObject<MobilityModel>();
 
-        double dist = mob1->GetDistanceFrom(mob2);
+//         double dist = mob1->GetDistanceFrom(mob2);
 
-        if ((min_arg == 0) || (dist < min_dist))
-        {
-            min_arg = sid;
-            min_dist = dist;
-        }
+//         if ((min_arg == 0) || (dist < min_dist))
+//         {
+//             min_arg = sid;
+//             min_dist = dist;
+//         }
 
-    }
+//     }
 
-    // std::cout << "arg: " << min_arg << "\t" << min_dist << "\n";
+//     // std::cout << "arg: " << min_arg << "\t" << min_dist << "\n";
 
-    return min_arg;
-}
+//     return min_arg;
+// }
 
 
 static void setup_gridplus(size_t cid)
@@ -111,16 +111,21 @@ static void setup_gridplus(size_t cid)
             // Left
             if (o > 1)
             {
-                satid_t s = find_shortest_right(o-1, sat);
-                tbl.Add(sat_id, s); //sat_id - Ns + 1);
+                //satid_t s = find_shortest_right(o-1, sat);
+                //tbl.Add(sat_id, s);
+                tbl.Add(sat_id, sat_id - Ns);
+                
+                
                 //std::cout << "> Left: " << (sat_id - Ns) << "\n";
             }
 
             // Right
             if (o < No)
             {
-                satid_t s = find_shortest_right(o+1, sat);
-                tbl.Add(sat_id, s);
+                // satid_t s = find_shortest_right(o+1, sat);
+                // tbl.Add(sat_id, s);
+                tbl.Add(sat_id, sat_id + Ns);
+                
                 //if (so < Ns) tbl.Add(sat_id, sat_id + Ns - 1);
                 //std::cout << "> Right: " << (sat_id + Ns) << "\n";
             }
@@ -184,7 +189,9 @@ static uint64_t check_link_available(Ptr<Node> sat1, Ptr<Node> sat2)
 static void plot_latency_matrix()
 {
 
-    double crit_dist = get_crit_distance(200);
+    double crit_dist = get_crit_distance(2000);
+
+    std::cout << "Crit Distance: " << crit_dist << "\n";
 
     std::ofstream out("./pyplot/data/sat-latency-matrix.txt");
 
@@ -192,11 +199,21 @@ static void plot_latency_matrix()
 
     std::ofstream edr("./pyplot/data/sat-edr-matrix.txt");
 
+    std::ofstream pos("./pyplot/data/sat-pos.txt");
+
 
     for (size_t sc = 1; sc <= SatelliteNodeTag::GetSatsN(); sc++)
     {
         Ptr<Node> sat1 = SatelliteNodeTag::GetSatellite(sc);
         Ptr<MobilityModel> mob1 = sat1->GetObject<MobilityModel>();
+
+        GeoCoordinate geo = GeoCoordinate(mob1->GetPosition());
+        pos << geo.GetLatitude()
+            << "\t" << geo.GetLongitude()
+            << "\t" << geo.GetAltitude()
+            << "\n";
+
+
 
         for (size_t so = 1; so <= SatelliteNodeTag::GetSatsN(); so++)
         {
@@ -244,6 +261,7 @@ static void plot_latency_matrix()
     out.close();
     bit.close();
     edr.close();
+    pos.close();
 }
 
 
