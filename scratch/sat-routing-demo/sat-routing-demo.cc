@@ -13,6 +13,8 @@
 
 #include <ns3/sat-isl-pck-tag.h>
 
+#include <ns3/sat-isl-ipv4-routing.h>
+
 using namespace ns3;
 
 
@@ -43,11 +45,24 @@ void serverRxClbk(sim_params_t *params, const Ptr<const Packet> packet, const Ad
 
 int main(int argc, char* argv[])
 {
+    bool use_sat_router = true;
 
     LogComponentEnable("UdpClient", LOG_LEVEL_INFO);
     LogComponentEnable("UdpServer", LOG_LEVEL_INFO);
+    LogComponentEnable("SatISLRoutingIPv4", LOG_LEVEL_ALL);
+    //LogComponentEnable("SatelliteISLNetDevice", LOG_LEVEL_ALL);
 
-    // LogComponentEnable("SatelliteISLNetDevice", LOG_LEVEL_ALL);
+
+
+    // Routing Tester
+    Ptr<SatelliteISLRoutingIPv4> satrouter = CreateObject<SatelliteISLRoutingIPv4>();
+
+    Ipv4ListRouting rtr = Ipv4ListRouting();
+    rtr.AddRoutingProtocol(satrouter, 10);
+
+    ///////
+
+
     // LogComponentEnable("SatelliteISLChannel", LOG_LEVEL_ALL);
     // LogComponentEnable("SatelliteISLTerminal", LOG_LEVEL_ALL);
 
@@ -94,6 +109,7 @@ int main(int argc, char* argv[])
 
     InternetStackHelper internet;
     internet.Install(c);
+
 
     // Setup p2p Links
     NodeContainer nAnB = NodeContainer(c.Get(0), c.Get(1));
@@ -145,11 +161,27 @@ int main(int argc, char* argv[])
     // ipv4C->SetMetric(ifIndexC, 1);
     // ipv4C->SetUp(ifIndexC);
 
+
+    // if (use_sat_router)
+    // {
+    //     for ( auto i = iAiB.Begin(); i != iAiB.End(); i++)
+    //     {
+    //         Ptr<Ipv4> ip4 = i->first;
+    //         ip4->SetRoutingProtocol(satrouter);
+    //     }
+    // }
+
+
     for ( auto i = iBiC.Begin(); i != iBiC.End(); i++)
     {
         Ptr<Ipv4> ip4 = i->first;
         uint32_t itf = i->second;
         NS_LOG_UNCOND(ip4->GetAddress(itf, 0));
+
+        // if (use_sat_router)
+        // {
+        //     ip4->SetRoutingProtocol(satrouter);
+        // }
     }
 
     // for ( auto i = iBiC.Begin(); i != iAiB.End(); i++)
@@ -160,18 +192,38 @@ int main(int argc, char* argv[])
     // }
 
     Ipv4StaticRoutingHelper ipv4RoutingHelper;
-    // Create static routes from A to C
-    Ptr<Ipv4StaticRouting> staticRoutingA = ipv4RoutingHelper.GetStaticRouting(ipv4A);
-    // The ifIndex for this outbound route is 1; the first p2p link added
-    staticRoutingA->AddHostRouteTo(Ipv4Address("192.168.1.1"), Ipv4Address("10.1.1.2"), 1);
-    staticRoutingA->AddHostRouteTo(Ipv4Address("10.1.1.6"), Ipv4Address("10.1.1.2"), 1);
-    Ptr<Ipv4StaticRouting> staticRoutingB = ipv4RoutingHelper.GetStaticRouting(ipv4B);
-    // The ifIndex we want on node B is 2; 0 corresponds to loopback, and 1 to the first point to
-    // point link
-    staticRoutingB->AddHostRouteTo(Ipv4Address("192.168.1.1"), Ipv4Address("10.1.1.6"), 2);
-    staticRoutingB->AddHostRouteTo(Ipv4Address("10.1.1.6"), Ipv4Address("10.1.1.6"), 2);
-    // Create the OnOff application to send UDP datagrams of size
-    // 210 bytes at a rate of 448 Kb/s
+    if (use_sat_router)
+    {
+        Ptr<SatelliteISLRoutingIPv4> RoutingA = Create<SatelliteISLRoutingIPv4>(); //StaticCast<SatelliteISLRoutingIPv4>(ipv4A->GetRoutingProtocol());
+        RoutingA->AddRoutingEntry(Ipv4Address("192.168.1.1"), Ipv4Mask::GetOnes(), Ipv4Address("10.1.1.2"), 1);
+        RoutingA->AddRoutingEntry(Ipv4Address("10.1.1.6"), Ipv4Mask::GetOnes(), Ipv4Address("10.1.1.2"), 1);
+        ipv4A->SetRoutingProtocol(RoutingA);
+
+        Ptr<SatelliteISLRoutingIPv4> RoutingB = Create<SatelliteISLRoutingIPv4>();
+        RoutingB->AddRoutingEntry(Ipv4Address("192.168.1.1"), Ipv4Mask::GetOnes(), Ipv4Address("10.1.1.6"), 2);
+        RoutingB->AddRoutingEntry(Ipv4Address("10.1.1.6"), Ipv4Mask::GetOnes(), Ipv4Address("10.1.1.6"), 2);
+        ipv4B->SetRoutingProtocol(RoutingB);
+    }   
+    else
+    {
+
+        // Create static routes from A to C
+        Ptr<Ipv4StaticRouting> staticRoutingA = ipv4RoutingHelper.GetStaticRouting(ipv4A);
+        // The ifIndex for this outbound route is 1; the first p2p link added
+        staticRoutingA->AddHostRouteTo(Ipv4Address("192.168.1.1"), Ipv4Address("10.1.1.2"), 1);
+        staticRoutingA->AddHostRouteTo(Ipv4Address("10.1.1.6"), Ipv4Address("10.1.1.2"), 1);
+        Ptr<Ipv4StaticRouting> staticRoutingB = ipv4RoutingHelper.GetStaticRouting(ipv4B);
+        // The ifIndex we want on node B is 2; 0 corresponds to loopback, and 1 to the first point to
+        // point link
+        staticRoutingB->AddHostRouteTo(Ipv4Address("192.168.1.1"), Ipv4Address("10.1.1.6"), 2);
+        staticRoutingB->AddHostRouteTo(Ipv4Address("10.1.1.6"), Ipv4Address("10.1.1.6"), 2);
+        // Create the OnOff application to send UDP datagrams of size
+        // 210 bytes at a rate of 448 Kb/s
+
+        Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper>("dynamic-global-routing.routes", std::ios::out);
+        staticRoutingA->PrintRoutingTable(routingStream);
+
+    }
     
     Ipv4Address serverAddress = Ipv4Address("10.1.1.6"); //("192.168.1.1");
     uint16_t serverPort = 9; // Discard port (RFC 863)

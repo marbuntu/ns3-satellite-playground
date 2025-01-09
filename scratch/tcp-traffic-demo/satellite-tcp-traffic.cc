@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 
     Ptr<WalkerConstellationHelper> helper = CreateObjectWithAttributes<WalkerConstellationHelper>(
         "Inclination", DoubleValue(66.0),
-        "NumOfSats", IntegerValue(10),
+        "SatsPerOrbit", IntegerValue(10),
         "NumOfOrbits", IntegerValue(10),
         "Altitude", DoubleValue(480)
     );

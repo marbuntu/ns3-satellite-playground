@@ -170,7 +170,7 @@ static uint64_t check_link_available(Ptr<Node> sat1, Ptr<Node> sat2)
     for (auto terminal = net1->BeginTerminals(); terminal != net1->EndTerminals(); terminal++)
     {
         //NS_LOG_UNCOND(terminal);
-        DataRate new_rate = (*terminal)->GetRateEstimation(mob1, mob2, chn->GetPropagationLossModel()); //.GetRateEstimation(mob1, mob2, chn->GetPropagationLossModel());
+        DataRate new_rate = (*terminal)->GetRateEstimation(mob1, mob2, chn->GetPropagationLossModel(), chn->GetNoiseTemperature()); //.GetRateEstimation(mob1, mob2, chn->GetPropagationLossModel());
         
         if ((new_rate > 0) && (new_rate > rate))
         {

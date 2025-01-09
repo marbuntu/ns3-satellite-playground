@@ -2,6 +2,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.random as rnd
 import random
 from geopy import distance
 
@@ -28,10 +29,23 @@ distances = np.zeros((Cr.shape[0], 2))
 N_load = 9000 * 112 * 8
 
 G = Cst.graph
-PS = 119# 119 #25
 
+if Pref == "star":
+    PS = 119# 119 #25
+else:
+    PS = 25
 
 cplot = ConstellationPlot(5, 40, cst_prefix=Pref)
+
+# Setup Pck Loss
+use_pck_loss = True
+pck_loss = np.zeros(200)
+while np.count_nonzero(pck_loss) < 10:
+    if id == PS:
+        continue
+
+    id = rnd.randint(0, 199)
+    pck_loss[id] = 1
 
 
 def degrade_link(n1 : int, n2 : int, load_bits : float) -> float:
@@ -92,6 +106,9 @@ def run_process(G : nx.Graph, PS : int = 1) -> None:
 
             if n > 1:
                 clat += 1
+
+        if pck_loss[src]:
+            clat += 500
 
         pos_src = positions[src]
         sr_ln = distance.lonlat(pos_src[1], pos_src[0], 2000)
