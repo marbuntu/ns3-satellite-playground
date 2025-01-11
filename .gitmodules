@@ -1,0 +1,15 @@
+[submodule "contrib/satellite"]
+	path = contrib/satellite
+	url = https://github.com/sns3/sns3-satellite.git
+	branch = master
+[submodule "contrib/traffic"]
+	path = contrib/traffic
+	url = https://github.com/sns3/traffic.git
+	branch = master
+[submodule "contrib/magister-stats"]
+	path = contrib/magister-stats
+	url = https://github.com/sns3/stats.git
+	branch = master
+[submodule "contrib/mlxsat"]
+	path = contrib/mlxsat
+	url = https://github.com/marbuntu/mlxsat.git
