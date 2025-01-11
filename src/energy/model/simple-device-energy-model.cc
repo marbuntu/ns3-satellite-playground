@@ -19,16 +19,18 @@
 
 #include "simple-device-energy-model.h"
 
-#include "ns3/energy-source.h"
+#include "energy-source.h"
+
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/trace-source-accessor.h"
 
 namespace ns3
 {
+namespace energy
+{
 
 NS_LOG_COMPONENT_DEFINE("SimpleDeviceEnergyModel");
-
 NS_OBJECT_ENSURE_REGISTERED(SimpleDeviceEnergyModel);
 
 TypeId
@@ -131,4 +133,5 @@ SimpleDeviceEnergyModel::DoGetCurrentA() const
     return m_actualCurrentA;
 }
 
+} // namespace energy
 } // namespace ns3

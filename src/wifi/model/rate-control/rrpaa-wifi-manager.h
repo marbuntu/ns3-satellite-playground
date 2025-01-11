@@ -37,7 +37,7 @@ struct RrpaaWifiRemoteStation;
  * Threshold Coordinated Management for High-Density IEEE 802.11 Networks</i>
  * by Matías Richart; Jorge Visca and Javier Baliosian in Integrated Network Management (IM),
  * 2015 IFIP/IEEE International Symposium on (pp. 139-146). IEEE.
- * http://dl.ifip.org/db/conf/im/im2015/137430.pdf
+ * https://ieeexplore.ieee.org/document/7140286
  *
  * RRPAA adds power control to the RRAA mechanism. RRAA is described in
  * <i>Robust rate adaptation for 802.11 wireless networks</i> by Starsky H. Y. Wong;
@@ -110,11 +110,12 @@ class RrpaaWifiManager : public WifiRemoteStationManager
                         double ackSnr,
                         WifiMode ackMode,
                         double dataSnr,
-                        uint16_t dataChannelWidth,
+                        ChannelWidthMhz dataChannelWidth,
                         uint8_t dataNss) override;
     void DoReportFinalRtsFailed(WifiRemoteStation* station) override;
     void DoReportFinalDataFailed(WifiRemoteStation* station) override;
-    WifiTxVector DoGetDataTxVector(WifiRemoteStation* station, uint16_t allowedWidth) override;
+    WifiTxVector DoGetDataTxVector(WifiRemoteStation* station,
+                                   ChannelWidthMhz allowedWidth) override;
     WifiTxVector DoGetRtsTxVector(WifiRemoteStation* station) override;
     bool DoNeedRts(WifiRemoteStation* st, uint32_t size, bool normally) override;
 

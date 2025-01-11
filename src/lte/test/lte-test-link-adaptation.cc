@@ -52,7 +52,7 @@ LteTestDlSchedulingCallback(LteLinkAdaptationTestCase* testcase,
  */
 
 LteLinkAdaptationTestSuite::LteLinkAdaptationTestSuite()
-    : TestSuite("lte-link-adaptation", SYSTEM)
+    : TestSuite("lte-link-adaptation", Type::SYSTEM)
 {
     NS_LOG_INFO("Creating LteLinkAdaptionTestSuite");
 
@@ -101,10 +101,14 @@ LteLinkAdaptationTestSuite::LteLinkAdaptationTestSuite()
                                                   snrEfficiencyMcs[i].snrDb,
                                                   lossDb,
                                                   snrEfficiencyMcs[i].mcsIndex),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteLinkAdaptationTestSuite lteLinkAdaptationTestSuite;
 
 /**
@@ -185,7 +189,7 @@ LteLinkAdaptationTestCase::DoRun()
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate the default EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
+    EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 

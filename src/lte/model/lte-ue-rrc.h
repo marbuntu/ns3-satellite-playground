@@ -26,13 +26,13 @@
 #ifndef LTE_UE_RRC_H
 #define LTE_UE_RRC_H
 
-#include "ns3/component-carrier-ue.h"
-#include <ns3/lte-as-sap.h>
-#include <ns3/lte-pdcp-sap.h>
-#include <ns3/lte-rrc-sap.h>
-#include <ns3/lte-ue-ccm-rrc-sap.h>
-#include <ns3/lte-ue-cmac-sap.h>
-#include <ns3/lte-ue-cphy-sap.h>
+#include "lte-as-sap.h"
+#include "lte-pdcp-sap.h"
+#include "lte-rrc-sap.h"
+#include "lte-ue-ccm-rrc-sap.h"
+#include "lte-ue-cmac-sap.h"
+#include "lte-ue-cphy-sap.h"
+
 #include <ns3/object.h>
 #include <ns3/packet.h>
 #include <ns3/traced-callback.h>
@@ -40,9 +40,6 @@
 #include <map>
 #include <set>
 #include <vector>
-
-#define MIN_NO_CC 1
-#define MAX_NO_CC 5 // this is the maximum number of carrier components allowed by 3GPP up to R13
 
 namespace ns3
 {
@@ -63,7 +60,7 @@ namespace ns3
  *  - time-to-trigger check is always performed before the reporting, so there
  *    would still be chance for it to cancel the reporting if necessary.
  */
-static const Time UE_MEASUREMENT_REPORT_DELAY = MicroSeconds(1);
+extern const Time UE_MEASUREMENT_REPORT_DELAY;
 
 class LteRlc;
 class LteMacSapProvider;
@@ -139,7 +136,7 @@ class LteUeRrc : public Object
      */
     static TypeId GetTypeId();
 
-    /// Initiaize SAP
+    /// Initialize SAP
     void InitializeSap();
 
     /**
@@ -347,7 +344,7 @@ class LteUeRrc : public Object
     typedef void (*ImsiCidRntiTracedCallback)(uint64_t imsi, uint16_t cellId, uint16_t rnti);
 
     /**
-     * TracedCallback signature for MIBRecieved, Sib1Received and
+     * TracedCallback signature for MIBReceived, Sib1Received and
      * HandoverStart events.
      *
      * \param [in] imsi
@@ -734,7 +731,7 @@ class LteUeRrc : public Object
     void StartConnection();
     /**
      * \brief Leave connected mode method
-     * Resets the UE back to an appropiate state depending
+     * Resets the UE back to an appropriate state depending
      * on the nature of cause. For example, the UE is move
      * to the IDLE_START state upon radio link failure. At
      * RRC, all radio bearers except SRB 0 are removed,
@@ -821,7 +818,7 @@ class LteUeRrc : public Object
 
     uint8_t m_lastRrcTransactionIdentifier; ///< last RRC transaction identifier
 
-    LteRrcSap::PdschConfigDedicated m_pdschConfigDedicated; ///< the PDSCH condig dedicated
+    LteRrcSap::PdschConfigDedicated m_pdschConfigDedicated; ///< the PDSCH config dedicated
 
     uint16_t m_dlBandwidth; /**< Downlink bandwidth in RBs. */
     uint16_t m_ulBandwidth; /**< Uplink bandwidth in RBs. */

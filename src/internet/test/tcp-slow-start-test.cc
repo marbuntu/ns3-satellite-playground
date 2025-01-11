@@ -30,7 +30,6 @@ NS_LOG_COMPONENT_DEFINE("TcpSlowStartTest");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Test the normal behavior for slow start
  *
@@ -208,7 +207,6 @@ TcpSlowStartNormalTest::Rx(const Ptr<const Packet> p, const TcpHeader& h, Socket
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief A slow start test using a socket which sends smaller ACKs
  *
@@ -262,7 +260,6 @@ TcpSlowStartAttackerTest::CreateReceiverSocket(Ptr<Node> node)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP Slow Start TestSuite.
  */
@@ -270,7 +267,7 @@ class TcpSlowStartTestSuite : public TestSuite
 {
   public:
     TcpSlowStartTestSuite()
-        : TestSuite("tcp-slow-start-test", UNIT)
+        : TestSuite("tcp-slow-start-test", Type::UNIT)
     {
         // This test have less packets to transmit than SsTh
         std::list<TypeId> types = {
@@ -287,21 +284,21 @@ class TcpSlowStartTestSuite : public TestSuite
                                                    10,
                                                    t,
                                                    "slow start 500 byte, " + typeName),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new TcpSlowStartNormalTest(1000,
                                                    1000,
                                                    10000,
                                                    9,
                                                    t,
                                                    "slow start 1000 byte, " + typeName),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(new TcpSlowStartNormalTest(500,
                                                    250,
                                                    10000,
                                                    10,
                                                    t,
                                                    "slow start small packets, " + typeName),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
             AddTestCase(
                 new TcpSlowStartAttackerTest(500,
                                              500,
@@ -309,7 +306,7 @@ class TcpSlowStartTestSuite : public TestSuite
                                              10,
                                              t,
                                              "slow start ack attacker, 500 byte, " + typeName),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
             AddTestCase(
                 new TcpSlowStartAttackerTest(1000,
                                              1000,
@@ -317,7 +314,7 @@ class TcpSlowStartTestSuite : public TestSuite
                                              9,
                                              t,
                                              "slow start ack attacker, 1000 byte, " + typeName),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
         }
     }
 };

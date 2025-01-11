@@ -19,7 +19,6 @@
  */
 
 #include "ns3/applications-module.h"
-#include "ns3/config-store.h"
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/log.h"
@@ -45,7 +44,7 @@ PrintGnuplottableUeListToFile(std::string filename)
         NS_LOG_ERROR("Can't open file " << filename);
         return;
     }
-    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it)
+    for (auto it = NodeList::Begin(); it != NodeList::End(); ++it)
     {
         Ptr<Node> node = *it;
         int nDevs = node->GetNDevices();
@@ -74,7 +73,7 @@ PrintGnuplottableEnbListToFile(std::string filename)
         NS_LOG_ERROR("Can't open file " << filename);
         return;
     }
-    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it)
+    for (auto it = NodeList::Begin(); it != NodeList::End(); ++it)
     {
         Ptr<Node> node = *it;
         int nDevs = node->GetNDevices();

@@ -32,6 +32,7 @@
 using namespace ns3;
 
 /**
+ * \ingroup uan
  *
  * This example shows the usage of raw packets transfer data.
  * Two nodes are sending their remaining energy percentage (1 byte)
@@ -130,11 +131,11 @@ UanExperiment::SetupCommunications()
     Ptr<UanChannel> channel = CreateObject<UanChannel>();
     UanHelper uanHelper;
     NetDeviceContainer netDeviceContainer = uanHelper.Install(m_nodes, channel);
-    EnergySourceContainer energySourceContainer;
-    NodeContainer::Iterator node = m_nodes.Begin();
+    energy::EnergySourceContainer energySourceContainer;
+    auto node = m_nodes.Begin();
     while (node != m_nodes.End())
     {
-        energySourceContainer.Add((*node)->GetObject<EnergySourceContainer>()->Get(0));
+        energySourceContainer.Add((*node)->GetObject<energy::EnergySourceContainer>()->Get(0));
         node++;
     }
     AcousticModemEnergyModelHelper acousticModemEnergyModelHelper;
@@ -165,7 +166,7 @@ UanExperiment::PrintReceivedPacket(Ptr<Socket> socket)
 void
 UanExperiment::SetupApplications()
 {
-    NodeContainer::Iterator node = m_nodes.Begin();
+    auto node = m_nodes.Begin();
     PacketSocketHelper packetSocketHelper;
     while (node != m_nodes.End())
     {
@@ -187,13 +188,14 @@ UanExperiment::SendPackets()
 {
     Ptr<UniformRandomVariable> uniformRandomVariable = CreateObject<UniformRandomVariable>();
 
-    NodeContainer::Iterator node = m_nodes.Begin();
+    auto node = m_nodes.Begin();
     Mac8Address dst = Mac8Address::ConvertFrom((*node)->GetDevice(0)->GetAddress());
     node++;
     while (node != m_nodes.End())
     {
         uint8_t energy =
-            ((*node)->GetObject<EnergySourceContainer>()->Get(0)->GetEnergyFraction()) * 100;
+            ((*node)->GetObject<energy::EnergySourceContainer>()->Get(0)->GetEnergyFraction()) *
+            100;
 
         Ptr<Packet> pkt = Create<Packet>(&energy, 1);
 
@@ -230,9 +232,7 @@ UanExperiment::Prepare()
 void
 UanExperiment::Teardown()
 {
-    std::map<Ptr<Node>, Ptr<Socket>>::iterator socket;
-
-    for (socket = m_sockets.begin(); socket != m_sockets.end(); socket++)
+    for (auto socket = m_sockets.begin(); socket != m_sockets.end(); socket++)
     {
         socket->second->Close();
     }

@@ -21,18 +21,19 @@
 #ifndef BASIC_ENERGY_HARVESTER
 #define BASIC_ENERGY_HARVESTER
 
-#include <iostream>
-
-// include from ns-3
+#include "device-energy-model.h"
 #include "energy-harvester.h"
 
-#include "ns3/device-energy-model.h"
 #include "ns3/event-id.h"
 #include "ns3/nstime.h"
 #include "ns3/random-variable-stream.h"
 #include "ns3/traced-value.h"
 
+#include <iostream>
+
 namespace ns3
+{
+namespace energy
 {
 
 /**
@@ -129,6 +130,7 @@ class BasicEnergyHarvester : public EnergyHarvester
     Time m_harvestedPowerUpdateInterval;   //!< harvestable energy update interval
 };
 
+} // namespace energy
 } // namespace ns3
 
 #endif /* defined(BASIC_ENERGY_HARVESTER) */

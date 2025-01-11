@@ -173,8 +173,8 @@ class BulkSendSeqTsSizeTestCase : public TestCase
     uint64_t m_received{0};      //!< number of bytes received
     uint64_t m_seqTxCounter{0};  //!< Counter for Sequences on Tx
     uint64_t m_seqRxCounter{0};  //!< Counter for Sequences on Rx
-    Time m_lastTxTs{Seconds(0)}; //!< Last recored timestamp on Tx
-    Time m_lastRxTs{Seconds(0)}; //!< Last recored timestamp on Rx
+    Time m_lastTxTs{Seconds(0)}; //!< Last recorded timestamp on Tx
+    Time m_lastRxTs{Seconds(0)}; //!< Last recorded timestamp on Rx
 };
 
 BulkSendSeqTsSizeTestCase::BulkSendSeqTsSizeTestCase()
@@ -274,10 +274,10 @@ class BulkSendTestSuite : public TestSuite
 };
 
 BulkSendTestSuite::BulkSendTestSuite()
-    : TestSuite("bulk-send-application", UNIT)
+    : TestSuite("applications-bulk-send", Type::UNIT)
 {
-    AddTestCase(new BulkSendBasicTestCase, TestCase::QUICK);
-    AddTestCase(new BulkSendSeqTsSizeTestCase, TestCase::QUICK);
+    AddTestCase(new BulkSendBasicTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new BulkSendSeqTsSizeTestCase, TestCase::Duration::QUICK);
 }
 
 static BulkSendTestSuite g_bulkSendTestSuite; //!< Static variable for test initialization

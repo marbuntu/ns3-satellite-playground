@@ -77,7 +77,12 @@ ConvertContextToNodeId(std::string context)
 class TestInterBssConstantObssPdAlgo : public TestCase
 {
   public:
-    TestInterBssConstantObssPdAlgo();
+    /**
+     * Constructor
+     *
+     * \param standard The standard to use for the test
+     */
+    TestInterBssConstantObssPdAlgo(WifiStandard standard);
     ~TestInterBssConstantObssPdAlgo() override;
 
     void DoRun() override;
@@ -205,9 +210,11 @@ class TestInterBssConstantObssPdAlgo : public TestCase
     uint8_t m_bssColor1; ///< color for BSS 1
     uint8_t m_bssColor2; ///< color for BSS 2
     uint8_t m_bssColor3; ///< color for BSS 3
+
+    WifiStandard m_standard; ///< the standard to use for the test
 };
 
-TestInterBssConstantObssPdAlgo::TestInterBssConstantObssPdAlgo()
+TestInterBssConstantObssPdAlgo::TestInterBssConstantObssPdAlgo(WifiStandard standard)
     : TestCase("InterBssConstantObssPd"),
       m_numSta1PacketsSent(0),
       m_numSta2PacketsSent(0),
@@ -226,7 +233,8 @@ TestInterBssConstantObssPdAlgo::TestInterBssConstantObssPdAlgo()
       m_expectedTxPowerDbm(15),
       m_bssColor1(1),
       m_bssColor2(2),
-      m_bssColor3(3)
+      m_bssColor3(3),
+      m_standard(standard)
 {
 }
 
@@ -331,17 +339,17 @@ TestInterBssConstantObssPdAlgo::SetupSimulation()
                         ap_device2,
                         WifiPhyState::TX);
     // All other PHYs should have stay idle until 4us (preamble detection time).
-    Simulator::Schedule(Seconds(2.0) + MicroSeconds(13),
+    Simulator::Schedule(Seconds(2.0) + MicroSeconds(11),
                         &TestInterBssConstantObssPdAlgo::CheckPhyState,
                         this,
                         sta_device1,
                         WifiPhyState::IDLE);
-    Simulator::Schedule(Seconds(2.0) + MicroSeconds(13),
+    Simulator::Schedule(Seconds(2.0) + MicroSeconds(11),
                         &TestInterBssConstantObssPdAlgo::CheckPhyState,
                         this,
                         sta_device2,
                         WifiPhyState::IDLE);
-    Simulator::Schedule(Seconds(2.0) + MicroSeconds(13),
+    Simulator::Schedule(Seconds(2.0) + MicroSeconds(11),
                         &TestInterBssConstantObssPdAlgo::CheckPhyState,
                         this,
                         ap_device1,
@@ -850,7 +858,7 @@ TestInterBssConstantObssPdAlgo::RunOne()
     phy.Set("ChannelSettings", StringValue("{36, 20, BAND_5GHZ, 0}"));
 
     WifiHelper wifi;
-    wifi.SetStandard(WIFI_STANDARD_80211ax);
+    wifi.SetStandard(m_standard);
     wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
                                  "DataMode",
                                  StringValue("HeMcs5"),
@@ -867,13 +875,13 @@ TestInterBssConstantObssPdAlgo::RunOne()
     m_staDevices = wifi.Install(phy, mac, wifiStaNodes);
 
     // Assign fixed streams to random variables in use
-    wifi.AssignStreams(m_staDevices, streamNumber);
+    WifiHelper::AssignStreams(m_staDevices, streamNumber);
 
     mac.SetType("ns3::ApWifiMac", "Ssid", SsidValue(ssid));
     m_apDevices = wifi.Install(phy, mac, wifiApNodes);
 
     // Assign fixed streams to random variables in use
-    wifi.AssignStreams(m_apDevices, streamNumber);
+    WifiHelper::AssignStreams(m_apDevices, streamNumber);
 
     for (uint32_t i = 0; i < m_apDevices.GetN(); i++)
     {
@@ -989,9 +997,12 @@ class InterBssTestSuite : public TestSuite
 };
 
 InterBssTestSuite::InterBssTestSuite()
-    : TestSuite("wifi-inter-bss", UNIT)
+    : TestSuite("wifi-inter-bss", Type::UNIT)
 {
-    AddTestCase(new TestInterBssConstantObssPdAlgo, TestCase::QUICK);
+    AddTestCase(new TestInterBssConstantObssPdAlgo(WIFI_STANDARD_80211ax),
+                TestCase::Duration::QUICK);
+    AddTestCase(new TestInterBssConstantObssPdAlgo(WIFI_STANDARD_80211be),
+                TestCase::Duration::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite

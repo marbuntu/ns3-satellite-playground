@@ -53,7 +53,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 Header Test
  */
@@ -63,7 +62,7 @@ class Ipv4HeaderTest : public TestCase
     Ipv4Header m_receivedHeader;  //!< Received header.
 
     /**
-     * \brief Send a packet with speciic DSCP and ECN fields.
+     * \brief Send a packet with specific DSCP and ECN fields.
      * \param socket The source socket.
      * \param to The destination address.
      * \param dscp The DSCP field.
@@ -75,7 +74,7 @@ class Ipv4HeaderTest : public TestCase
                                Ipv4Header::EcnType ecn);
 
     /**
-     * \brief Send a packet with speciic DSCP and ECN fields.
+     * \brief Send a packet with specific DSCP and ECN fields.
      * \param socket The source socket.
      * \param to The destination address.
      * \param dscp The DSCP field.
@@ -293,7 +292,6 @@ Ipv4HeaderTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 Header TestSuite
  */
@@ -301,9 +299,9 @@ class Ipv4HeaderTestSuite : public TestSuite
 {
   public:
     Ipv4HeaderTestSuite()
-        : TestSuite("ipv4-header", UNIT)
+        : TestSuite("ipv4-header", Type::UNIT)
     {
-        AddTestCase(new Ipv4HeaderTest, TestCase::QUICK);
+        AddTestCase(new Ipv4HeaderTest, TestCase::Duration::QUICK);
     }
 };
 

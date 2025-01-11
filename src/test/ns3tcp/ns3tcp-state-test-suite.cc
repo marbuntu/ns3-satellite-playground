@@ -98,7 +98,7 @@ class Ns3TcpStateTestCase : public TestCase
     bool m_needToClose;         //!< Check if the sending socket need to be closed.
 
     /**
-     * Check that the transmitted packets are consitent with the trace.
+     * Check that the transmitted packets are consistent with the trace.
      * This callback is hooked to ns3::Ipv4L3Protocol/Tx.
      *
      * \param context The callback context (unused).
@@ -111,7 +111,7 @@ class Ns3TcpStateTestCase : public TestCase
                   Ptr<Ipv4> ipv4,
                   uint32_t interface);
     /**
-     * Check that the received packets are consitent with the trace.
+     * Check that the received packets are consistent with the trace.
      * This callback is hooked to ns3::Ipv4L3Protocol/Tx.
      *
      * \param context The callback context (unused).
@@ -252,7 +252,7 @@ Ns3TcpStateTestCase::Ipv4L3Tx(std::string, Ptr<const Packet> packet, Ptr<Ipv4>, 
 
         NS_LOG_INFO("read " << readLen << " bytes");
 
-        uint8_t* actual = new uint8_t[readLen];
+        auto actual = new uint8_t[readLen];
         received->CopyData(actual, readLen);
 
         int result = memcmp(actual, expectedBuffer, readLen);
@@ -531,21 +531,21 @@ class Ns3TcpStateTestSuite : public TestSuite
 };
 
 Ns3TcpStateTestSuite::Ns3TcpStateTestSuite()
-    : TestSuite("ns3-tcp-state", SYSTEM)
+    : TestSuite("ns3-tcp-state", Type::SYSTEM)
 {
     // We can't use NS_TEST_SOURCEDIR variable here because we use subdirectories
     SetDataDir("src/test/ns3tcp/response-vectors");
     Packet::EnablePrinting(); // Enable packet metadata for all test cases
 
-    AddTestCase(new Ns3TcpStateTestCase(0), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(1), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(2), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(3), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(4), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(5), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(6), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(7), TestCase::QUICK);
-    AddTestCase(new Ns3TcpStateTestCase(8), TestCase::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(0), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(1), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(2), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(3), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(4), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(5), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(6), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(7), TestCase::Duration::QUICK);
+    AddTestCase(new Ns3TcpStateTestCase(8), TestCase::Duration::QUICK);
 }
 
 /// Do not forget to allocate an instance of this TestSuite.

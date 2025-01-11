@@ -27,6 +27,7 @@
 #include "ns3/minstrel-wifi-manager.h"
 #include "ns3/pointer.h"
 #include "ns3/simulator.h"
+#include "ns3/string.h"
 #include "ns3/wifi-default-ack-manager.h"
 #include "ns3/wifi-default-protection-manager.h"
 #include "ns3/wifi-helper.h"
@@ -48,7 +49,7 @@ MeshHelper::~MeshHelper()
 }
 
 void
-MeshHelper::SetSpreadInterfaceChannels(enum ChannelPolicy policy)
+MeshHelper::SetSpreadInterfaceChannels(ChannelPolicy policy)
 {
     m_spreadChannelPolicy = policy;
 }
@@ -64,7 +65,7 @@ MeshHelper::Install(const WifiPhyHelper& phyHelper, NodeContainer c) const
 {
     NetDeviceContainer devices;
     NS_ASSERT(m_stack);
-    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         Ptr<Node> node = *i;
         // Create a mesh point device
@@ -105,7 +106,7 @@ MeshHelper::Default()
 }
 
 void
-MeshHelper::SetStandard(enum WifiStandard standard)
+MeshHelper::SetStandard(WifiStandard standard)
 {
     m_standard = standard;
 }
@@ -120,6 +121,13 @@ MeshHelper::CreateInterface(const WifiPhyHelper& phyHelper,
     // this is a const method, but we need to force the correct QoS setting
     ObjectFactory macObjectFactory = m_mac;
     macObjectFactory.Set("QosSupported", BooleanValue(true)); // a mesh station is a QoS station
+    // create (Qos)Txop objects
+    for (const std::string ac : {"BE", "BK", "VI", "VO"})
+    {
+        auto qosTxop =
+            CreateObjectWithAttributes<QosTxop>("AcIndex", StringValue(std::string("AC_") + ac));
+        macObjectFactory.Set(ac + "_Txop", PointerValue(qosTxop));
+    }
     std::vector<Ptr<WifiPhy>> phys = phyHelper.Create(node, device);
     NS_ABORT_IF(phys.size() != 1);
     node->AddDevice(device);
@@ -135,18 +143,19 @@ MeshHelper::CreateInterface(const WifiPhyHelper& phyHelper,
     mac->SetAddress(Mac48Address::Allocate());
     device->SetMac(mac);
     mac->SetMacQueueScheduler(CreateObject<FcfsWifiQueueScheduler>());
-    mac->ConfigureStandard(m_standard);
-    Ptr<FrameExchangeManager> fem = mac->GetFrameExchangeManager();
-    if (fem)
-    {
-        Ptr<WifiProtectionManager> protectionManager = CreateObject<WifiDefaultProtectionManager>();
-        protectionManager->SetWifiMac(mac);
-        fem->SetProtectionManager(protectionManager);
+    mac->SetChannelAccessManagers({CreateObject<ChannelAccessManager>()});
+    ObjectFactory femFactory;
+    femFactory.SetTypeId(GetFrameExchangeManagerTypeIdName(m_standard, true));
+    auto fem = femFactory.Create<FrameExchangeManager>();
+    mac->SetFrameExchangeManagers({fem});
+    fem->SetAddress(mac->GetAddress());
+    Ptr<WifiProtectionManager> protectionManager = CreateObject<WifiDefaultProtectionManager>();
+    protectionManager->SetWifiMac(mac);
+    fem->SetProtectionManager(protectionManager);
 
-        Ptr<WifiAckManager> ackManager = CreateObject<WifiDefaultAckManager>();
-        ackManager->SetWifiMac(mac);
-        fem->SetAckManager(ackManager);
-    }
+    Ptr<WifiAckManager> ackManager = CreateObject<WifiDefaultAckManager>();
+    ackManager->SetWifiMac(mac);
+    fem->SetAckManager(ackManager);
     mac->SwitchFrequencyChannel(channelId);
 
     return device;
@@ -179,7 +188,7 @@ MeshHelper::AssignStreams(NetDeviceContainer c, int64_t stream)
 {
     int64_t currentStream = stream;
     Ptr<NetDevice> netDevice;
-    for (NetDeviceContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         netDevice = (*i);
         Ptr<MeshPointDevice> mpd = DynamicCast<MeshPointDevice>(netDevice);
@@ -190,7 +199,7 @@ MeshHelper::AssignStreams(NetDeviceContainer c, int64_t stream)
             currentStream += mpd->AssignStreams(currentStream);
             // To access, we need the underlying WifiNetDevices
             std::vector<Ptr<NetDevice>> ifaces = mpd->GetInterfaces();
-            for (std::vector<Ptr<NetDevice>>::iterator i = ifaces.begin(); i != ifaces.end(); i++)
+            for (auto i = ifaces.begin(); i != ifaces.end(); i++)
             {
                 wifi = DynamicCast<WifiNetDevice>(*i);
 

@@ -201,9 +201,7 @@ void
 HwmpProtocol::DoDispose()
 {
     NS_LOG_FUNCTION(this);
-    for (std::map<Mac48Address, PreqEvent>::iterator i = m_preqTimeouts.begin();
-         i != m_preqTimeouts.end();
-         i++)
+    for (auto i = m_preqTimeouts.begin(); i != m_preqTimeouts.end(); i++)
     {
         i->second.preqTimeout.Cancel();
     }
@@ -263,14 +261,10 @@ HwmpProtocol::RequestRoute(uint32_t sourceIface,
         m_stats.txBytes += packet->GetSize();
         // channel IDs where we have already sent broadcast:
         std::vector<uint16_t> channels;
-        for (HwmpProtocolMacMap::const_iterator plugin = m_interfaces.begin();
-             plugin != m_interfaces.end();
-             plugin++)
+        for (auto plugin = m_interfaces.begin(); plugin != m_interfaces.end(); plugin++)
         {
             bool shouldSend = true;
-            for (std::vector<uint16_t>::const_iterator chan = channels.begin();
-                 chan != channels.end();
-                 chan++)
+            for (auto chan = channels.begin(); chan != channels.end(); chan++)
             {
                 if ((*chan) == plugin->second->GetChannelId())
                 {
@@ -283,9 +277,7 @@ HwmpProtocol::RequestRoute(uint32_t sourceIface,
             }
             channels.push_back(plugin->second->GetChannelId());
             std::vector<Mac48Address> receivers = GetBroadcastReceivers(plugin->first);
-            for (std::vector<Mac48Address>::const_iterator i = receivers.begin();
-                 i != receivers.end();
-                 i++)
+            for (auto i = receivers.begin(); i != receivers.end(); i++)
             {
                 Ptr<Packet> packetCopy = packet->Copy();
                 //
@@ -396,8 +388,7 @@ HwmpProtocol::ForwardUnicast(uint32_t sourceIface,
             dst_seqno = result.seqnum;
         }
         m_stats.initiatedPreq++;
-        for (HwmpProtocolMacMap::const_iterator i = m_interfaces.begin(); i != m_interfaces.end();
-             i++)
+        for (auto i = m_interfaces.begin(); i != m_interfaces.end(); i++)
         {
             i->second->RequestDestination(destination, originator_seqno, dst_seqno);
         }
@@ -433,8 +424,7 @@ HwmpProtocol::ReceivePreq(IePreq preq,
     NS_LOG_FUNCTION(this << from << interface << fromMp << metric);
     preq.IncrementMetric(metric);
     // acceptance cretirea:
-    std::map<Mac48Address, std::pair<uint32_t, uint32_t>>::const_iterator i =
-        m_hwmpSeqnoMetricDatabase.find(preq.GetOriginatorAddress());
+    auto i = m_hwmpSeqnoMetricDatabase.find(preq.GetOriginatorAddress());
     bool freshInfo(true);
     if (i != m_hwmpSeqnoMetricDatabase.end())
     {
@@ -469,7 +459,7 @@ HwmpProtocol::ReceivePreq(IePreq preq,
                                   MicroSeconds(preq.GetLifetime() * 1024),
                                   preq.GetOriginatorSeqNumber());
         // Notify trace source of routing change
-        struct RouteChange rChange;
+        RouteChange rChange;
         rChange.type = "Add Reactive";
         rChange.destination = preq.GetOriginatorAddress();
         rChange.retransmitter = from;
@@ -490,7 +480,7 @@ HwmpProtocol::ReceivePreq(IePreq preq,
                                   MicroSeconds(preq.GetLifetime() * 1024),
                                   preq.GetOriginatorSeqNumber());
         // Notify trace source of routing change
-        struct RouteChange rChange;
+        RouteChange rChange;
         rChange.type = "Add Reactive";
         rChange.destination = fromMp;
         rChange.retransmitter = from;
@@ -501,9 +491,7 @@ HwmpProtocol::ReceivePreq(IePreq preq,
         m_routeChangeTraceSource(rChange);
         ReactivePathResolved(fromMp);
     }
-    for (std::vector<Ptr<DestinationAddressUnit>>::const_iterator i = destinations.begin();
-         i != destinations.end();
-         i++)
+    for (auto i = destinations.begin(); i != destinations.end(); i++)
     {
         if ((*i)->GetDestinationAddress() == Mac48Address::GetBroadcast())
         {
@@ -525,7 +513,7 @@ HwmpProtocol::ReceivePreq(IePreq preq,
                                            MicroSeconds(preq.GetLifetime() * 1024),
                                            preq.GetOriginatorSeqNumber());
                 // Notify trace source of routing change
-                struct RouteChange rChange;
+                RouteChange rChange;
                 rChange.type = "Add Proactive";
                 rChange.destination = preq.GetOriginatorAddress();
                 rChange.retransmitter = from;
@@ -603,7 +591,7 @@ HwmpProtocol::ReceivePreq(IePreq preq,
     }
     // Forward PREQ to all interfaces:
     NS_LOG_DEBUG("I am " << GetAddress() << "retransmitting PREQ:" << preq);
-    for (HwmpProtocolMacMap::const_iterator i = m_interfaces.begin(); i != m_interfaces.end(); i++)
+    for (auto i = m_interfaces.begin(); i != m_interfaces.end(); i++)
     {
         Time forwardingDelay = GetMeshPoint()->GetForwardingDelay();
         NS_LOG_DEBUG("Forwarding PREQ from " << from << " with delay "
@@ -622,8 +610,7 @@ HwmpProtocol::ReceivePrep(IePrep prep,
     NS_LOG_FUNCTION(this << from << interface << fromMp << metric);
     prep.IncrementMetric(metric);
     // acceptance cretirea:
-    std::map<Mac48Address, std::pair<uint32_t, uint32_t>>::const_iterator i =
-        m_hwmpSeqnoMetricDatabase.find(prep.GetOriginatorAddress());
+    auto i = m_hwmpSeqnoMetricDatabase.find(prep.GetOriginatorAddress());
     bool freshInfo(true);
     uint32_t sequence = prep.GetDestinationSeqNumber();
     if (i != m_hwmpSeqnoMetricDatabase.end())
@@ -658,7 +645,7 @@ HwmpProtocol::ReceivePrep(IePrep prep,
                                   MicroSeconds(prep.GetLifetime() * 1024),
                                   sequence);
         // Notify trace source of routing change
-        struct RouteChange rChange;
+        RouteChange rChange;
         rChange.type = "Add Reactive";
         rChange.destination = prep.GetOriginatorAddress();
         rChange.retransmitter = from;
@@ -690,7 +677,7 @@ HwmpProtocol::ReceivePrep(IePrep prep,
                                   MicroSeconds(prep.GetLifetime() * 1024),
                                   sequence);
         // Notify trace source of routing change
-        struct RouteChange rChange;
+        RouteChange rChange;
         rChange.type = "Add Reactive";
         rChange.destination = fromMp;
         rChange.retransmitter = from;
@@ -711,7 +698,7 @@ HwmpProtocol::ReceivePrep(IePrep prep,
         return;
     }
     // Forward PREP
-    HwmpProtocolMacMap::const_iterator prep_sender = m_interfaces.find(result.ifIndex);
+    auto prep_sender = m_interfaces.find(result.ifIndex);
     NS_ASSERT(prep_sender != m_interfaces.end());
     Time forwardingDelay = GetMeshPoint()->GetForwardingDelay();
     NS_LOG_DEBUG("Forwarding PREP from " << from << " with delay " << forwardingDelay.As(Time::US));
@@ -742,7 +729,7 @@ HwmpProtocol::ReceivePerr(std::vector<FailedDestination> destinations,
             retval.push_back(destinations[i]);
         }
     }
-    if (retval.size() == 0)
+    if (retval.empty())
     {
         return;
     }
@@ -768,7 +755,7 @@ HwmpProtocol::SendPrep(Mac48Address src,
     prep.SetMetric(initMetric);
     prep.SetOriginatorAddress(src);
     prep.SetOriginatorSeqNumber(originatorDsn);
-    HwmpProtocolMacMap::const_iterator prep_sender = m_interfaces.find(interface);
+    auto prep_sender = m_interfaces.find(interface);
     NS_ASSERT(prep_sender != m_interfaces.end());
     prep_sender->second->SendPrep(prep, retransmitter);
     m_stats.initiatedPrep++;
@@ -780,8 +767,7 @@ HwmpProtocol::Install(Ptr<MeshPointDevice> mp)
     NS_LOG_FUNCTION(this << mp);
     m_mp = mp;
     std::vector<Ptr<NetDevice>> interfaces = mp->GetInterfaces();
-    for (std::vector<Ptr<NetDevice>>::const_iterator i = interfaces.begin(); i != interfaces.end();
-         i++)
+    for (auto i = interfaces.begin(); i != interfaces.end(); i++)
     {
         // Checking for compatible net device
         Ptr<WifiNetDevice> wifiNetDev = (*i)->GetObject<WifiNetDevice>();
@@ -841,8 +827,7 @@ HwmpProtocol::DropDataFrame(uint32_t seqno, Mac48Address source)
         NS_LOG_DEBUG("Dropping seqno " << seqno << "; from self");
         return true;
     }
-    std::map<Mac48Address, uint32_t, std::less<Mac48Address>>::const_iterator i =
-        m_lastDataSeqno.find(source);
+    const auto i = m_lastDataSeqno.find(source);
     if (i == m_lastDataSeqno.end())
     {
         m_lastDataSeqno[source] = seqno;
@@ -866,7 +851,7 @@ HwmpProtocol::MakePathError(std::vector<FailedDestination> destinations)
     PathError retval;
     // HwmpRtable increments a sequence number as written in 11B.9.7.2
     retval.receivers = GetPerrReceivers(destinations);
-    if (retval.receivers.size() == 0)
+    if (retval.receivers.empty())
     {
         return retval;
     }
@@ -876,7 +861,7 @@ HwmpProtocol::MakePathError(std::vector<FailedDestination> destinations)
         retval.destinations.push_back(destinations[i]);
         m_rtable->DeleteReactivePath(destinations[i].destination);
         // Notify trace source of routing change
-        struct RouteChange rChange;
+        RouteChange rChange;
         rChange.type = "Delete Reactive";
         rChange.destination = destinations[i].destination;
         rChange.seqnum = destinations[i].seqnum;
@@ -889,7 +874,7 @@ void
 HwmpProtocol::InitiatePathError(PathError perr)
 {
     NS_LOG_FUNCTION(this);
-    for (HwmpProtocolMacMap::const_iterator i = m_interfaces.begin(); i != m_interfaces.end(); i++)
+    for (auto i = m_interfaces.begin(); i != m_interfaces.end(); i++)
     {
         std::vector<Mac48Address> receivers_for_interface;
         for (unsigned int j = 0; j < perr.receivers.size(); j++)
@@ -907,7 +892,7 @@ void
 HwmpProtocol::ForwardPathError(PathError perr)
 {
     NS_LOG_FUNCTION(this);
-    for (HwmpProtocolMacMap::const_iterator i = m_interfaces.begin(); i != m_interfaces.end(); i++)
+    for (auto i = m_interfaces.begin(); i != m_interfaces.end(); i++)
     {
         std::vector<Mac48Address> receivers_for_interface;
         for (unsigned int j = 0; j < perr.receivers.size(); j++)
@@ -938,14 +923,14 @@ HwmpProtocol::GetPerrReceivers(std::vector<FailedDestination> failedDest)
         HwmpRtable::PrecursorList precursors = m_rtable->GetPrecursors(failedDest[i].destination);
         m_rtable->DeleteReactivePath(failedDest[i].destination);
         // Notify trace source of routing change
-        struct RouteChange rChange;
+        RouteChange rChange;
         rChange.type = "Delete Reactive";
         rChange.destination = failedDest[i].destination;
         rChange.seqnum = failedDest[i].seqnum;
         m_routeChangeTraceSource(rChange);
         m_rtable->DeleteProactivePath(failedDest[i].destination);
         // Notify trace source of routing change
-        struct RouteChange rChangePro;
+        RouteChange rChangePro;
         rChangePro.type = "Delete Proactive";
         rChangePro.destination = failedDest[i].destination;
         rChangePro.seqnum = failedDest[i].seqnum;
@@ -978,7 +963,7 @@ HwmpProtocol::GetPreqReceivers(uint32_t interface)
     {
         retval = m_neighboursCallback(interface);
     }
-    if ((retval.size() >= m_unicastPreqThreshold) || (retval.size() == 0))
+    if (retval.size() >= m_unicastPreqThreshold || retval.empty())
     {
         retval.clear();
         retval.push_back(Mac48Address::GetBroadcast());
@@ -995,7 +980,7 @@ HwmpProtocol::GetBroadcastReceivers(uint32_t interface)
     {
         retval = m_neighboursCallback(interface);
     }
-    if ((retval.size() >= m_unicastDataThreshold) || (retval.size() == 0))
+    if (retval.size() >= m_unicastDataThreshold || retval.empty())
     {
         retval.clear();
         retval.push_back(Mac48Address::GetBroadcast());
@@ -1021,7 +1006,7 @@ HwmpProtocol::DequeueFirstPacketByDst(Mac48Address dst)
     NS_LOG_FUNCTION(this << dst);
     QueuedPacket retval;
     retval.pkt = nullptr;
-    for (std::vector<QueuedPacket>::iterator i = m_rqueue.begin(); i != m_rqueue.end(); i++)
+    for (auto i = m_rqueue.begin(); i != m_rqueue.end(); i++)
     {
         if ((*i).dst == dst)
         {
@@ -1039,7 +1024,7 @@ HwmpProtocol::DequeueFirstPacket()
     NS_LOG_FUNCTION(this);
     QueuedPacket retval;
     retval.pkt = nullptr;
-    if (m_rqueue.size() != 0)
+    if (!m_rqueue.empty())
     {
         retval = m_rqueue[0];
         m_rqueue.erase(m_rqueue.begin());
@@ -1051,7 +1036,7 @@ void
 HwmpProtocol::ReactivePathResolved(Mac48Address dst)
 {
     NS_LOG_FUNCTION(this << dst);
-    std::map<Mac48Address, PreqEvent>::iterator i = m_preqTimeouts.find(dst);
+    auto i = m_preqTimeouts.find(dst);
     if (i != m_preqTimeouts.end())
     {
         m_routeDiscoveryTimeCallback(Simulator::Now() - i->second.whenScheduled);
@@ -1106,7 +1091,7 @@ bool
 HwmpProtocol::ShouldSendPreq(Mac48Address dst)
 {
     NS_LOG_FUNCTION(this << dst);
-    std::map<Mac48Address, PreqEvent>::const_iterator i = m_preqTimeouts.find(dst);
+    auto i = m_preqTimeouts.find(dst);
     if (i == m_preqTimeouts.end())
     {
         m_preqTimeouts[dst].preqTimeout =
@@ -1132,7 +1117,7 @@ HwmpProtocol::RetryPathDiscovery(Mac48Address dst, uint8_t numOfRetry)
     }
     if (result.retransmitter != Mac48Address::GetBroadcast())
     {
-        std::map<Mac48Address, PreqEvent>::iterator i = m_preqTimeouts.find(dst);
+        auto i = m_preqTimeouts.find(dst);
         NS_ASSERT(i != m_preqTimeouts.end());
         m_preqTimeouts.erase(i);
         return;
@@ -1152,7 +1137,7 @@ HwmpProtocol::RetryPathDiscovery(Mac48Address dst, uint8_t numOfRetry)
                          HwmpRtable::MAX_METRIC);
             packet = DequeueFirstPacketByDst(dst);
         }
-        std::map<Mac48Address, PreqEvent>::iterator i = m_preqTimeouts.find(dst);
+        auto i = m_preqTimeouts.find(dst);
         NS_ASSERT(i != m_preqTimeouts.end());
         m_routeDiscoveryTimeCallback(Simulator::Now() - i->second.whenScheduled);
         m_preqTimeouts.erase(i);
@@ -1161,7 +1146,7 @@ HwmpProtocol::RetryPathDiscovery(Mac48Address dst, uint8_t numOfRetry)
     numOfRetry++;
     uint32_t originator_seqno = GetNextHwmpSeqno();
     uint32_t dst_seqno = m_rtable->LookupReactiveExpired(dst).seqnum;
-    for (HwmpProtocolMacMap::const_iterator i = m_interfaces.begin(); i != m_interfaces.end(); i++)
+    for (auto i = m_interfaces.begin(); i != m_interfaces.end(); i++)
     {
         i->second->RequestDestination(dst, originator_seqno, dst_seqno);
     }
@@ -1204,7 +1189,7 @@ HwmpProtocol::SendProactivePreq()
     preq.SetOriginatorAddress(GetAddress());
     preq.SetPreqID(GetNextPreqId());
     preq.SetOriginatorSeqNumber(GetNextHwmpSeqno());
-    for (HwmpProtocolMacMap::const_iterator i = m_interfaces.begin(); i != m_interfaces.end(); i++)
+    for (auto i = m_interfaces.begin(); i != m_interfaces.end(); i++)
     {
         i->second->SendPreq(preq);
     }
@@ -1214,13 +1199,13 @@ HwmpProtocol::SendProactivePreq()
 }
 
 bool
-HwmpProtocol::GetDoFlag()
+HwmpProtocol::GetDoFlag() const
 {
     return m_doFlag;
 }
 
 bool
-HwmpProtocol::GetRfFlag()
+HwmpProtocol::GetRfFlag() const
 {
     return m_rfFlag;
 }
@@ -1238,7 +1223,7 @@ HwmpProtocol::GetPerrMinInterval()
 }
 
 uint8_t
-HwmpProtocol::GetMaxTtl()
+HwmpProtocol::GetMaxTtl() const
 {
     return m_maxTtl;
 }
@@ -1264,7 +1249,7 @@ HwmpProtocol::GetActivePathLifetime()
 }
 
 uint8_t
-HwmpProtocol::GetUnicastPerrThreshold()
+HwmpProtocol::GetUnicastPerrThreshold() const
 {
     return m_unicastPerrThreshold;
 }
@@ -1352,9 +1337,7 @@ HwmpProtocol::Report(std::ostream& os) const
        << "doFlag=\"" << m_doFlag << "\"" << std::endl
        << "rfFlag=\"" << m_rfFlag << "\">" << std::endl;
     m_stats.Print(os);
-    for (HwmpProtocolMacMap::const_iterator plugin = m_interfaces.begin();
-         plugin != m_interfaces.end();
-         plugin++)
+    for (auto plugin = m_interfaces.begin(); plugin != m_interfaces.end(); plugin++)
     {
         plugin->second->Report(os);
     }
@@ -1366,9 +1349,7 @@ HwmpProtocol::ResetStats()
 {
     NS_LOG_FUNCTION(this);
     m_stats = Statistics();
-    for (HwmpProtocolMacMap::const_iterator plugin = m_interfaces.begin();
-         plugin != m_interfaces.end();
-         plugin++)
+    for (auto plugin = m_interfaces.begin(); plugin != m_interfaces.end(); plugin++)
     {
         plugin->second->ResetStats();
     }

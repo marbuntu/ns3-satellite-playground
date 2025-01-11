@@ -36,7 +36,6 @@
 #include "ns3/udp-echo-helper.h"
 #include "ns3/udp-socket-factory.h"
 #include "ns3/uinteger.h"
-#include "ns3/v4ping.h"
 #include "ns3/yans-wifi-helper.h"
 
 #include <sstream>
@@ -74,7 +73,7 @@ class LoopbackTestCase : public TestCase
      * Echo data function
      * \param socket The socket to echo data
      */
-    void EchoData(Ptr<Socket> socket);
+    void EchoData(Ptr<Socket> socket) const;
 
   public:
     LoopbackTestCase();
@@ -98,7 +97,7 @@ LoopbackTestCase::ReceivePkt(Ptr<Socket> socket)
 }
 
 void
-LoopbackTestCase::EchoData(Ptr<Socket> socket)
+LoopbackTestCase::EchoData(Ptr<Socket> socket) const
 {
     Address from;
     Ptr<Packet> receivedPacket = socket->RecvFrom(std::numeric_limits<uint32_t>::max(), 0, from);
@@ -191,7 +190,6 @@ LoopbackTestCase::DoRun()
 
 /**
  * \ingroup aodv-test
- * \ingroup tests
  *
  * \brief AODV Loopback test suite
  */
@@ -199,11 +197,11 @@ class AodvLoopbackTestSuite : public TestSuite
 {
   public:
     AodvLoopbackTestSuite()
-        : TestSuite("routing-aodv-loopback", SYSTEM)
+        : TestSuite("routing-aodv-loopback", Type::SYSTEM)
     {
         SetDataDir(NS_TEST_SOURCEDIR);
         // UDP Echo loopback test case
-        AddTestCase(new LoopbackTestCase(), TestCase::QUICK);
+        AddTestCase(new LoopbackTestCase(), TestCase::Duration::QUICK);
     }
 } g_aodvLoopbackTestSuite; ///< the test suite
 

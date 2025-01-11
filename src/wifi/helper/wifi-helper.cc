@@ -147,7 +147,7 @@ WifiPhyHelper::WifiPhyHelper(uint8_t nLinks)
     : m_pcapDlt(PcapHelper::DLT_IEEE802_11)
 {
     NS_ABORT_IF(nLinks == 0);
-    m_phy.resize(nLinks);
+    m_phys.resize(nLinks);
     m_errorRateModel.resize(nLinks);
     m_frameCaptureModel.resize(nLinks);
     m_preambleDetectionModel.resize(nLinks);
@@ -162,7 +162,7 @@ WifiPhyHelper::~WifiPhyHelper()
 void
 WifiPhyHelper::Set(std::string name, const AttributeValue& v)
 {
-    for (auto& phy : m_phy)
+    for (auto& phy : m_phys)
     {
         phy.Set(name, v);
     }
@@ -171,7 +171,7 @@ WifiPhyHelper::Set(std::string name, const AttributeValue& v)
 void
 WifiPhyHelper::Set(uint8_t linkId, std::string name, const AttributeValue& v)
 {
-    m_phy.at(linkId).Set(name, v);
+    m_phys.at(linkId).Set(name, v);
 }
 
 void
@@ -377,7 +377,7 @@ WifiPhyHelper::GetRadiotapHeader(RadiotapHeader& header,
         packet->RemoveHeader(hdr);
         extractedLength = hdr.GetLength();
         packet = packet->CreateFragment(0, static_cast<uint32_t>(extractedLength));
-        if (aMpdu.type == LAST_MPDU_IN_AGGREGATE || (hdr.GetEof() == true && hdr.GetLength() > 0))
+        if (aMpdu.type == LAST_MPDU_IN_AGGREGATE || (hdr.GetEof() && hdr.GetLength() > 0))
         {
             ampduStatusFlags |= RadiotapHeader::A_MPDU_STATUS_LAST;
         }
@@ -759,7 +759,7 @@ WifiHelper::Install(const WifiPhyHelper& phyHelper,
                     NodeContainer::Iterator last) const
 {
     NetDeviceContainer devices;
-    for (NodeContainer::Iterator i = first; i != last; ++i)
+    for (auto i = first; i != last; ++i)
     {
         Ptr<Node> node = *i;
         Ptr<WifiNetDevice> device = CreateObject<WifiNetDevice>();
@@ -798,10 +798,20 @@ WifiHelper::Install(const WifiPhyHelper& phyHelper,
         std::vector<Ptr<WifiRemoteStationManager>> managers;
         std::vector<Ptr<WifiPhy>> phys = phyHelper.Create(node, device);
         device->SetPhys(phys);
+        // if only one remote station manager model was provided, replicate it for all the links
+        auto stationManagers = m_stationManager;
+        if (stationManagers.size() == 1 && phys.size() > 1)
+        {
+            stationManagers.resize(phys.size(), stationManagers[0]);
+        }
+        NS_ABORT_MSG_IF(stationManagers.size() != phys.size(),
+                        "Number of station manager models ("
+                            << stationManagers.size() << ") does not match the number of links ("
+                            << phys.size() << ")");
         for (std::size_t i = 0; i < phys.size(); i++)
         {
             phys[i]->ConfigureStandard(m_standard);
-            managers.push_back(m_stationManager.Create<WifiRemoteStationManager>());
+            managers.push_back(stationManagers[i].Create<WifiRemoteStationManager>());
         }
         device->SetRemoteStationManagers(managers);
         Ptr<WifiMac> mac = macHelper.Create(device, m_standard);
@@ -867,104 +877,109 @@ WifiHelper::Install(const WifiPhyHelper& phy, const WifiMacHelper& mac, std::str
 }
 
 void
-WifiHelper::EnableLogComponents()
+WifiHelper::EnableLogComponents(LogLevel logLevel)
 {
     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnableAll(LOG_PREFIX_NODE);
 
-    LogComponentEnable("AarfWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("AarfcdWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("AdhocWifiMac", LOG_LEVEL_ALL);
-    LogComponentEnable("AmrrWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("ApWifiMac", LOG_LEVEL_ALL);
-    LogComponentEnable("AparfWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("ArfWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("BlockAckAgreement", LOG_LEVEL_ALL);
-    LogComponentEnable("RecipientBlockAckAgreement", LOG_LEVEL_ALL);
-    LogComponentEnable("BlockAckManager", LOG_LEVEL_ALL);
-    LogComponentEnable("CaraWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("ChannelAccessManager", LOG_LEVEL_ALL);
-    LogComponentEnable("ConstantObssPdAlgorithm", LOG_LEVEL_ALL);
-    LogComponentEnable("ConstantRateWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("ChannelAccessManager", LOG_LEVEL_ALL);
-    LogComponentEnable("DsssErrorRateModel", LOG_LEVEL_ALL);
-    LogComponentEnable("DsssPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("DsssPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("ErpOfdmPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("ErpOfdmPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("EhtPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("EhtPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("FrameExchangeManager", LOG_LEVEL_ALL);
-    LogComponentEnable("HeConfiguration", LOG_LEVEL_ALL);
-    LogComponentEnable("HeFrameExchangeManager", LOG_LEVEL_ALL);
-    LogComponentEnable("HePhy", LOG_LEVEL_ALL);
-    LogComponentEnable("HePpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("HtConfiguration", LOG_LEVEL_ALL);
-    LogComponentEnable("HtFrameExchangeManager", LOG_LEVEL_ALL);
-    LogComponentEnable("HtPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("HtPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("IdealWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("InterferenceHelper", LOG_LEVEL_ALL);
-    LogComponentEnable("MacRxMiddle", LOG_LEVEL_ALL);
-    LogComponentEnable("MacTxMiddle", LOG_LEVEL_ALL);
-    LogComponentEnable("MinstrelHtWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("MinstrelWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("MpduAggregator", LOG_LEVEL_ALL);
-    LogComponentEnable("MsduAggregator", LOG_LEVEL_ALL);
-    LogComponentEnable("MultiUserScheduler", LOG_LEVEL_ALL);
-    LogComponentEnable("NistErrorRateModel", LOG_LEVEL_ALL);
-    LogComponentEnable("ObssPdAlgorithm", LOG_LEVEL_ALL);
-    LogComponentEnable("OfdmPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("OnoeWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("OriginatorBlockAckAgreement", LOG_LEVEL_ALL);
-    LogComponentEnable("OfdmPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("ParfWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("PhyEntity", LOG_LEVEL_ALL);
-    LogComponentEnable("QosFrameExchangeManager", LOG_LEVEL_ALL);
-    LogComponentEnable("QosTxop", LOG_LEVEL_ALL);
-    LogComponentEnable("RraaWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("RrMultiUserScheduler", LOG_LEVEL_ALL);
-    LogComponentEnable("RrpaaWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("SimpleFrameCaptureModel", LOG_LEVEL_ALL);
-    LogComponentEnable("SpectrumWifiPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("StaWifiMac", LOG_LEVEL_ALL);
-    LogComponentEnable("SupportedRates", LOG_LEVEL_ALL);
-    LogComponentEnable("TableBasedErrorRateModel", LOG_LEVEL_ALL);
-    LogComponentEnable("ThompsonSamplingWifiManager", LOG_LEVEL_ALL);
-    LogComponentEnable("ThresholdPreambleDetectionModel", LOG_LEVEL_ALL);
-    LogComponentEnable("Txop", LOG_LEVEL_ALL);
-    LogComponentEnable("VhtConfiguration", LOG_LEVEL_ALL);
-    LogComponentEnable("VhtFrameExchangeManager", LOG_LEVEL_ALL);
-    LogComponentEnable("VhtPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("VhtPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiAckManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiAssocManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiDefaultAckManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiDefaultAssocManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiDefaultProtectionManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiMac", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiMacQueue", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiMpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiNetDevice", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiPhyStateHelper", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiPhy", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiPhyOperatingChannel", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiPpdu", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiProtectionManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiPsdu", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiRadioEnergyModel", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiRemoteStationManager", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiSpectrumPhyInterface", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiSpectrumSignalParameters", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiTxCurrentModel", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiTxParameters", LOG_LEVEL_ALL);
-    LogComponentEnable("WifiTxTimer", LOG_LEVEL_ALL);
-    LogComponentEnable("YansErrorRateModel", LOG_LEVEL_ALL);
-    LogComponentEnable("YansWifiChannel", LOG_LEVEL_ALL);
-    LogComponentEnable("YansWifiPhy", LOG_LEVEL_ALL);
+    LogComponentEnable("AarfWifiManager", logLevel);
+    LogComponentEnable("AarfcdWifiManager", logLevel);
+    LogComponentEnable("AdhocWifiMac", logLevel);
+    LogComponentEnable("AmrrWifiManager", logLevel);
+    LogComponentEnable("ApWifiMac", logLevel);
+    LogComponentEnable("AparfWifiManager", logLevel);
+    LogComponentEnable("ArfWifiManager", logLevel);
+    LogComponentEnable("BlockAckAgreement", logLevel);
+    LogComponentEnable("BlockAckManager", logLevel);
+    LogComponentEnable("CaraWifiManager", logLevel);
+    LogComponentEnable("ChannelAccessManager", logLevel);
+    LogComponentEnable("ConstantObssPdAlgorithm", logLevel);
+    LogComponentEnable("ConstantRateWifiManager", logLevel);
+    LogComponentEnable("DefaultEmlsrManager", logLevel);
+    LogComponentEnable("DsssErrorRateModel", logLevel);
+    LogComponentEnable("DsssPhy", logLevel);
+    LogComponentEnable("DsssPpdu", logLevel);
+    LogComponentEnable("EhtFrameExchangeManager", logLevel);
+    LogComponentEnable("EhtPhy", logLevel);
+    LogComponentEnable("EhtPpdu", logLevel);
+    LogComponentEnable("EmlsrManager", logLevel);
+    LogComponentEnable("ErpOfdmPhy", logLevel);
+    LogComponentEnable("ErpOfdmPpdu", logLevel);
+    LogComponentEnable("FrameExchangeManager", logLevel);
+    LogComponentEnable("HeConfiguration", logLevel);
+    LogComponentEnable("HeFrameExchangeManager", logLevel);
+    LogComponentEnable("HePhy", logLevel);
+    LogComponentEnable("HePpdu", logLevel);
+    LogComponentEnable("HtConfiguration", logLevel);
+    LogComponentEnable("HtFrameExchangeManager", logLevel);
+    LogComponentEnable("HtPhy", logLevel);
+    LogComponentEnable("HtPpdu", logLevel);
+    LogComponentEnable("IdealWifiManager", logLevel);
+    LogComponentEnable("InterferenceHelper", logLevel);
+    LogComponentEnable("MacRxMiddle", logLevel);
+    LogComponentEnable("MacTxMiddle", logLevel);
+    LogComponentEnable("MinstrelHtWifiManager", logLevel);
+    LogComponentEnable("MinstrelWifiManager", logLevel);
+    LogComponentEnable("MpduAggregator", logLevel);
+    LogComponentEnable("MsduAggregator", logLevel);
+    LogComponentEnable("MultiUserScheduler", logLevel);
+    LogComponentEnable("NistErrorRateModel", logLevel);
+    LogComponentEnable("ObssPdAlgorithm", logLevel);
+    LogComponentEnable("OfdmPhy", logLevel);
+    LogComponentEnable("OfdmPpdu", logLevel);
+    LogComponentEnable("OnoeWifiManager", logLevel);
+    LogComponentEnable("OriginatorBlockAckAgreement", logLevel);
+    LogComponentEnable("ParfWifiManager", logLevel);
+    LogComponentEnable("PhyEntity", logLevel);
+    LogComponentEnable("QosFrameExchangeManager", logLevel);
+    LogComponentEnable("QosTxop", logLevel);
+    LogComponentEnable("RecipientBlockAckAgreement", logLevel);
+    LogComponentEnable("RrMultiUserScheduler", logLevel);
+    LogComponentEnable("RraaWifiManager", logLevel);
+    LogComponentEnable("RrpaaWifiManager", logLevel);
+    LogComponentEnable("SimpleFrameCaptureModel", logLevel);
+    LogComponentEnable("SpectrumWifiPhy", logLevel);
+    LogComponentEnable("StaWifiMac", logLevel);
+    LogComponentEnable("SupportedRates", logLevel);
+    LogComponentEnable("TableBasedErrorRateModel", logLevel);
+    LogComponentEnable("ThompsonSamplingWifiManager", logLevel);
+    LogComponentEnable("ThresholdPreambleDetectionModel", logLevel);
+    LogComponentEnable("Txop", logLevel);
+    LogComponentEnable("VhtConfiguration", logLevel);
+    LogComponentEnable("VhtFrameExchangeManager", logLevel);
+    LogComponentEnable("VhtPhy", logLevel);
+    LogComponentEnable("VhtPpdu", logLevel);
+    LogComponentEnable("WifiAckManager", logLevel);
+    LogComponentEnable("WifiAssocManager", logLevel);
+    LogComponentEnable("WifiDefaultAckManager", logLevel);
+    LogComponentEnable("WifiDefaultAssocManager", logLevel);
+    LogComponentEnable("WifiDefaultProtectionManager", logLevel);
+    LogComponentEnable("WifiMac", logLevel);
+    LogComponentEnable("WifiMacQueue", logLevel);
+    LogComponentEnable("WifiMpdu", logLevel);
+    LogComponentEnable("WifiNetDevice", logLevel);
+    LogComponentEnable("WifiPhyStateHelper", logLevel);
+    LogComponentEnable("WifiPhyOperatingChannel", logLevel);
+    LogComponentEnable("WifiPhy", logLevel);
+    LogComponentEnable("WifiPpdu", logLevel);
+    LogComponentEnable("WifiProtectionManager", logLevel);
+    LogComponentEnable("WifiPsdu", logLevel);
+    LogComponentEnable("WifiRadioEnergyModel", logLevel);
+    LogComponentEnable("WifiRemoteStationManager", logLevel);
+    LogComponentEnable("WifiSpectrumPhyInterface", logLevel);
+    LogComponentEnable("WifiSpectrumSignalParameters", logLevel);
+    LogComponentEnable("WifiSpectrumValueHelper", logLevel);
+    LogComponentEnable("WifiTxCurrentModel", logLevel);
+    LogComponentEnable("WifiTxParameters", logLevel);
+    LogComponentEnable("WifiTxTimer", logLevel);
+    LogComponentEnable("YansErrorRateModel", logLevel);
+    LogComponentEnable("YansWifiChannel", logLevel);
+    LogComponentEnable("YansWifiPhy", logLevel);
 
-    // From Spectrum
-    LogComponentEnable("WifiSpectrumValueHelper", LOG_LEVEL_ALL);
+    LogComponentEnable("Athstats", logLevel);
+    LogComponentEnable("WifiHelper", logLevel);
+    LogComponentEnable("SpectrumWifiHelper", logLevel);
+    LogComponentEnable("YansWifiHelper", logLevel);
 }
 
 int64_t
@@ -972,43 +987,48 @@ WifiHelper::AssignStreams(NetDeviceContainer c, int64_t stream)
 {
     int64_t currentStream = stream;
     Ptr<NetDevice> netDevice;
-    for (NetDeviceContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         netDevice = (*i);
-        Ptr<WifiNetDevice> wifi = DynamicCast<WifiNetDevice>(netDevice);
-        if (wifi)
+        if (auto wifi = DynamicCast<WifiNetDevice>(netDevice))
         {
             // Handle any random numbers in the PHY objects.
-            currentStream += wifi->GetPhy()->AssignStreams(currentStream);
+            for (auto& phy : wifi->GetPhys())
+            {
+                currentStream += phy->AssignStreams(currentStream);
+            }
 
             // Handle any random numbers in the station managers.
-            currentStream += wifi->GetRemoteStationManager()->AssignStreams(currentStream);
+            for (auto& manager : wifi->GetRemoteStationManagers())
+            {
+                currentStream += manager->AssignStreams(currentStream);
+            }
 
             // Handle any random numbers in the MAC objects.
-            Ptr<WifiMac> mac = wifi->GetMac();
+            auto mac = wifi->GetMac();
             PointerValue ptr;
             if (!mac->GetQosSupported())
             {
                 mac->GetAttribute("Txop", ptr);
-                Ptr<Txop> txop = ptr.Get<Txop>();
+                auto txop = ptr.Get<Txop>();
                 currentStream += txop->AssignStreams(currentStream);
             }
             else
             {
                 mac->GetAttribute("VO_Txop", ptr);
-                Ptr<QosTxop> vo_txop = ptr.Get<QosTxop>();
+                auto vo_txop = ptr.Get<QosTxop>();
                 currentStream += vo_txop->AssignStreams(currentStream);
 
                 mac->GetAttribute("VI_Txop", ptr);
-                Ptr<QosTxop> vi_txop = ptr.Get<QosTxop>();
+                auto vi_txop = ptr.Get<QosTxop>();
                 currentStream += vi_txop->AssignStreams(currentStream);
 
                 mac->GetAttribute("BE_Txop", ptr);
-                Ptr<QosTxop> be_txop = ptr.Get<QosTxop>();
+                auto be_txop = ptr.Get<QosTxop>();
                 currentStream += be_txop->AssignStreams(currentStream);
 
                 mac->GetAttribute("BK_Txop", ptr);
-                Ptr<QosTxop> bk_txop = ptr.Get<QosTxop>();
+                auto bk_txop = ptr.Get<QosTxop>();
                 currentStream += bk_txop->AssignStreams(currentStream);
             }
 

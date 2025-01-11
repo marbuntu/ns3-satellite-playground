@@ -47,7 +47,7 @@ FileHelper::FileHelper()
 }
 
 FileHelper::FileHelper(const std::string& outputFileNameWithoutExtension,
-                       enum FileAggregator::FileType fileType)
+                       FileAggregator::FileType fileType)
     : m_aggregator(nullptr),
       m_fileProbeCount(0),
       m_fileType(fileType),
@@ -67,7 +67,7 @@ FileHelper::~FileHelper()
 
 void
 FileHelper::ConfigureFile(const std::string& outputFileNameWithoutExtension,
-                          enum FileAggregator::FileType fileType)
+                          FileAggregator::FileType fileType)
 {
     NS_LOG_FUNCTION(this << outputFileNameWithoutExtension << fileType);
 
@@ -288,8 +288,7 @@ FileHelper::GetProbe(std::string probeName) const
     NS_LOG_FUNCTION(this << probeName);
 
     // Look for the probe.
-    std::map<std::string, std::pair<Ptr<Probe>, std::string>>::const_iterator mapIterator =
-        m_probeMap.find(probeName);
+    auto mapIterator = m_probeMap.find(probeName);
 
     // Return the probe if it has been added.
     if (mapIterator != m_probeMap.end())
@@ -477,7 +476,8 @@ FileHelper::ConnectProbeToAggregator(const std::string& typeId,
     AddTimeSeriesAdaptor(probeContext);
 
     // Connect the probe to the adaptor.
-    if (m_probeMap[probeName].second == "ns3::DoubleProbe")
+    if (m_probeMap[probeName].second == "ns3::DoubleProbe" ||
+        m_probeMap[probeName].second == "ns3::TimeProbe")
     {
         m_probeMap[probeName].first->TraceConnectWithoutContext(
             probeTraceSource,
@@ -491,28 +491,11 @@ FileHelper::ConnectProbeToAggregator(const std::string& typeId,
             MakeCallback(&TimeSeriesAdaptor::TraceSinkBoolean,
                          m_timeSeriesAdaptorMap[probeContext]));
     }
-    else if (m_probeMap[probeName].second == "ns3::PacketProbe")
-    {
-        m_probeMap[probeName].first->TraceConnectWithoutContext(
-            probeTraceSource,
-            MakeCallback(&TimeSeriesAdaptor::TraceSinkUinteger32,
-                         m_timeSeriesAdaptorMap[probeContext]));
-    }
-    else if (m_probeMap[probeName].second == "ns3::ApplicationPacketProbe")
-    {
-        m_probeMap[probeName].first->TraceConnectWithoutContext(
-            probeTraceSource,
-            MakeCallback(&TimeSeriesAdaptor::TraceSinkUinteger32,
-                         m_timeSeriesAdaptorMap[probeContext]));
-    }
-    else if (m_probeMap[probeName].second == "ns3::Ipv4PacketProbe")
-    {
-        m_probeMap[probeName].first->TraceConnectWithoutContext(
-            probeTraceSource,
-            MakeCallback(&TimeSeriesAdaptor::TraceSinkUinteger32,
-                         m_timeSeriesAdaptorMap[probeContext]));
-    }
-    else if (m_probeMap[probeName].second == "ns3::Ipv6PacketProbe")
+    else if (m_probeMap[probeName].second == "ns3::Uinteger32Probe" ||
+             m_probeMap[probeName].second == "ns3::PacketProbe" ||
+             m_probeMap[probeName].second == "ns3::ApplicationPacketProbe" ||
+             m_probeMap[probeName].second == "ns3::Ipv4PacketProbe" ||
+             m_probeMap[probeName].second == "ns3::Ipv6PacketProbe")
     {
         m_probeMap[probeName].first->TraceConnectWithoutContext(
             probeTraceSource,
@@ -531,20 +514,6 @@ FileHelper::ConnectProbeToAggregator(const std::string& typeId,
         m_probeMap[probeName].first->TraceConnectWithoutContext(
             probeTraceSource,
             MakeCallback(&TimeSeriesAdaptor::TraceSinkUinteger16,
-                         m_timeSeriesAdaptorMap[probeContext]));
-    }
-    else if (m_probeMap[probeName].second == "ns3::Uinteger32Probe")
-    {
-        m_probeMap[probeName].first->TraceConnectWithoutContext(
-            probeTraceSource,
-            MakeCallback(&TimeSeriesAdaptor::TraceSinkUinteger32,
-                         m_timeSeriesAdaptorMap[probeContext]));
-    }
-    else if (m_probeMap[probeName].second == "ns3::TimeProbe")
-    {
-        m_probeMap[probeName].first->TraceConnectWithoutContext(
-            probeTraceSource,
-            MakeCallback(&TimeSeriesAdaptor::TraceSinkDouble,
                          m_timeSeriesAdaptorMap[probeContext]));
     }
     else

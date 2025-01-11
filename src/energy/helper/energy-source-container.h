@@ -30,6 +30,8 @@
 
 namespace ns3
 {
+namespace energy
+{
 
 /**
  * \ingroup energy
@@ -63,7 +65,7 @@ class EnergySourceContainer : public Object
     /**
      * \param source Pointer to an EnergySource.
      *
-     * Creates an EnergySourceContianer with exactly one EnergySource previously
+     * Creates an EnergySourceContainer with exactly one EnergySource previously
      * instantiated.
      */
     EnergySourceContainer(Ptr<EnergySource> source);
@@ -181,6 +183,7 @@ class EnergySourceContainer : public Object
     std::vector<Ptr<EnergySource>> m_sources; //!< Energy source container
 };
 
+} // namespace energy
 } // namespace ns3
 
 #endif /* ENERGY_SOURCE_CONTAINER_H */

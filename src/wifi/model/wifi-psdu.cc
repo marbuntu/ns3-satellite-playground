@@ -139,6 +139,16 @@ WifiPsdu::GetAddr2() const
     return ta;
 }
 
+bool
+WifiPsdu::HasNav() const
+{
+    // When the contents of a received Duration/ID field, treated as an unsigned integer,
+    // are greater than 32 768, the contents are interpreted as appropriate for the frame
+    // type and subtype or ignored if the receiving MAC entity does not have a defined
+    // interpretation for that type and subtype (IEEE 802.11-2016 sec. 10.27.3)
+    return (m_mpduList.at(0)->GetHeader().GetRawDuration() & 0x8000) == 0;
+}
+
 Time
 WifiPsdu::GetDuration() const
 {
@@ -182,7 +192,7 @@ WifiMacHeader::QosAckPolicy
 WifiPsdu::GetAckPolicyForTid(uint8_t tid) const
 {
     NS_LOG_FUNCTION(this << +tid);
-    WifiMacHeader::QosAckPolicy policy;
+    WifiMacHeader::QosAckPolicy policy{WifiMacHeader::NORMAL_ACK};
     auto it = m_mpduList.begin();
     bool found = false;
 

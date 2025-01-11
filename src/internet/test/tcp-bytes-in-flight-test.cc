@@ -29,7 +29,6 @@ NS_LOG_COMPONENT_DEFINE("TcpBytesInFlightTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Check the value of BytesInFlight against a home-made guess
  *
@@ -142,7 +141,7 @@ Ptr<ErrorModel>
 TcpBytesInFlightTest::CreateReceiverErrorModel()
 {
     Ptr<TcpSeqErrorModel> m_errorModel = CreateObject<TcpSeqErrorModel>();
-    for (std::vector<uint32_t>::iterator it = m_toDrop.begin(); it != m_toDrop.end(); ++it)
+    for (auto it = m_toDrop.begin(); it != m_toDrop.end(); ++it)
     {
         m_errorModel->AddSeqToKill(SequenceNumber32(*it));
     }
@@ -237,7 +236,7 @@ TcpBytesInFlightTest::Tx(const Ptr<const Packet> p, const TcpHeader& h, SocketWh
 {
     if (who == SENDER)
     {
-        static SequenceNumber32 retr = SequenceNumber32(0);
+        static SequenceNumber32 retr(0);
         static uint32_t times = 0;
 
         if (m_greatestSeqSent <= h.GetSequenceNumber())
@@ -283,7 +282,6 @@ TcpBytesInFlightTest::FinalChecks()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TestSuite: Check the value of BytesInFlight against a home-made guess
  */
@@ -291,24 +289,24 @@ class TcpBytesInFlightTestSuite : public TestSuite
 {
   public:
     TcpBytesInFlightTestSuite()
-        : TestSuite("tcp-bytes-in-flight-test", UNIT)
+        : TestSuite("tcp-bytes-in-flight-test", Type::UNIT)
     {
         std::vector<uint32_t> toDrop;
         AddTestCase(new TcpBytesInFlightTest("BytesInFlight value, no drop", toDrop),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         toDrop.push_back(4001);
         AddTestCase(new TcpBytesInFlightTest("BytesInFlight value, one drop", toDrop),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         toDrop.push_back(4001);
         AddTestCase(
             new TcpBytesInFlightTest("BytesInFlight value, two drop of same segment", toDrop),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         toDrop.pop_back();
         toDrop.push_back(4501);
         AddTestCase(
             new TcpBytesInFlightTest("BytesInFlight value, two drop of consecutive segments",
                                      toDrop),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
     }
 };
 

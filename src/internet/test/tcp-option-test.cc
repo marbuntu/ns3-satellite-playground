@@ -28,7 +28,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP Window Scaling option Test
  */
@@ -107,7 +106,6 @@ TcpOptionWSTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP TimeStamp option Test
  */
@@ -198,7 +196,6 @@ TcpOptionTSTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP options TestSuite
  */
@@ -206,14 +203,15 @@ class TcpOptionTestSuite : public TestSuite
 {
   public:
     TcpOptionTestSuite()
-        : TestSuite("tcp-option", UNIT)
+        : TestSuite("tcp-option", Type::UNIT)
     {
         for (uint8_t i = 0; i < 15; ++i)
         {
-            AddTestCase(new TcpOptionWSTestCase("Testing window scale value", i), TestCase::QUICK);
+            AddTestCase(new TcpOptionWSTestCase("Testing window scale value", i),
+                        TestCase::Duration::QUICK);
         }
         AddTestCase(new TcpOptionTSTestCase("Testing serialization of random values for timestamp"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 };
 

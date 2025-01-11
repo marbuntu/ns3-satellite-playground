@@ -182,8 +182,7 @@ UplinkSchedulerSimple::Schedule()
     AllocateInitialRangingInterval(symbolsToAllocation, availableSymbols);
 
     std::vector<SSRecord*>* ssRecords = GetBs()->GetSSManager()->GetSSRecords();
-    for (std::vector<SSRecord*>::iterator iter = ssRecords->begin(); iter != ssRecords->end();
-         ++iter)
+    for (auto iter = ssRecords->begin(); iter != ssRecords->end(); ++iter)
     {
         SSRecord* ssRecord = *iter;
 
@@ -340,7 +339,7 @@ UplinkSchedulerSimple::Schedule()
 
 void
 UplinkSchedulerSimple::ServiceUnsolicitedGrants(const SSRecord* ssRecord,
-                                                enum ServiceFlow::SchedulingType schedulingType,
+                                                ServiceFlow::SchedulingType schedulingType,
                                                 OfdmUlMapIe& ulMapIe,
                                                 const WimaxPhy::ModulationType modulationType,
                                                 uint32_t& symbolsToAllocation,
@@ -350,9 +349,7 @@ UplinkSchedulerSimple::ServiceUnsolicitedGrants(const SSRecord* ssRecord,
     uint8_t uiuc = ulMapIe.GetUiuc(); // SS's burst profile
     std::vector<ServiceFlow*> serviceFlows = ssRecord->GetServiceFlows(schedulingType);
 
-    for (std::vector<ServiceFlow*>::iterator iter = serviceFlows.begin();
-         iter != serviceFlows.end();
-         ++iter)
+    for (auto iter = serviceFlows.begin(); iter != serviceFlows.end(); ++iter)
     {
         ServiceFlow* serviceFlow = *iter;
 
@@ -415,7 +412,7 @@ UplinkSchedulerSimple::ServiceUnsolicitedGrants(const SSRecord* ssRecord,
 
 void
 UplinkSchedulerSimple::ServiceBandwidthRequests(const SSRecord* ssRecord,
-                                                enum ServiceFlow::SchedulingType schedulingType,
+                                                ServiceFlow::SchedulingType schedulingType,
                                                 OfdmUlMapIe& ulMapIe,
                                                 const WimaxPhy::ModulationType modulationType,
                                                 uint32_t& symbolsToAllocation,
@@ -423,9 +420,7 @@ UplinkSchedulerSimple::ServiceBandwidthRequests(const SSRecord* ssRecord,
 {
     std::vector<ServiceFlow*> serviceFlows = ssRecord->GetServiceFlows(schedulingType);
 
-    for (std::vector<ServiceFlow*>::iterator iter = serviceFlows.begin();
-         iter != serviceFlows.end();
-         ++iter)
+    for (auto iter = serviceFlows.begin(); iter != serviceFlows.end(); ++iter)
     {
         if (!ServiceBandwidthRequests(*iter,
                                       schedulingType,
@@ -441,7 +436,7 @@ UplinkSchedulerSimple::ServiceBandwidthRequests(const SSRecord* ssRecord,
 
 bool
 UplinkSchedulerSimple::ServiceBandwidthRequests(ServiceFlow* serviceFlow,
-                                                enum ServiceFlow::SchedulingType schedulingType,
+                                                ServiceFlow::SchedulingType schedulingType,
                                                 OfdmUlMapIe& ulMapIe,
                                                 const WimaxPhy::ModulationType modulationType,
                                                 uint32_t& symbolsToAllocation,
@@ -542,7 +537,7 @@ UplinkSchedulerSimple::SetupServiceFlow(SSRecord* ssRecord, ServiceFlow* service
     switch (serviceFlow->GetSchedulingType())
     {
     case ServiceFlow::SF_TYPE_UGS: {
-        if (serviceFlow->GetIsMulticast() == true)
+        if (serviceFlow->GetIsMulticast())
         {
             modulation = serviceFlow->GetModulation();
         }
@@ -574,14 +569,11 @@ UplinkSchedulerSimple::SetupServiceFlow(SSRecord* ssRecord, ServiceFlow* service
         serviceFlow->SetUnsolicitedPollingInterval(interval);
     }
     break;
-    case ServiceFlow::SF_TYPE_NRTPS: {
+    case ServiceFlow::SF_TYPE_NRTPS:
         // no real-time guarantees are given to NRTPS, serviced based on available bandwidth
-    }
-    break;
-    case ServiceFlow::SF_TYPE_BE: {
+    case ServiceFlow::SF_TYPE_BE:
         // no real-time guarantees are given to BE, serviced based on available bandwidth
-    }
-    break;
+        break;
     default:
         NS_FATAL_ERROR("Invalid scheduling type");
     }

@@ -20,8 +20,9 @@
 #ifndef IPV6_RAW_SOCKET_IMPL_H
 #define IPV6_RAW_SOCKET_IMPL_H
 
+#include "ipv6-header.h"
+
 #include "ns3/ipv6-address.h"
-#include "ns3/ipv6-header.h"
 #include "ns3/socket.h"
 
 #include <list>
@@ -80,13 +81,13 @@ class Ipv6RawSocketImpl : public Socket
      */
     void SetNode(Ptr<Node> node);
 
-    enum Socket::SocketErrno GetErrno() const override;
+    Socket::SocketErrno GetErrno() const override;
 
     /**
      * \brief Get socket type (NS3_SOCK_RAW)
      * \return socket type
      */
-    enum Socket::SocketType GetSocketType() const override;
+    Socket::SocketType GetSocketType() const override;
 
     Ptr<Node> GetNode() const override;
 
@@ -170,12 +171,12 @@ class Ipv6RawSocketImpl : public Socket
     /**
      * \brief IPv6 raw data and additional information.
      */
-    typedef struct
+    struct Data
     {
         Ptr<Packet> packet;    /**< Packet data */
         Ipv6Address fromIp;    /**< Source address */
         uint16_t fromProtocol; /**< Protocol used */
-    } Data;
+    };
 
     /**
      * \brief Dispose object.
@@ -185,7 +186,7 @@ class Ipv6RawSocketImpl : public Socket
     /**
      * \brief Last error number.
      */
-    mutable enum Socket::SocketErrno m_err;
+    mutable Socket::SocketErrno m_err;
 
     /**
      * \brief Node.
@@ -225,10 +226,10 @@ class Ipv6RawSocketImpl : public Socket
     /**
      * \brief Struct to hold the ICMPv6 filter
      */
-    typedef struct
+    struct Icmpv6Filter
     {
         uint32_t icmpv6Filt[8]; //!< ICMPv6 filter specification
-    } Icmpv6Filter;
+    };
 
     /**
      * \brief ICMPv6 filter.

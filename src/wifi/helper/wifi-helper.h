@@ -24,7 +24,6 @@
 
 #include "wifi-mac-helper.h"
 
-#include "ns3/deprecated.h"
 #include "ns3/qos-utils.h"
 #include "ns3/trace-helper.h"
 #include "ns3/wifi-phy.h"
@@ -236,7 +235,7 @@ class WifiPhyHelper : public PcapHelperForDevice, public AsciiTraceHelperForDevi
                                  SignalNoiseDbm signalNoise,
                                  uint16_t staId = SU_STA_ID);
 
-    std::vector<ObjectFactory> m_phy;                    ///< PHY object
+    std::vector<ObjectFactory> m_phys;                   ///< PHY objects
     ObjectFactory m_interferenceHelper;                  ///< interference helper
     std::vector<ObjectFactory> m_errorRateModel;         ///< error rate model
     std::vector<ObjectFactory> m_frameCaptureModel;      ///< frame capture model
@@ -345,6 +344,21 @@ class WifiHelper
      */
     template <typename... Args>
     void SetRemoteStationManager(std::string type, Args&&... args);
+
+    /**
+     * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+     * \param linkId ID of the link to configure (>0 only for 11be devices)
+     * \param type the type of the preamble detection model to set.
+     * \param args A sequence of name-value pairs of the attributes to set.
+     *
+     * Set the remote station manager model and its attributes to use for the given link.
+     * If the helper stored a remote station manager model for the first N links only
+     * (corresponding to link IDs from 0 to N-1) and the given linkId is M >= N, then a
+     * remote station manager model using the given attributes is configured for all links
+     * with ID from N to M.
+     */
+    template <typename... Args>
+    void SetRemoteStationManager(uint8_t linkId, std::string type, Args&&... args);
 
     /**
      * Helper function used to set the OBSS-PD algorithm
@@ -483,8 +497,9 @@ class WifiHelper
 
     /**
      * Helper to enable all WifiNetDevice log components with one statement
+     * \param logLevel (optional) log level setting
      */
-    static void EnableLogComponents();
+    static void EnableLogComponents(LogLevel logLevel = LOG_LEVEL_ALL);
 
     /**
      * Assign a fixed random variable stream number to the random variables
@@ -500,18 +515,18 @@ class WifiHelper
      * \param stream first stream index to use
      * \return the number of stream indices assigned by this helper
      */
-    int64_t AssignStreams(NetDeviceContainer c, int64_t stream);
+    static int64_t AssignStreams(NetDeviceContainer c, int64_t stream);
 
   protected:
-    ObjectFactory m_stationManager;            ///< station manager
-    WifiStandard m_standard;                   ///< wifi standard
-    ObjectFactory m_htConfig;                  ///< HT configuration
-    ObjectFactory m_vhtConfig;                 ///< VHT configuration
-    ObjectFactory m_heConfig;                  ///< HE configuration
-    ObjectFactory m_ehtConfig;                 ///< EHT configuration
-    SelectQueueCallback m_selectQueueCallback; ///< select queue callback
-    ObjectFactory m_obssPdAlgorithm;           ///< OBSS_PD algorithm
-    bool m_enableFlowControl;                  //!< whether to enable flow control
+    mutable std::vector<ObjectFactory> m_stationManager; ///< station manager
+    WifiStandard m_standard;                             ///< wifi standard
+    ObjectFactory m_htConfig;                            ///< HT configuration
+    ObjectFactory m_vhtConfig;                           ///< VHT configuration
+    ObjectFactory m_heConfig;                            ///< HE configuration
+    ObjectFactory m_ehtConfig;                           ///< EHT configuration
+    SelectQueueCallback m_selectQueueCallback;           ///< select queue callback
+    ObjectFactory m_obssPdAlgorithm;                     ///< OBSS_PD algorithm
+    bool m_enableFlowControl;                            //!< whether to enable flow control
 };
 
 } // namespace ns3
@@ -535,7 +550,7 @@ template <typename... Args>
 void
 WifiPhyHelper::SetErrorRateModel(std::string type, Args&&... args)
 {
-    for (std::size_t linkId = 0; linkId < m_phy.size(); linkId++)
+    for (std::size_t linkId = 0; linkId < m_phys.size(); linkId++)
     {
         SetErrorRateModel(linkId, type, std::forward<Args>(args)...);
     }
@@ -553,7 +568,7 @@ template <typename... Args>
 void
 WifiPhyHelper::SetFrameCaptureModel(std::string type, Args&&... args)
 {
-    for (std::size_t linkId = 0; linkId < m_phy.size(); linkId++)
+    for (std::size_t linkId = 0; linkId < m_phys.size(); linkId++)
     {
         SetFrameCaptureModel(linkId, type, std::forward<Args>(args)...);
     }
@@ -571,7 +586,7 @@ template <typename... Args>
 void
 WifiPhyHelper::SetPreambleDetectionModel(std::string type, Args&&... args)
 {
-    for (std::size_t linkId = 0; linkId < m_phy.size(); linkId++)
+    for (std::size_t linkId = 0; linkId < m_phys.size(); linkId++)
     {
         SetPreambleDetectionModel(linkId, type, std::forward<Args>(args)...);
     }
@@ -589,8 +604,21 @@ template <typename... Args>
 void
 WifiHelper::SetRemoteStationManager(std::string type, Args&&... args)
 {
-    m_stationManager.SetTypeId(type);
-    m_stationManager.Set(args...);
+    SetRemoteStationManager(0, type, std::forward<Args>(args)...);
+}
+
+template <typename... Args>
+void
+WifiHelper::SetRemoteStationManager(uint8_t linkId, std::string type, Args&&... args)
+{
+    if (m_stationManager.size() > linkId)
+    {
+        m_stationManager[linkId] = ObjectFactory(type, std::forward<Args>(args)...);
+    }
+    else
+    {
+        m_stationManager.resize(linkId + 1, ObjectFactory(type, std::forward<Args>(args)...));
+    }
 }
 
 template <typename... Args>

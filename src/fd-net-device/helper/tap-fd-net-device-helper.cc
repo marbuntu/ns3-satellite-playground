@@ -22,7 +22,6 @@
 #include "ns3/abort.h"
 #include "ns3/config.h"
 #include "ns3/fd-net-device.h"
-#include "ns3/internet-module.h"
 #include "ns3/log.h"
 #include "ns3/names.h"
 #include "ns3/object-factory.h"
@@ -224,7 +223,7 @@ TapFdNetDeviceHelper::CreateFileDescriptor() const
         // which tells the system to make up a device name such as "tap123".
         //
         std::ostringstream ossDeviceName;
-        if (m_deviceName != "")
+        if (!m_deviceName.empty())
         {
             ossDeviceName << "-d" << m_deviceName;
         }
@@ -350,7 +349,7 @@ TapFdNetDeviceHelper::CreateFileDescriptor() const
         // an "ancillary element" but the msghdr uses the control message termimology
         // so we call it "control."
         //
-        size_t msg_size = sizeof(int);
+        constexpr size_t msg_size = sizeof(int);
         char control[CMSG_SPACE(msg_size)];
 
         //

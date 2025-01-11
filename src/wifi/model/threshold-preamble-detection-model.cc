@@ -40,7 +40,7 @@ ThresholdPreambleDetectionModel::GetTypeId()
             .SetGroupName("Wifi")
             .AddConstructor<ThresholdPreambleDetectionModel>()
             .AddAttribute("Threshold",
-                          "Preamble is successfully detection if the SNR is at or above this value "
+                          "Preamble is successfully detected if the SNR is at or above this value "
                           "(expressed in dB).",
                           DoubleValue(4),
                           MakeDoubleAccessor(&ThresholdPreambleDetectionModel::m_threshold),
@@ -66,7 +66,7 @@ ThresholdPreambleDetectionModel::~ThresholdPreambleDetectionModel()
 bool
 ThresholdPreambleDetectionModel::IsPreambleDetected(double rssi,
                                                     double snr,
-                                                    double channelWidth) const
+                                                    ChannelWidthMhz channelWidth) const
 {
     NS_LOG_FUNCTION(this << WToDbm(rssi) << RatioToDb(snr) << channelWidth);
     if (WToDbm(rssi) >= m_rssiMin)

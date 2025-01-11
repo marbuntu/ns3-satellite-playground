@@ -26,8 +26,6 @@
 #include <limits>
 #include <stdint.h>
 
-// #include "ns3/lte-rlc.h"
-
 namespace ns3
 {
 
@@ -146,7 +144,7 @@ class SequenceNumber10
     uint16_t operator-(const SequenceNumber10& other) const
     {
         uint16_t diff = m_value - other.m_value;
-        return (diff);
+        return diff;
     }
 
     /**

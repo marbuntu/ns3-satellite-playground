@@ -42,6 +42,10 @@ The following propagation loss models are implemented:
       * ThreeGppUMaPropagationLossModel
       * ThreeGppUmiStreetCanyonPropagationLossModel
       * ThreeGppIndoorOfficePropagationLossModel
+      * ThreeGppNTNDenseUrbanPropagationLossModel
+      * ThreeGppNTNUrbanPropagationLossModel
+      * ThreeGppNTNSuburbanPropagationLossModel
+      * ThreeGppNTNRuralPropagationLossModel
 
 Other models could be available thanks to other modules, e.g., the ``building`` module.
 
@@ -410,7 +414,7 @@ The extension for the standard OH in open area is
 
 
 The literature lacks of extensions of the COST231 to open area (for suburban it seems that
-we can just impose C = 0); therefore we consider it a special case fo the suburban one.
+we can just impose C = 0); therefore we consider it a special case of the suburban one.
 
 
 Cost231PropagationLossModel
@@ -746,6 +750,47 @@ The test cases :cpp:class:`ThreeGppRmaPropagationLossModelTestCase`,
 :cpp:class:`ThreeGppIndoorOfficePropagationLossModelTestCase` compute the path loss between two nodes and compares it with the value obtained using the formulas in 3GPP TR 38.901 [38901]_, Table 7.4.1-1.
 The test case :cpp:class:`ThreeGppShadowingTestCase` checks if the shadowing is correctly computed by testing the deviation of the overall propagation loss from the path loss. The test is carried out for all the scenarios, both in LOS and NLOS condition.
 
+ThreeGppNTNPropagationLossModel
+===============================
+
+Four different classes have been derived from the base class :cpp:class:`ThreeGppPropagationLossModel`
+to support Non-Terrestrial Networks, one for each scenario presented in 3GPP TR 38.811 [38811]_, i.e.,
+dense urban, urban, suburban and rural.
+
+*Implemented features:*
+
+  * Line of Sight and Not Line of Sight (LOS/NLOS) probability models (3GPP TR 38.811, Sec. 6.6.1)
+  * Path loss, shadowing models and clutter loss (3GPP TR 38.811, Sec. 6.6.2)
+  * Atmospheric absorption model (3GPP TR 38.811, Sec. 6.6.4)
+  * Ionospheric and tropospheric scintillation (3GPP TR 38.811, Sec. 6.6.6)
+  * All the features already implemented in `ThreeGppPropagationLossModel <index.html#threegpppropagationlossmodel>`_
+
+
+ThreeGppNTNDenseUrbanPropagationLossModel
+`````````````````````````````````````````
+This class implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-1 for the Dense Urban scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+ThreeGppNTNUrbanPropagationLossModel
+````````````````````````````````````
+This class implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-2 for the Urban scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+ThreeGppNTNSuburbanPropagationLossModel
+```````````````````````````````````````
+This class implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-3 for the Suburban scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+ThreeGppNTNRuralPropagationLossModel
+````````````````````````````````````
+This class implements the LOS/NLOS path loss and shadow fading models described in 3GPP
+TR 38.811 [38811]_, Table 6.6.2-3 for the Rural scenario. It
+supports frequencies between 0.5 and 100 GHz.
+
+
 ChannelConditionModel
 *********************
 
@@ -778,30 +823,60 @@ The two approach are coded, respectively, in the classes:
 ThreeGppChannelConditionModel
 =============================
 This is the base class for the 3GPP channel condition models.
-It provides the possibility to updated the condition of each channel periodically,
+It provides the possibility to update the condition of each channel periodically,
 after a given time period which can be configured through the attribute "UpdatePeriod".
 If "UpdatePeriod" is set to 0, the channel condition is never updated.
 It has five derived classes implementing the channel condition models described in 3GPP TR 38.901 [38901]_ for different propagation scenarios.
 
 ThreeGppRmaChannelConditionModel
 ````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the RMa scenario.
+This class implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the RMa scenario.
 
 ThreeGppUmaChannelConditionModel
 ````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the UMa scenario.
+This class implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the UMa scenario.
 
 ThreeGppUmiStreetCanyonChannelConditionModel
 ````````````````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the UMi-Street Canyon scenario.
+This class implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the UMi-Street Canyon scenario.
 
 ThreeGppIndoorMixedOfficeChannelConditionModel
 ``````````````````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the Indoor-Mixed office scenario.
+This class implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the Indoor-Mixed office scenario.
 
 ThreeGppIndoorOpenOfficeChannelConditionModel
 `````````````````````````````````````````````
-This implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the Indoor-Open office scenario.
+This class implements the statistical channel condition model described in 3GPP TR 38.901 [38901]_, Table 7.4.2-1, for the Indoor-Open office scenario.
+
+ThreeGppNTNChannelConditionModel
+================================
+This is the base class for the 3GPP NTN channel condition models.
+It provides the possibility to update the condition of each channel periodically,
+after a given time period which can be configured through the attribute "UpdatePeriod".
+If "UpdatePeriod" is set to 0, the channel condition is never updated.
+It has four derived classes implementing the channel condition models described in 3GPP TR 38.811 [38811]_
+for the different propagation scenarios. i.e., dense urban, urban, suburban and rural.
+
+ThreeGppDenseUrbanChannelConditionModel
+```````````````````````````````````````
+This class implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
+Table 6.6.1-1, for the Dense Urban scenario.
+
+ThreeGppUrbanChannelConditionModel
+``````````````````````````````````
+This class implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
+Table 6.6.1-1, for the Urban scenario.
+
+ThreeGppSuburbanStreetCanyonChannelConditionModel
+`````````````````````````````````````````````````
+This class implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
+Table 6.6.1-1, for the Suburban scenario.
+
+ThreeGppRuralChannelConditionModel
+``````````````````````````````````
+This class implements the statistical channel condition model described in 3GPP TR 38.811 [38811]_,
+Table 6.6.1-1, for the Rural office scenario.
+
 
 Testing
 =======
@@ -946,7 +1021,7 @@ Vehicular fast fading model
 
 The fast fading model described in Sec. 6.2.3 of TR 37.885 is based on the one
 specified in TR 38.901, whose implementation is provided in the ``spectrum`` module
-(see the :ref:`spectrum module documentation <sec-3gpp-fast-fading-model>`).
+(see the :ref:`spectrum module documentation <3gpp-fast-fading-model>`).
 This model is general and includes different parameters which can
 be tuned to simulate multiple propagation environments.
 To better model the channel dynamics in vehicular environments, TR 37.885
@@ -956,7 +1031,7 @@ To select the parameters for vehicular scenarios, it is necessary to set
 the attribute "Scenario" of the class :cpp:class:`ThreeGppChannelModel` using the value
 "V2V-Urban" or "V2V-Highway".
 
-Additionally, TR 37.885 specifies a new equation to compute the Doppler component,
+edditionally, TR 37.885 specifies a new equation to compute the Doppler component,
 which accounts for the mobility of both nodes, as well as scattering
 from the environment.
 In particular, the scattering effect is considered by deviating the Doppler
@@ -978,7 +1053,7 @@ We considered two communicating vehicles moving within the scenario, and
 computed the SNR experienced during the entire simulation, with a time
 resolution of 10 ms.
 The vehicles are equipped with 2x2 antenna arrays modeled using the
-:ref:`3GPP antenna model <sec-3gpp-antenna-model>`.
+:ref:`3GPP antenna model <3gpp-antenna-model>`.
 The bearing and the downtilt angles are properly configured and the
 optimal beamforming vectors are computed at the beginning of the simulation.
 
@@ -1036,3 +1111,5 @@ References
 .. [Boban2016Modeling]  M. Boban,  X. Gong, and  W. Xu, “Modeling the evolution
    of line-of-sight blockage for V2V channels,” in IEEE 84th Vehicular Technology
    Conference (VTC-Fall), 2016.
+
+.. [38811] 3GPP. 2018. TR 38.811, Study on New Radio (NR) to support non-terrestrial networks, V15.4.0. (2020-09).

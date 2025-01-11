@@ -64,6 +64,7 @@ class EhtPhy : public HePhy
     Ptr<WifiPpdu> BuildPpdu(const WifiConstPsduMap& psdus,
                             const WifiTxVector& txVector,
                             Time ppduDuration) override;
+    WifiMode GetSigBMode(const WifiTxVector& txVector) const override;
 
     /**
      * Initialize all EHT modes.
@@ -198,7 +199,7 @@ class EhtPhy : public HePhy
      * \return the physical bit rate of this signal in bps.
      */
     static uint64_t GetPhyRate(uint8_t mcsValue,
-                               uint16_t channelWidth,
+                               ChannelWidthMhz channelWidth,
                                uint16_t guardInterval,
                                uint8_t nss);
 
@@ -237,7 +238,7 @@ class EhtPhy : public HePhy
      * \return the data bit rate in bps.
      */
     static uint64_t GetDataRate(uint8_t mcsValue,
-                                uint16_t channelWidth,
+                                ChannelWidthMhz channelWidth,
                                 uint16_t guardInterval,
                                 uint8_t nss);
 
@@ -259,6 +260,10 @@ class EhtPhy : public HePhy
                                 PhyFieldRxStatus status,
                                 WifiPpduField field) override;
     WifiPhyRxfailureReason GetFailureReason(WifiPpduField field) const override;
+    Time CalculateNonHeDurationForHeTb(const WifiTxVector& txVector) const override;
+    Time CalculateNonHeDurationForHeMu(const WifiTxVector& txVector) const override;
+    uint32_t GetSigBSize(const WifiTxVector& txVector) const override;
+
     /**
      * Create and return the EHT MCS corresponding to
      * the provided index.

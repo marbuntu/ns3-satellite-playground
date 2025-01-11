@@ -20,9 +20,10 @@
 
 #include "tcp-dctcp.h"
 
+#include "tcp-socket-state.h"
+
 #include "ns3/abort.h"
 #include "ns3/log.h"
-#include "ns3/tcp-socket-state.h"
 
 namespace ns3
 {
@@ -120,6 +121,7 @@ TcpDctcp::Init(Ptr<TcpSocketState> tcb)
     tcb->m_useEcn = TcpSocketState::On;
     tcb->m_ecnMode = TcpSocketState::DctcpEcn;
     tcb->m_ectCodePoint = m_useEct0 ? TcpSocketState::Ect0 : TcpSocketState::Ect1;
+    SetSuppressIncreaseIfCwndLimited(false);
     m_initialized = true;
 }
 
@@ -142,7 +144,7 @@ TcpDctcp::PktsAcked(Ptr<TcpSocketState> tcb, uint32_t segmentsAcked, const Time&
     {
         m_ackedBytesEcn += segmentsAcked * tcb->m_segmentSize;
     }
-    if (m_nextSeqFlag == false)
+    if (!m_nextSeqFlag)
     {
         m_nextSeq = tcb->m_nextTxSequence;
         m_nextSeqFlag = true;
@@ -196,7 +198,7 @@ TcpDctcp::CeState0to1(Ptr<TcpSocketState> tcb)
         tcb->m_rxBuffer->SetNextRxSequence(tmpRcvNxt);
     }
 
-    if (m_priorRcvNxtFlag == false)
+    if (!m_priorRcvNxtFlag)
     {
         m_priorRcvNxtFlag = true;
     }
@@ -223,7 +225,7 @@ TcpDctcp::CeState1to0(Ptr<TcpSocketState> tcb)
         tcb->m_rxBuffer->SetNextRxSequence(tmpRcvNxt);
     }
 
-    if (m_priorRcvNxtFlag == false)
+    if (!m_priorRcvNxtFlag)
     {
         m_priorRcvNxtFlag = true;
     }

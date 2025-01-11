@@ -45,7 +45,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 RIPng Test
  */
@@ -276,7 +275,6 @@ Ipv6RipngTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 RIPng count to infinity Test
  */
@@ -509,7 +507,6 @@ Ipv6RipngCountToInfinityTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 RIPng SplitHorizon strategy Test
  */
@@ -559,7 +556,7 @@ Ipv6RipngSplitHorizonStrategyTest::ReceivePktProbe(Ptr<Socket> socket)
         std::list<RipNgRte> rtes = hdr.GetRteList();
 
         // validate the RTEs before processing
-        for (std::list<RipNgRte>::iterator iter = rtes.begin(); iter != rtes.end(); iter++)
+        for (auto iter = rtes.begin(); iter != rtes.end(); iter++)
         {
             if (iter->GetPrefix() == "2001:1::")
             {
@@ -698,7 +695,6 @@ Ipv6RipngSplitHorizonStrategyTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 RIPng TestSuite
  */
@@ -706,14 +702,16 @@ class Ipv6RipngTestSuite : public TestSuite
 {
   public:
     Ipv6RipngTestSuite()
-        : TestSuite("ipv6-ripng", UNIT)
+        : TestSuite("ipv6-ripng", Type::UNIT)
     {
-        AddTestCase(new Ipv6RipngTest, TestCase::QUICK);
-        AddTestCase(new Ipv6RipngCountToInfinityTest, TestCase::QUICK);
-        AddTestCase(new Ipv6RipngSplitHorizonStrategyTest(RipNg::POISON_REVERSE), TestCase::QUICK);
-        AddTestCase(new Ipv6RipngSplitHorizonStrategyTest(RipNg::SPLIT_HORIZON), TestCase::QUICK);
+        AddTestCase(new Ipv6RipngTest, TestCase::Duration::QUICK);
+        AddTestCase(new Ipv6RipngCountToInfinityTest, TestCase::Duration::QUICK);
+        AddTestCase(new Ipv6RipngSplitHorizonStrategyTest(RipNg::POISON_REVERSE),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new Ipv6RipngSplitHorizonStrategyTest(RipNg::SPLIT_HORIZON),
+                    TestCase::Duration::QUICK);
         AddTestCase(new Ipv6RipngSplitHorizonStrategyTest(RipNg::NO_SPLIT_HORIZON),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 };
 

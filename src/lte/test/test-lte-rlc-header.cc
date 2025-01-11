@@ -27,6 +27,7 @@
 #include <bitset>
 #include <iomanip>
 #include <list>
+#include <vector>
 
 NS_LOG_COMPONENT_DEFINE("TestLteRlcHeader");
 
@@ -35,7 +36,6 @@ namespace ns3
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Test Utils
  */
@@ -49,13 +49,12 @@ class TestUtils
      */
     static std::string sprintPacketContentsHex(Ptr<Packet> pkt)
     {
-        uint32_t psize = pkt->GetSize();
-        uint8_t buffer[psize];
+        std::vector<uint8_t> buffer(pkt->GetSize());
         std::ostringstream oss(std::ostringstream::out);
-        pkt->CopyData(buffer, psize);
-        for (uint32_t i = 0; i < psize; i++)
+        pkt->CopyData(buffer.data(), buffer.size());
+        for (auto b : buffer)
         {
-            oss << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)buffer[i];
+            oss << std::setfill('0') << std::setw(2) << std::hex << (uint32_t)b;
         }
         return oss.str();
     }
@@ -67,13 +66,12 @@ class TestUtils
      */
     static std::string sprintPacketContentsBin(Ptr<Packet> pkt)
     {
-        uint32_t psize = pkt->GetSize();
-        uint8_t buffer[psize];
+        std::vector<uint8_t> buffer(pkt->GetSize());
         std::ostringstream oss(std::ostringstream::out);
-        pkt->CopyData(buffer, psize);
-        for (uint32_t i = 0; i < psize; i++)
+        pkt->CopyData(buffer.data(), buffer.size());
+        for (auto b : buffer)
         {
-            oss << (std::bitset<8>(buffer[i]));
+            oss << (std::bitset<8>(b));
         }
         return std::string(oss.str() + "\n");
     }
@@ -106,7 +104,6 @@ class TestUtils
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rlc Am Status Pdu Test Case
  */
@@ -153,8 +150,7 @@ RlcAmStatusPduTestCase::DoRun()
     LteRlcAmHeader h;
     h.SetControlPdu(LteRlcAmHeader::STATUS_PDU);
     h.SetAckSn(m_ackSn);
-    for (std::list<SequenceNumber10>::iterator it = m_nackSnList.begin(); it != m_nackSnList.end();
-         ++it)
+    for (auto it = m_nackSnList.begin(); it != m_nackSnList.end(); ++it)
     {
         h.PushNack(it->GetValue());
     }
@@ -172,8 +168,7 @@ RlcAmStatusPduTestCase::DoRun()
     SequenceNumber10 ackSn = h2.GetAckSn();
     NS_TEST_ASSERT_MSG_EQ(ackSn, m_ackSn, "deserialized ACK SN differs from test vector");
 
-    for (std::list<SequenceNumber10>::iterator it = m_nackSnList.begin(); it != m_nackSnList.end();
-         ++it)
+    for (auto it = m_nackSnList.begin(); it != m_nackSnList.end(); ++it)
     {
         int nackSn = h2.PopNack();
         NS_TEST_ASSERT_MSG_GT(nackSn, -1, "not enough elements in deserialized NACK list");
@@ -187,7 +182,6 @@ RlcAmStatusPduTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Lte Rlc Header Test Suite
  */
@@ -198,7 +192,7 @@ class LteRlcHeaderTestSuite : public TestSuite
 } staticLteRlcHeaderTestSuiteInstance; ///< the test suite
 
 LteRlcHeaderTestSuite::LteRlcHeaderTestSuite()
-    : TestSuite("lte-rlc-header", UNIT)
+    : TestSuite("lte-rlc-header", Type::UNIT)
 {
     NS_LOG_FUNCTION(this);
 
@@ -206,14 +200,14 @@ LteRlcHeaderTestSuite::LteRlcHeaderTestSuite()
         SequenceNumber10 ackSn(8);
         std::list<SequenceNumber10> nackSnList;
         std::string hex("0020");
-        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::QUICK);
+        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::Duration::QUICK);
     }
 
     {
         SequenceNumber10 ackSn(873);
         std::list<SequenceNumber10> nackSnList;
         std::string hex("0da4");
-        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::QUICK);
+        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::Duration::QUICK);
     }
 
     {
@@ -222,7 +216,7 @@ LteRlcHeaderTestSuite::LteRlcHeaderTestSuite()
             SequenceNumber10(873),
         };
         std::string hex("000bb480");
-        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::QUICK);
+        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::Duration::QUICK);
     }
 
     {
@@ -232,7 +226,7 @@ LteRlcHeaderTestSuite::LteRlcHeaderTestSuite()
             SequenceNumber10(754),
         };
         std::string hex("000bfed790");
-        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::QUICK);
+        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::Duration::QUICK);
     }
 
     {
@@ -243,7 +237,7 @@ LteRlcHeaderTestSuite::LteRlcHeaderTestSuite()
             SequenceNumber10(947),
         };
         std::string hex("000bfed795d980");
-        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::QUICK);
+        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::Duration::QUICK);
     }
 
     {
@@ -255,7 +249,7 @@ LteRlcHeaderTestSuite::LteRlcHeaderTestSuite()
             SequenceNumber10(347),
         };
         std::string hex("000bfed795d9cad8");
-        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::QUICK);
+        AddTestCase(new RlcAmStatusPduTestCase(ackSn, nackSnList, hex), TestCase::Duration::QUICK);
     }
 }
 

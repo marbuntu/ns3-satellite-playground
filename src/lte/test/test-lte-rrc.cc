@@ -31,7 +31,6 @@ NS_LOG_COMPONENT_DEFINE("LteRrcTest");
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Test rrc connection establishment.
  */
@@ -322,7 +321,7 @@ LteRrcConnectionEstablishmentTestCase::DoRun()
     // instead of lteHelper->Attach () and lteHelper->ActivateXxx
 
     // Set AdmitConnectionRequest attribute
-    for (NetDeviceContainer::Iterator it = enbDevs.Begin(); it != enbDevs.End(); ++it)
+    for (auto it = enbDevs.Begin(); it != enbDevs.End(); ++it)
     {
         Ptr<LteEnbRrc> enbRrc = (*it)->GetObject<LteEnbNetDevice>()->GetRrc();
         enbRrc->SetAttribute("AdmitRrcConnectionRequest",
@@ -331,7 +330,7 @@ LteRrcConnectionEstablishmentTestCase::DoRun()
 
     uint32_t i = 0;
     uint32_t tmax = 0;
-    for (NetDeviceContainer::Iterator it = ueDevs.Begin(); it != ueDevs.End(); ++it)
+    for (auto it = ueDevs.Begin(); it != ueDevs.End(); ++it)
     {
         Ptr<NetDevice> ueDevice = *it;
         Ptr<NetDevice> enbDevice = enbDevs.Get(0);
@@ -390,7 +389,7 @@ LteRrcConnectionEstablishmentTestCase::Connect(Ptr<NetDevice> ueDevice, Ptr<NetD
 
     for (uint32_t b = 0; b < m_nBearers; ++b)
     {
-        enum EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
+        EpsBearer::Qci q = EpsBearer::NGBR_VIDEO_TCP_DEFAULT;
         EpsBearer bearer(q);
         m_lteHelper->ActivateDataRadioBearer(ueDevice, bearer);
     }
@@ -495,8 +494,8 @@ LteRrcConnectionEstablishmentTestCase::CheckConnected(Ptr<NetDevice> ueDevice,
                                   m_nBearers,
                                   "wrong num bearers at UE");
 
-            ObjectMapValue::Iterator enbBearerIt = enbDataRadioBearerMapValue.Begin();
-            ObjectMapValue::Iterator ueBearerIt = ueDataRadioBearerMapValue.Begin();
+            auto enbBearerIt = enbDataRadioBearerMapValue.Begin();
+            auto ueBearerIt = ueDataRadioBearerMapValue.Begin();
             while (enbBearerIt != enbDataRadioBearerMapValue.End() &&
                    ueBearerIt != ueDataRadioBearerMapValue.End())
             {
@@ -584,7 +583,6 @@ LteRrcConnectionEstablishmentTestCase::ConnectionTimeoutCallback(std::string con
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Lte Rrc Connection Establishment Error Test Case
  */
@@ -681,7 +679,7 @@ LteRrcConnectionEstablishmentErrorTestCase::DoRun()
     // instead of lteHelper->Attach () and lteHelper->ActivateXxx
 
     // Set AdmitConnectionRequest attribute
-    for (NetDeviceContainer::Iterator it = enbDevs.Begin(); it != enbDevs.End(); ++it)
+    for (auto it = enbDevs.Begin(); it != enbDevs.End(); ++it)
     {
         Ptr<LteEnbRrc> enbRrc = (*it)->GetObject<LteEnbNetDevice>()->GetRrc();
         enbRrc->SetAttribute("AdmitRrcConnectionRequest",
@@ -690,7 +688,7 @@ LteRrcConnectionEstablishmentErrorTestCase::DoRun()
 
     uint32_t i = 0;
     uint32_t tmax = 0;
-    for (NetDeviceContainer::Iterator it = ueDevs.Begin(); it != ueDevs.End(); ++it)
+    for (auto it = ueDevs.Begin(); it != ueDevs.End(); ++it)
     {
         Ptr<NetDevice> ueDevice = *it;
         Ptr<NetDevice> enbDevice = enbDevs.Get(0);
@@ -765,7 +763,6 @@ LteRrcConnectionEstablishmentErrorTestCase::JumpBack()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Lte Rrc Test Suite
  */
@@ -776,7 +773,7 @@ class LteRrcTestSuite : public TestSuite
 };
 
 LteRrcTestSuite::LteRrcTestSuite()
-    : TestSuite("lte-rrc", SYSTEM)
+    : TestSuite("lte-rrc", Type::SYSTEM)
 {
     //  LogComponentEnableAll (LOG_PREFIX_ALL);
     //  LogComponentEnable ("LteRrcTest", LOG_LEVEL_ALL);
@@ -785,75 +782,72 @@ LteRrcTestSuite::LteRrcTestSuite()
 
     NS_LOG_FUNCTION(this);
 
-    for (uint32_t useIdealRrc = 0; useIdealRrc <= 1; ++useIdealRrc)
+    for (auto useIdealRrc : {false, true})
     {
-        //         <----- all times in ms ----------------->
+        // <----- all times in ms ----------------->
 
-        //                                                     nUes      tConnBase delayDiscStart
-        //                                                     useIdealRrc
-        //                                                        nBearers       tConnIncrPerUe
-        //                                                        errorExpected
-        //                                                        admitRrcConnectionRequest
+        // nUes tConnBase delayDiscStart useIdealRrc nBearers tConnIncrPerUe errorExpected
+        // admitRrcConnectionRequest
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 0, 0, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 0, 100, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 1, 0, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 1, 100, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 2, 0, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 2, 100, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 0, 20, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 0, 20, 10, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 0, 20, 100, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 1, 20, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 1, 20, 10, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 1, 20, 100, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 2, 20, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 2, 20, 10, 1, false, useIdealRrc, true),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 2, 20, 100, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(3, 0, 20, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(4, 0, 20, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(4, 0, 20, 300, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(20, 0, 10, 1, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(50, 0, 0, 0, 1, false, useIdealRrc, true),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
 
         // Test cases to check admitRrcConnectionRequest=false
         //                                                     nUes      tConnBase delayDiscStart
@@ -863,28 +857,28 @@ LteRrcTestSuite::LteRrcTestSuite()
         //                                                        admitRrcConnectionRequest
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 0, 0, 0, 1, false, useIdealRrc, false),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(1, 2, 100, 0, 1, false, useIdealRrc, false),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 0, 20, 0, 1, false, useIdealRrc, false),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(2, 1, 20, 0, 1, false, useIdealRrc, false),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         AddTestCase(
             new LteRrcConnectionEstablishmentTestCase(3, 0, 20, 0, 1, false, useIdealRrc, false),
-            TestCase::EXTENSIVE);
+            TestCase::Duration::EXTENSIVE);
     }
 
     // Test cases with transmission error
     AddTestCase(new LteRrcConnectionEstablishmentErrorTestCase(Seconds(0.020214),
                                                                "failure at RRC Connection Request"),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteRrcConnectionEstablishmentErrorTestCase(Seconds(0.025),
                                                                "failure at RRC Connection Setup"),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     /*
      * With RLF implementation we now do support the Idle mode,
      * thus it solve Bug 1762 Comment #25.
@@ -892,7 +886,11 @@ LteRrcTestSuite::LteRrcTestSuite()
     AddTestCase(
         new LteRrcConnectionEstablishmentErrorTestCase(Seconds(0.030),
                                                        "failure at RRC Connection Setup Complete"),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteRrcTestSuite g_lteRrcTestSuiteInstance;

@@ -20,10 +20,12 @@
 #ifndef LTE_RLC_UM_H
 #define LTE_RLC_UM_H
 
-#include "ns3/lte-rlc-sequence-number.h"
-#include "ns3/lte-rlc.h"
+#include "lte-rlc-sequence-number.h"
+#include "lte-rlc.h"
+
 #include <ns3/event-id.h>
 
+#include <deque>
 #include <map>
 
 namespace ns3
@@ -120,7 +122,7 @@ class LteRlcUm : public LteRlc
         Time m_waitingSince; ///< Layer arrival time
     };
 
-    std::vector<TxPdu> m_txBuffer;              ///< Transmission buffer
+    std::deque<TxPdu> m_txBuffer;               ///< Transmission buffer
     std::map<uint16_t, Ptr<Packet>> m_rxBuffer; ///< Reception buffer
     std::vector<Ptr<Packet>> m_reasBuffer;      ///< Reassembling buffer
 
@@ -143,19 +145,22 @@ class LteRlcUm : public LteRlc
     /**
      * Timers. See section 7.3 in TS 36.322
      */
-    Time m_reorderingTimerValue; ///< reordering timer value
-    EventId m_reorderingTimer;   ///< reordering timer
-    EventId m_rbsTimer;          ///< RBS timer
+    Time m_reorderingTimerValue;        ///< reordering timer value
+    EventId m_reorderingTimer;          ///< reordering timer
+    EventId m_rbsTimer;                 ///< RBS timer
+    bool m_enablePdcpDiscarding{false}; //!< whether to use the PDCP discarding (perform discarding
+                                        //!< at the moment of passing the PDCP SDU to RLC)
+    uint32_t m_discardTimerMs{0};       //!< the discard timer value in milliseconds
 
     /**
      * Reassembling state
      */
-    typedef enum
+    enum ReassemblingState_t
     {
         NONE = 0,
         WAITING_S0_FULL = 1,
         WAITING_SI_SF = 2
-    } ReassemblingState_t;
+    };
 
     ReassemblingState_t m_reassemblingState; ///< reassembling state
     Ptr<Packet> m_keepS0;                    ///< keep S0

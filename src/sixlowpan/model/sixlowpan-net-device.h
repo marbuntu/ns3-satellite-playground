@@ -80,10 +80,15 @@ class SixLowPanNetDevice : public NetDevice
         DROP_FRAGMENT_TIMEOUT = 1,           //!< Fragment timeout exceeded
         DROP_FRAGMENT_BUFFER_FULL,           //!< Fragment buffer size exceeded
         DROP_UNKNOWN_EXTENSION,              //!< Unsupported compression kind
-        DROP_DISALLOWED_COMPRESSION,         //!< HC1 while in IPHC mode or viceversa
+        DROP_DISALLOWED_COMPRESSION,         //!< HC1 while in IPHC mode or vice-versa
         DROP_SATETFUL_DECOMPRESSION_PROBLEM, //!< Decompression failed due to missing or expired
                                              //!< context
     };
+
+    /**
+     * \brief The protocol number for 6LoWPAN (0xA0ED) - see \RFC{7973}.
+     */
+    static constexpr uint16_t PROT_NUMBER{0xA0ED};
 
     /**
      * \brief Get the type ID.
@@ -178,7 +183,7 @@ class SixLowPanNetDevice : public NetDevice
                                        uint32_t ifindex);
 
     /**
-     * TracedCallback signature fo packet drop events
+     * TracedCallback signature for packet drop events
      *
      * \param [in] reason The reason for the drop.
      * \param [in] packet The packet.
@@ -382,7 +387,7 @@ class SixLowPanNetDevice : public NetDevice
      * \param [in] packet The packet to be compressed.
      * \param [in] src The MAC source address.
      * \param [in] dst The MAC destination address.
-     * \return true if the packet can not be decompressed due to wrong context informations.
+     * \return true if the packet can not be decompressed due to wrong context information.
      */
     bool DecompressLowPanIphc(Ptr<Packet> packet, const Address& src, const Address& dst);
 
@@ -407,7 +412,7 @@ class SixLowPanNetDevice : public NetDevice
      * \param [in] srcAddress The IPv6 source address.
      * \param [in] dstAddress The IPv6 destination address.
      * \return A std::pair containing the decompressed header type and a flag - true if the packet
-     * can not be decompressed due to wrong context informations.
+     * can not be decompressed due to wrong context information.
      */
     std::pair<uint8_t, bool> DecompressLowPanNhc(Ptr<Packet> packet,
                                                  const Address& src,
@@ -510,7 +515,7 @@ class SixLowPanNetDevice : public NetDevice
          * \brief Get a list of the current stored fragments.
          * \returns The current stored fragments.
          */
-        std::list<Ptr<Packet>> GetFraments() const;
+        std::list<Ptr<Packet>> GetFragments() const;
 
         /**
          * \brief Set the Timeout iterator.
@@ -626,14 +631,6 @@ class SixLowPanNetDevice : public NetDevice
     Ptr<NetDevice> m_netDevice; //!< Smart pointer to the underlying NetDevice.
     uint32_t m_ifIndex;         //!< Interface index.
 
-    /**
-     * \brief Force the EtherType number.
-     * Also implying that the underlying NetDevice is using 48-bit Addresses, e.g., Ethernet, Wi-Fi,
-     * etc.
-     */
-    bool m_forceEtherType;
-
-    uint16_t m_etherType;   //!< EtherType number (used only if m_forceEtherType is true).
     bool m_omitUdpChecksum; //!< Omit UDP checksum in NC1 encoding.
 
     uint32_t m_compressionThreshold; //!< Minimum L2 payload size.
@@ -641,7 +638,7 @@ class SixLowPanNetDevice : public NetDevice
     Ptr<UniformRandomVariable> m_rng; //!< Rng for the fragments tag.
 
     /**
-     * Structure holding the informations for a context (used in compression and decompression)
+     * Structure holding the information for a context (used in compression and decompression)
      */
     struct ContextEntry
     {

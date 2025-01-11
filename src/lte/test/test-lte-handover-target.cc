@@ -49,7 +49,6 @@ NS_LOG_COMPONENT_DEFINE("LteHandoverTargetTest");
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Testing a handover algorithm, verifying that it selects the right
  *        target cell when more than one options available.
@@ -392,7 +391,7 @@ class LteHandoverTargetTestSuite : public TestSuite
 };
 
 LteHandoverTargetTestSuite::LteHandoverTargetTestSuite()
-    : TestSuite("lte-handover-target", SYSTEM)
+    : TestSuite("lte-handover-target", Type::SYSTEM)
 {
     // LogComponentEnable ("LteHandoverTargetTest", LOG_PREFIX_ALL);
     // LogComponentEnable ("LteHandoverTargetTest", LOG_LEVEL_ALL);
@@ -414,7 +413,7 @@ LteHandoverTargetTestSuite::LteHandoverTargetTestSuite()
                                               1,
                                               3,
                                               "ns3::A2A4RsrqHandoverAlgorithm"),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteHandoverTargetTestCase("4 cells and strongest cell algorithm",
                                               Vector(20, 40, 0),
                                               2,
@@ -422,7 +421,7 @@ LteHandoverTargetTestSuite::LteHandoverTargetTestSuite()
                                               1,
                                               3,
                                               "ns3::A3RsrpHandoverAlgorithm"),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     /*
      *    4 --- 5 --- 6
@@ -437,7 +436,7 @@ LteHandoverTargetTestSuite::LteHandoverTargetTestSuite()
                                               5,
                                               2,
                                               "ns3::A2A4RsrqHandoverAlgorithm"),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteHandoverTargetTestCase("6 cells and strongest cell algorithm",
                                               Vector(150, 90, 0),
                                               3,
@@ -445,8 +444,12 @@ LteHandoverTargetTestSuite::LteHandoverTargetTestSuite()
                                               5,
                                               2,
                                               "ns3::A3RsrpHandoverAlgorithm"),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
 } // end of LteHandoverTargetTestSuite ()
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteHandoverTargetTestSuite g_lteHandoverTargetTestSuiteInstance;

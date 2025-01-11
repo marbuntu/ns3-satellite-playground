@@ -15,34 +15,33 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Nicola Baldo <nbaldo@cttc.es>
- *          Marco Miozzo <mmiozzo@cttc.es>
- *          Manuel Requena <manuel.requena@cttc.es>
+ * Authors:
+ *   Nicola Baldo <nbaldo@cttc.es>
+ *   Marco Miozzo <mmiozzo@cttc.es>
+ *   Manuel Requena <manuel.requena@cttc.es>
  * Modified by:
- *          Danilo Abrignani <danilo.abrignani@unibo.it> (Carrier Aggregation - GSoC 2015)
- *          Biljana Bojovic <biljana.bojovic@cttc.es> (Carrier Aggregation)
- *          Vignesh Babu <ns3-dev@esk.fraunhofer.de> (RLF extensions)
+ *   Danilo Abrignani <danilo.abrignani@unibo.it> (Carrier Aggregation - GSoC 2015)
+ *   Biljana Bojovic <biljana.bojovic@cttc.es> (Carrier Aggregation)
+ *   Vignesh Babu <ns3-dev@esk.fraunhofer.de> (RLF extensions)
  */
 
 #ifndef LTE_ENB_RRC_H
 #define LTE_ENB_RRC_H
 
-#include <ns3/component-carrier-enb.h>
-#include <ns3/epc-enb-s1-sap.h>
-#include <ns3/epc-x2-sap.h>
+#include "component-carrier.h"
+#include "epc-enb-s1-sap.h"
+#include "epc-x2-sap.h"
+#include "lte-anr-sap.h"
+#include "lte-ccm-rrc-sap.h"
+#include "lte-enb-cmac-sap.h"
+#include "lte-enb-cphy-sap.h"
+#include "lte-ffr-rrc-sap.h"
+#include "lte-handover-management-sap.h"
+#include "lte-mac-sap.h"
+#include "lte-pdcp-sap.h"
+#include "lte-rrc-sap.h"
+
 #include <ns3/event-id.h>
-#include <ns3/ff-mac-csched-sap.h>
-#include <ns3/ff-mac-sched-sap.h>
-#include <ns3/lte-anr-sap.h>
-#include <ns3/lte-ccm-rrc-sap.h>
-#include <ns3/lte-enb-cmac-sap.h>
-#include <ns3/lte-enb-cphy-sap.h>
-#include <ns3/lte-ffr-rrc-sap.h>
-#include <ns3/lte-handover-management-sap.h>
-#include <ns3/lte-mac-sap.h>
-#include <ns3/lte-pdcp-sap.h>
-#include <ns3/lte-rlc.h>
-#include <ns3/lte-rrc-sap.h>
 #include <ns3/nstime.h>
 #include <ns3/object.h>
 #include <ns3/traced-callback.h>
@@ -50,9 +49,6 @@
 #include <map>
 #include <set>
 #include <vector>
-
-#define MIN_NO_CC 1
-#define MAX_NO_CC 5 // this is the maximum number of carrier components allowed by 3GPP up to R13
 
 namespace ns3
 {
@@ -1498,7 +1494,7 @@ class LteEnbRrc : public Object
      * \note this method can have the side effect of updating the SRS
      * configuration index of all UEs
      *
-     * \param srcCi the indext to be removed
+     * \param srcCi the index to be removed
      */
     void RemoveSrsConfigurationIndex(uint16_t srcCi);
 
@@ -1637,7 +1633,7 @@ class LteEnbRrc : public Object
      * The `EpsBearerToRlcMapping` attribute. Specify which type of RLC will be
      * used for each type of EPS bearer.
      */
-    enum LteEpsBearerToRlcMapping_t m_epsBearerToRlcMapping;
+    LteEpsBearerToRlcMapping_t m_epsBearerToRlcMapping;
     /**
      * The `SystemInformationPeriodicity` attribute. The interval for sending
      * system information.

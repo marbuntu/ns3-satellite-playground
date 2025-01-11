@@ -21,8 +21,9 @@
 #ifndef COST231_PROPAGATION_LOSS_MODEL_H
 #define COST231_PROPAGATION_LOSS_MODEL_H
 
+#include "propagation-loss-model.h"
+
 #include "ns3/nstime.h"
-#include "ns3/propagation-loss-model.h"
 
 namespace ns3
 {
@@ -120,7 +121,7 @@ class Cost231PropagationLossModel : public PropagationLossModel
      * Get the shadowing value
      * \returns the shadowing value
      */
-    double GetShadowing();
+    double GetShadowing() const;
     /**
      * Set the shadowing value
      * \param shadowing the shadowing value

@@ -33,7 +33,6 @@ NS_LOG_COMPONENT_DEFINE("TcpLpTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Testing the behaviour common to New Reno
  */
@@ -114,7 +113,6 @@ TcpLpToNewReno::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Testing TcpLp when cwd exceeds threshold
  */
@@ -184,7 +182,6 @@ TcpLpInferenceTest1::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Testing TcpLp when it is inference phase
  */
@@ -258,7 +255,6 @@ TcpLpInferenceTest2::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * Test the behaviour common to New Reno
  */
@@ -266,7 +262,7 @@ class TcpLpTestSuite : public TestSuite
 {
   public:
     TcpLpTestSuite()
-        : TestSuite("tcp-lp-test", UNIT)
+        : TestSuite("tcp-lp-test", Type::UNIT)
     {
         AddTestCase(new TcpLpToNewReno(4 * 1446,
                                        1446,
@@ -274,7 +270,7 @@ class TcpLpTestSuite : public TestSuite
                                        2 * 1446,
                                        MilliSeconds(100),
                                        "LP falls to New Reno if the cwd is within threshold"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         AddTestCase(new TcpLpInferenceTest1(
                         2 * 1446,
@@ -282,7 +278,7 @@ class TcpLpTestSuite : public TestSuite
                         2,
                         MilliSeconds(100),
                         "LP enters Inference phase when cwd exceeds threshold for the first time"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         AddTestCase(new TcpLpInferenceTest2(
                         2 * 1446,
@@ -290,7 +286,7 @@ class TcpLpTestSuite : public TestSuite
                         2,
                         MilliSeconds(100),
                         "LP reduces cWnd to 1 if cwd exceeds threshold in inference phase"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 };
 

@@ -46,7 +46,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 RIP Test
  */
@@ -276,7 +275,6 @@ Ipv4RipTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 RIP count to infinity Test
  */
@@ -510,7 +508,6 @@ Ipv4RipCountToInfinityTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 RIP SplitHorizon strategy Test
  */
@@ -561,7 +558,7 @@ Ipv4RipSplitHorizonStrategyTest::ReceivePktProbe(Ptr<Socket> socket)
         std::list<RipRte> rtes = hdr.GetRteList();
 
         // validate the RTEs before processing
-        for (std::list<RipRte>::iterator iter = rtes.begin(); iter != rtes.end(); iter++)
+        for (auto iter = rtes.begin(); iter != rtes.end(); iter++)
         {
             if (iter->GetPrefix() == "10.0.1.0")
             {
@@ -699,7 +696,6 @@ Ipv4RipSplitHorizonStrategyTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 RIP TestSuite
  */
@@ -707,13 +703,16 @@ class Ipv4RipTestSuite : public TestSuite
 {
   public:
     Ipv4RipTestSuite()
-        : TestSuite("ipv4-rip", UNIT)
+        : TestSuite("ipv4-rip", Type::UNIT)
     {
-        AddTestCase(new Ipv4RipTest, TestCase::QUICK);
-        AddTestCase(new Ipv4RipCountToInfinityTest, TestCase::QUICK);
-        AddTestCase(new Ipv4RipSplitHorizonStrategyTest(Rip::POISON_REVERSE), TestCase::QUICK);
-        AddTestCase(new Ipv4RipSplitHorizonStrategyTest(Rip::SPLIT_HORIZON), TestCase::QUICK);
-        AddTestCase(new Ipv4RipSplitHorizonStrategyTest(Rip::NO_SPLIT_HORIZON), TestCase::QUICK);
+        AddTestCase(new Ipv4RipTest, TestCase::Duration::QUICK);
+        AddTestCase(new Ipv4RipCountToInfinityTest, TestCase::Duration::QUICK);
+        AddTestCase(new Ipv4RipSplitHorizonStrategyTest(Rip::POISON_REVERSE),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new Ipv4RipSplitHorizonStrategyTest(Rip::SPLIT_HORIZON),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new Ipv4RipSplitHorizonStrategyTest(Rip::NO_SPLIT_HORIZON),
+                    TestCase::Duration::QUICK);
     }
 };
 

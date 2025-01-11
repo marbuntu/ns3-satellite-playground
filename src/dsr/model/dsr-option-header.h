@@ -46,15 +46,15 @@ class Time;
 namespace dsr
 {
 /**
- * \class DsrOptionHeader
- * \brief Header for Dsr Options.
+ * \ingroup dsr
+ * \brief header for Dsr Options.
  */
 class DsrOptionHeader : public Header
 {
   public:
     /**
      * \struct Alignment
-     * \brief represents the alignment requirements of an option header
+     * \brief Represents the alignment requirements of an option header
      */
     struct Alignment
     {
@@ -146,7 +146,7 @@ class DsrOptionHeader : public Header
 };
 
 /**
- * \class DsrOptionPad1Header
+ * \ingroup dsr
  * \brief Header of Dsr Option Pad1
  */
 class DsrOptionPad1Header : public DsrOptionHeader
@@ -194,7 +194,7 @@ class DsrOptionPad1Header : public DsrOptionHeader
 };
 
 /**
- * \class DsrOptionPadnHeader
+ * \ingroup dsr
  * \brief Header of Dsr Option Padn
  */
 class DsrOptionPadnHeader : public DsrOptionHeader
@@ -243,18 +243,16 @@ class DsrOptionPadnHeader : public DsrOptionHeader
 };
 
 /**
- * \class DsrOptionRouteRequestHeader
+ * \ingroup dsr
  * \brief Header of Dsr Option Route Request
- */
+ *
+ * \verbatim
+   Route Request (RREQ) Message Format
 
-/**
-* \ingroup dsr
-* \brief   Route Request (RREQ) Message Format
-  \verbatim
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |  Option Type |  Opt Data Len |         Identification         |
+   |  Option Type  | Opt Data Len  |        Identification         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                         Target Address                        |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -266,9 +264,8 @@ class DsrOptionPadnHeader : public DsrOptionHeader
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                            Address[n]                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-
+   \endverbatim
+ */
 class DsrOptionRreqHeader : public DsrOptionHeader
 {
   public:
@@ -384,7 +381,7 @@ class DsrOptionRreqHeader : public DsrOptionHeader
      */
     Ipv4Address m_target;
     /**
-     * Ipv4 address to write when desearizing the packet
+     * Ipv4 address to write when deserializing the packet
      */
     Ipv4Address m_address;
     /**
@@ -398,14 +395,12 @@ class DsrOptionRreqHeader : public DsrOptionHeader
 };
 
 /**
- * \class DsrOptionRrepHeader
+ * \ingroup dsr
  * \brief Header of Dsr Option Route Reply
- */
+ *
+ * \verbatim
+   Standard Route Reply (RREP) Message Format
 
-/**
-* \ingroup dsr
-* \brief Route Reply (RREP) Message Format
-  \verbatim
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
                   -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -419,14 +414,13 @@ class DsrOptionRreqHeader : public DsrOptionHeader
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                            Address[n]                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
+   \endverbatim
+ *
+ * The Route Reply header modified for ns-3 implementation:
+ *
+ * \verbatim
+   ns-3 Route Reply (RREP) Message Format
 
-// The Route Reply header modified for ns-3 implementation
-/**
-* \ingroup dsr
-* \brief Route Reply (RREP) Message Format
-  \verbatim
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -440,9 +434,8 @@ class DsrOptionRreqHeader : public DsrOptionHeader
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                            Address[n]                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-
+   \endverbatim
+ */
 class DsrOptionRrepHeader : public DsrOptionHeader
 {
   public:
@@ -530,7 +523,7 @@ class DsrOptionRrepHeader : public DsrOptionHeader
      */
     Ipv4Address m_address;
     /**
-     * \brief type def A vector of IPv4 Address.
+     * \brief typedef for a vector of IPv4 Addresses.
      */
     typedef std::vector<Ipv4Address> VectorIpv4Address_t;
     /**
@@ -540,14 +533,12 @@ class DsrOptionRrepHeader : public DsrOptionHeader
 };
 
 /**
- * \class DsrOptionSRHeader
+ * \ingroup dsr
  * \brief Header of Dsr Option Source Route
- */
+ *
+ * \verbatim
+   Source Route (SR) Message Format
 
-/**
-* \ingroup dsr
-* \brief Source Route (SR) Message Format
-  \verbatim
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -561,9 +552,8 @@ class DsrOptionRrepHeader : public DsrOptionHeader
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                            Address[n]                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-
+   \endverbatim
+ */
 class DsrOptionSRHeader : public DsrOptionHeader
 {
   public:
@@ -673,7 +663,7 @@ class DsrOptionSRHeader : public DsrOptionHeader
 
   private:
     /**
-     * \brief The ip address header deserilize to
+     * \brief The ip address header deserialize to
      */
     Ipv4Address m_address;
     /**
@@ -681,7 +671,7 @@ class DsrOptionSRHeader : public DsrOptionHeader
      */
     uint8_t m_segmentsLeft;
     /**
-     * \brief Number of savlage times for a packet.
+     * \brief Number of salvage times for a packet.
      */
     uint8_t m_salvage;
     /**
@@ -695,14 +685,24 @@ class DsrOptionSRHeader : public DsrOptionHeader
 };
 
 /**
- * \class DsrOptionRerrHeader
- * \brief Header of Dsr Option Route Error
+ * \ingroup dsr
+ * \enum ErrorType
+ * \brief Error type used in several DSR Option Headers
  */
+enum ErrorType
+{
+    NODE_UNREACHABLE = 1,         // !< NODE_UNREACHABLE
+    FLOW_STATE_NOT_SUPPORTED = 2, // !< FLOW_STATE_NOT_SUPPORTED
+    OPTION_NOT_SUPPORTED = 3,     // !< OPTION_NOT_SUPPORTED
+};
 
 /**
-* \ingroup dsr
-* \brief Route Error (RERR) Message Format
-  \verbatim
+ * \ingroup dsr
+ * \brief Header of Dsr Option Route Error
+ *
+ * \verbatim
+   Route Error (RERR) Message Format
+
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -716,17 +716,11 @@ class DsrOptionSRHeader : public DsrOptionHeader
    .                    Type-Specific Information                  .
    .                                                               .
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-
-/// Error type
-enum ErrorType
-{
-    NODE_UNREACHABLE = 1,         // !< NODE_UNREACHABLE
-    FLOW_STATE_NOT_SUPPORTED = 2, // !< FLOW_STATE_NOT_SUPPORTED
-    OPTION_NOT_SUPPORTED = 3,     // !< OPTION_NOT_SUPPORTED
-};
-
+   \endverbatim
+ *
+ * The type-specific information field varies by type of error,
+ * as detailed in the derived classes.
+ */
 class DsrOptionRerrHeader : public DsrOptionHeader
 {
   public:
@@ -821,7 +815,7 @@ class DsrOptionRerrHeader : public DsrOptionHeader
      */
     uint8_t m_errorType;
     /**
-     * \brief The salavage field
+     * \brief The salvage field
      */
     uint8_t m_salvage;
     /**
@@ -843,27 +837,12 @@ class DsrOptionRerrHeader : public DsrOptionHeader
 };
 
 /**
-* \ingroup dsr
-* \brief Route Error (RERR) Unreachable node address option Message Format
-  \verbatim
-   |      0        |      1        |      2        |      3        |
-   0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |  Option Type |  Opt Data Len |   Error Type  |Reservd| Salvage|
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                      Error Source Address                     |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Error Destination Address                  |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   .                                                               .
-   .                    Type-Specific Information                  .
-   .                                                               .
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-/*
- * \brief The type-specific info field
+ * \ingroup dsr
+ * \brief Route Error (RERR) Unreachable node address option Message Format
+ *
  * \verbatim
+   Route Error Unreachable type-specific info field
+
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -871,7 +850,6 @@ class DsrOptionRerrHeader : public DsrOptionHeader
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    \endverbatim
  */
-
 class DsrOptionRerrUnreachHeader : public DsrOptionRerrHeader
 {
   public:
@@ -976,7 +954,7 @@ class DsrOptionRerrUnreachHeader : public DsrOptionRerrHeader
      */
     uint8_t m_errorType;
     /**
-     * \brief The salavage field
+     * \brief The salvage field
      */
     uint8_t m_salvage;
     /**
@@ -998,28 +976,14 @@ class DsrOptionRerrUnreachHeader : public DsrOptionRerrHeader
 };
 
 /**
-* \ingroup dsr
-* \brief Route Error (RERR) Unsupported option Message Format
-  \verbatim
-   |      0        |      1        |      2        |      3        |
-   0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |  Option Type |  Opt Data Len |   Error Type  |Reservd| Salvage|
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                      Error Source Address                     |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Error Destination Address                  |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   .                                                               .
-   .                    Type-Specific Information                  .
-   .                                                               .
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-/*
- * \brief The type-specific info field
- * \unsupported option
+ * \ingroup dsr
+ * \brief Route Error (RERR) Unsupported option Message Format
+ *
+ * The type-specific info field of DsrOptionRerrHeader contains
+ *
  * \verbatim
+   Route Error Unsupported type-specific info field
+
    |      0        |
    0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+
@@ -1027,8 +991,7 @@ class DsrOptionRerrUnreachHeader : public DsrOptionRerrHeader
    +-+-+-+-+-+-+-+-+
    \endverbatim
  */
-
-class DsrOptionRerrUnsupportHeader : public DsrOptionRerrHeader
+class DsrOptionRerrUnsupportedHeader : public DsrOptionRerrHeader
 {
   public:
     /**
@@ -1044,11 +1007,11 @@ class DsrOptionRerrUnsupportHeader : public DsrOptionRerrHeader
     /**
      * \brief Constructor.
      */
-    DsrOptionRerrUnsupportHeader();
+    DsrOptionRerrUnsupportedHeader();
     /**
      * \brief Destructor.
      */
-    ~DsrOptionRerrUnsupportHeader() override;
+    ~DsrOptionRerrUnsupportedHeader() override;
     /**
      * \brief Set the route error source address
      * \param errorSrcAddress The error source address
@@ -1122,7 +1085,7 @@ class DsrOptionRerrUnsupportHeader : public DsrOptionRerrHeader
      */
     uint8_t m_errorType;
     /**
-     * \brief The salavage field
+     * \brief The salvage field
      */
     uint8_t m_salvage;
     /**
@@ -1136,26 +1099,23 @@ class DsrOptionRerrUnsupportHeader : public DsrOptionRerrHeader
     /**
      * \brief The unsupported option
      */
-    uint16_t m_unsupport;
+    uint16_t m_unsupported;
 };
 
 /**
- * \class DsrOptionAckReqHeader
+ * \ingroup dsr
  * \brief Header of Dsr Option ack request
- */
+ *
+ * \verbatim
+   Acknowledgement Request (ACK_RREQ) Message Format
 
-/**
-* \ingroup dsr
-* \brief   Acknowledgement Request (ACK_RREQ) Message Format
-  \verbatim
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |  Option Type |  Opt Data Len |         Identification         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-
+   \endverbatim
+ */
 class DsrOptionAckReqHeader : public DsrOptionHeader
 {
   public:
@@ -1222,14 +1182,12 @@ class DsrOptionAckReqHeader : public DsrOptionHeader
 };
 
 /**
- * \class DsrOptionAckHeader
+ * \ingroup dsr
  * \brief Header of Dsr Option ack
- */
+ *
+ * \verbatim
+   Acknowledgement (ACK) Message Format
 
-/**
-* \ingroup dsr
-* \brief   Acknowledgement (ACK) Message Format
-  \verbatim
    |      0        |      1        |      2        |      3        |
    0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1239,9 +1197,8 @@ class DsrOptionAckReqHeader : public DsrOptionHeader
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                     ACK Destination Address                   |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-  \endverbatim
-*/
-
+   \endverbatim
+ */
 class DsrOptionAckHeader : public DsrOptionHeader
 {
   public:
@@ -1322,20 +1279,20 @@ class DsrOptionAckHeader : public DsrOptionHeader
 
   private:
     /**
-     * \brief identification field
+     * \brief Identification field
      */
     uint16_t m_identification;
     /**
-     * \brief ack source address
+     * \brief Ack source address
      */
     Ipv4Address m_realSrcAddress;
     /**
-     * \brief ack destination address
+     * \brief Ack destination address
      */
     Ipv4Address m_realDstAddress;
 };
 
-static inline std::ostream&
+[[maybe_unused]] static inline std::ostream&
 operator<<(std::ostream& os, const DsrOptionSRHeader& sr)
 {
     sr.Print(os);

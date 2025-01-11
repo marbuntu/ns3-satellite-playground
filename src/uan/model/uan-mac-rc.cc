@@ -73,8 +73,7 @@ Reservation::Reservation(std::list<std::pair<Ptr<Packet>, Mac8Address>>& list,
 
 Reservation::~Reservation()
 {
-    std::list<std::pair<Ptr<Packet>, Mac8Address>>::iterator it;
-    for (it = m_pktList.begin(); it != m_pktList.end(); it++)
+    for (auto it = m_pktList.begin(); it != m_pktList.end(); it++)
     {
         it->first = Ptr<Packet>((Packet*)nullptr);
     }
@@ -185,8 +184,7 @@ UanMacRc::Clear()
         m_phy->Clear();
         m_phy = nullptr;
     }
-    std::list<std::pair<Ptr<Packet>, Mac8Address>>::iterator it;
-    for (it = m_pktQueue.begin(); it != m_pktQueue.end(); it++)
+    for (auto it = m_pktQueue.begin(); it != m_pktQueue.end(); it++)
     {
         it->first = nullptr;
     }
@@ -296,7 +294,7 @@ UanMacRc::Enqueue(Ptr<Packet> packet, uint16_t protocolNumber, const Address& de
         Associate();
         return true;
     case IDLE:
-        if (!m_rtsEvent.IsRunning())
+        if (!m_rtsEvent.IsPending())
         {
             SendRts();
         }
@@ -424,7 +422,7 @@ UanMacRc::ScheduleData(const UanHeaderRcCts& ctsh,
 {
     NS_ASSERT(m_state == RTSSENT || m_state == GWPSENT);
 
-    std::list<Reservation>::iterator it = m_resList.begin();
+    auto it = m_resList.begin();
     for (; it != m_resList.end(); it++)
     {
         if (it->GetFrameNo() == ctsh.GetFrameNo())
@@ -455,8 +453,7 @@ UanMacRc::ScheduleData(const UanHeaderRcCts& ctsh,
     Time frameDelay = Seconds(0);
 
     const std::list<std::pair<Ptr<Packet>, Mac8Address>> l = it->GetPktList();
-    std::list<std::pair<Ptr<Packet>, Mac8Address>>::const_iterator pit;
-    pit = l.begin();
+    auto pit = l.begin();
 
     for (uint8_t i = 0; i < it->GetNoFrames(); i++, pit++)
     {
@@ -492,7 +489,7 @@ UanMacRc::ScheduleData(const UanHeaderRcCts& ctsh,
     m_state = IDLE;
     if (!m_pktQueue.empty())
     {
-        if (m_rtsEvent.IsRunning())
+        if (m_rtsEvent.IsPending())
         {
             m_rtsEvent.Cancel();
         }
@@ -544,7 +541,7 @@ UanMacRc::ProcessAck(Ptr<Packet> ack)
     UanHeaderRcAck ah;
     ack->RemoveHeader(ah);
 
-    std::list<Reservation>::iterator it = m_resList.begin();
+    auto it = m_resList.begin();
     for (; it != m_resList.end(); it++)
     {
         if (it->GetFrameNo() == ah.GetFrameNo())
@@ -565,11 +562,10 @@ UanMacRc::ProcessAck(Ptr<Packet> ack)
     if (ah.GetNoNacks() > 0)
     {
         const std::list<std::pair<Ptr<Packet>, Mac8Address>> l = it->GetPktList();
-        std::list<std::pair<Ptr<Packet>, Mac8Address>>::const_iterator pit;
-        pit = l.begin();
+        auto pit = l.begin();
 
         const std::set<uint8_t>& nacks = ah.GetNackedFrames();
-        std::set<uint8_t>::iterator nit = nacks.begin();
+        auto nit = nacks.begin();
         uint8_t pnum = 0;
         for (; nit != nacks.end(); nit++)
         {
@@ -617,7 +613,7 @@ UanMacRc::Associate()
     m_resList.push_back(res);
     Ptr<UanPhyDual> phyDual = m_phy->GetObject<UanPhyDual>();
     bool phy1ok = IsPhy1Ok();
-    if (phy1ok && !phyDual->IsPhy2Tx() & !m_rtsBlocked)
+    if (phy1ok && !phyDual->IsPhy2Tx() && !m_rtsBlocked)
     {
         Ptr<Packet> pkt = Create<Packet>(0);
         pkt->AddHeader(CreateRtsHeader(res));
@@ -629,7 +625,7 @@ UanMacRc::Associate()
         SendPacket(pkt, m_currentRate + m_numRates);
     }
     m_state = GWPSENT;
-    NS_ASSERT(!m_rtsEvent.IsRunning());
+    NS_ASSERT(!m_rtsEvent.IsPending());
     m_ev->SetAttribute("Mean", DoubleValue(1 / m_retryRate));
     double timeout = m_ev->GetValue();
     m_rtsEvent = Simulator::Schedule(Seconds(timeout), &UanMacRc::AssociateTimeout, this);
@@ -663,7 +659,7 @@ UanMacRc::AssociateTimeout()
         SendPacket(pkt, m_currentRate + m_numRates);
         m_resList.push_back(res);
     }
-    NS_ASSERT(!m_rtsEvent.IsRunning());
+    NS_ASSERT(!m_rtsEvent.IsPending());
     m_ev->SetAttribute("Mean", DoubleValue(1 / m_retryRate));
     double timeout = m_ev->GetValue();
     m_rtsEvent = Simulator::Schedule(Seconds(timeout), &UanMacRc::AssociateTimeout, this);
@@ -697,7 +693,7 @@ UanMacRc::SendRts()
         SendPacket(pkt, m_currentRate + m_numRates);
     }
     m_state = RTSSENT;
-    NS_ASSERT(!m_rtsEvent.IsRunning());
+    NS_ASSERT(!m_rtsEvent.IsPending());
     m_ev->SetAttribute("Mean", DoubleValue(1 / m_retryRate));
     double timeout = m_ev->GetValue();
     m_rtsEvent = Simulator::Schedule(Seconds(timeout), &UanMacRc::RtsTimeout, this);
@@ -715,11 +711,8 @@ UanMacRc::IsPhy1Ok()
         Ptr<Packet> pkt = phyDual->GetPhy1PacketRx();
         UanHeaderCommon ch;
         pkt->PeekHeader(ch);
-        if (ch.GetType() == TYPE_CTS || ch.GetType() == TYPE_ACK)
-        {
-            phy1ok = false;
-        }
-        else if (ch.GetDest() == Mac8Address::ConvertFrom(GetAddress()))
+        if (ch.GetType() == TYPE_CTS || ch.GetType() == TYPE_ACK ||
+            ch.GetDest() == Mac8Address::ConvertFrom(GetAddress()))
         {
             phy1ok = false;
         }
@@ -762,7 +755,7 @@ UanMacRc::RtsTimeout()
         SendPacket(pkt, m_currentRate + m_numRates);
     }
     m_state = RTSSENT;
-    NS_ASSERT(!m_rtsEvent.IsRunning());
+    NS_ASSERT(!m_rtsEvent.IsPending());
     m_ev->SetAttribute("Mean", DoubleValue(1 / m_retryRate));
     double timeout = m_ev->GetValue();
     m_rtsEvent = Simulator::Schedule(Seconds(timeout), &UanMacRc::RtsTimeout, this);

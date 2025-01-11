@@ -160,7 +160,7 @@ RateErrorModel::GetTypeId()
             .AddAttribute("ErrorUnit",
                           "The error unit",
                           EnumValue(ERROR_UNIT_BYTE),
-                          MakeEnumAccessor(&RateErrorModel::m_unit),
+                          MakeEnumAccessor<ErrorUnit>(&RateErrorModel::m_unit),
                           MakeEnumChecker(ERROR_UNIT_BIT,
                                           "ERROR_UNIT_BIT",
                                           ERROR_UNIT_BYTE,
@@ -198,7 +198,7 @@ RateErrorModel::GetUnit() const
 }
 
 void
-RateErrorModel::SetUnit(enum ErrorUnit error_unit)
+RateErrorModel::SetUnit(ErrorUnit error_unit)
 {
     NS_LOG_FUNCTION(this << error_unit);
     m_unit = error_unit;
@@ -445,7 +445,7 @@ ListErrorModel::~ListErrorModel()
     NS_LOG_FUNCTION(this);
 }
 
-std::list<uint32_t>
+std::list<uint64_t>
 ListErrorModel::GetList() const
 {
     NS_LOG_FUNCTION(this);
@@ -453,7 +453,7 @@ ListErrorModel::GetList() const
 }
 
 void
-ListErrorModel::SetList(const std::list<uint32_t>& packetlist)
+ListErrorModel::SetList(const std::list<uint64_t>& packetlist)
 {
     NS_LOG_FUNCTION(this << &packetlist);
     m_packetList = packetlist;
@@ -470,8 +470,8 @@ ListErrorModel::DoCorrupt(Ptr<Packet> p)
     {
         return false;
     }
-    uint32_t uid = p->GetUid();
-    for (PacketListCI i = m_packetList.begin(); i != m_packetList.end(); i++)
+    auto uid = p->GetUid();
+    for (auto i = m_packetList.begin(); i != m_packetList.end(); i++)
     {
         if (uid == *i)
         {
@@ -538,7 +538,7 @@ ReceiveListErrorModel::DoCorrupt(Ptr<Packet> p)
         return false;
     }
     m_timesInvoked += 1;
-    for (PacketListCI i = m_packetList.begin(); i != m_packetList.end(); i++)
+    for (auto i = m_packetList.begin(); i != m_packetList.end(); i++)
     {
         if (m_timesInvoked - 1 == *i)
         {

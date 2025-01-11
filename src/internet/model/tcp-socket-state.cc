@@ -91,7 +91,11 @@ TcpSocketState::GetTypeId()
                             MakeTraceSourceAccessor(&TcpSocketState::m_bytesInFlight),
                             "ns3::TracedValueCallback::Uint32")
             .AddTraceSource("RTT",
-                            "Last RTT sample",
+                            "Smoothed RTT",
+                            MakeTraceSourceAccessor(&TcpSocketState::m_srtt),
+                            "ns3::TracedValueCallback::Time")
+            .AddTraceSource("LastRTT",
+                            "RTT of the last (S)ACKed packet",
                             MakeTraceSourceAccessor(&TcpSocketState::m_lastRtt),
                             "ns3::TracedValueCallback::Time");
     return tid;
@@ -119,6 +123,8 @@ TcpSocketState::TcpSocketState(const TcpSocketState& other)
       m_paceInitialWindow(other.m_paceInitialWindow),
       m_minRtt(other.m_minRtt),
       m_bytesInFlight(other.m_bytesInFlight),
+      m_isCwndLimited(other.m_isCwndLimited),
+      m_srtt(other.m_srtt),
       m_lastRtt(other.m_lastRtt),
       m_ecnMode(other.m_ecnMode),
       m_useEcn(other.m_useEcn),
@@ -128,13 +134,21 @@ TcpSocketState::TcpSocketState(const TcpSocketState& other)
 {
 }
 
-const char* const TcpSocketState::TcpCongStateName[TcpSocketState::CA_LAST_STATE] = {"CA_OPEN",
-                                                                                     "CA_DISORDER",
-                                                                                     "CA_CWR",
-                                                                                     "CA_RECOVERY",
-                                                                                     "CA_LOSS"};
+const char* const TcpSocketState::TcpCongStateName[TcpSocketState::CA_LAST_STATE] = {
+    "CA_OPEN",
+    "CA_DISORDER",
+    "CA_CWR",
+    "CA_RECOVERY",
+    "CA_LOSS",
+};
 
-const char* const TcpSocketState::EcnStateName[TcpSocketState::ECN_CWR_SENT + 1] =
-    {"ECN_DISABLED", "ECN_IDLE", "ECN_CE_RCVD", "ECN_SENDING_ECE", "ECN_ECE_RCVD", "ECN_CWR_SENT"};
+const char* const TcpSocketState::EcnStateName[TcpSocketState::ECN_CWR_SENT + 1] = {
+    "ECN_DISABLED",
+    "ECN_IDLE",
+    "ECN_CE_RCVD",
+    "ECN_SENDING_ECE",
+    "ECN_ECE_RCVD",
+    "ECN_CWR_SENT",
+};
 
 } // namespace ns3

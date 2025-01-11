@@ -19,10 +19,11 @@
 #ifndef IPV4_GLOBAL_ROUTING_H
 #define IPV4_GLOBAL_ROUTING_H
 
+#include "ipv4-header.h"
+#include "ipv4-routing-protocol.h"
+#include "ipv4.h"
+
 #include "ns3/ipv4-address.h"
-#include "ns3/ipv4-header.h"
-#include "ns3/ipv4-routing-protocol.h"
-#include "ns3/ipv4.h"
 #include "ns3/ptr.h"
 #include "ns3/random-variable-stream.h"
 
@@ -96,10 +97,10 @@ class Ipv4GlobalRouting : public Ipv4RoutingProtocol
     bool RouteInput(Ptr<const Packet> p,
                     const Ipv4Header& header,
                     Ptr<const NetDevice> idev,
-                    UnicastForwardCallback ucb,
-                    MulticastForwardCallback mcb,
-                    LocalDeliverCallback lcb,
-                    ErrorCallback ecb) override;
+                    const UnicastForwardCallback& ucb,
+                    const MulticastForwardCallback& mcb,
+                    const LocalDeliverCallback& lcb,
+                    const ErrorCallback& ecb) override;
     void NotifyInterfaceUp(uint32_t interface) override;
     void NotifyInterfaceDown(uint32_t interface) override;
     void NotifyAddAddress(uint32_t interface, Ipv4InterfaceAddress address) override;
@@ -238,7 +239,7 @@ class Ipv4GlobalRouting : public Ipv4RoutingProtocol
     /// Set to true if packets are randomly routed among ECMP; set to false for using only one route
     /// consistently
     bool m_randomEcmpRouting;
-    /// Set to true if this interface should respond to interface events by globallly recomputing
+    /// Set to true if this interface should respond to interface events by globally recomputing
     /// routes
     bool m_respondToInterfaceEvents;
     /// A uniform random number generator for randomly routing packets among ECMP

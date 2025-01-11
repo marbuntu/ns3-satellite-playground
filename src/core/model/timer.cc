@@ -42,7 +42,7 @@ Timer::Timer()
     NS_LOG_FUNCTION(this);
 }
 
-Timer::Timer(enum DestroyPolicy destroyPolicy)
+Timer::Timer(DestroyPolicy destroyPolicy)
     : m_flags(destroyPolicy),
       m_delay(FemtoSeconds(0)),
       m_event(),
@@ -56,7 +56,7 @@ Timer::~Timer()
     NS_LOG_FUNCTION(this);
     if (m_flags & CHECK_ON_DESTROY)
     {
-        if (m_event.IsRunning())
+        if (m_event.IsPending())
         {
             NS_FATAL_ERROR("Event is still running while destroying.");
         }
@@ -94,17 +94,13 @@ Timer::GetDelayLeft() const
     {
     case Timer::RUNNING:
         return Simulator::GetDelayLeft(m_event);
-        break;
     case Timer::EXPIRED:
         return TimeStep(0);
-        break;
     case Timer::SUSPENDED:
         return m_delayLeft;
-        break;
     default:
         NS_ASSERT(false);
         return TimeStep(0);
-        break;
     }
 }
 
@@ -133,7 +129,7 @@ bool
 Timer::IsRunning() const
 {
     NS_LOG_FUNCTION(this);
-    return !IsSuspended() && m_event.IsRunning();
+    return !IsSuspended() && m_event.IsPending();
 }
 
 bool
@@ -143,7 +139,7 @@ Timer::IsSuspended() const
     return (m_flags & TIMER_SUSPENDED) == TIMER_SUSPENDED;
 }
 
-enum Timer::State
+Timer::State
 Timer::GetState() const
 {
     NS_LOG_FUNCTION(this);
@@ -174,7 +170,7 @@ Timer::Schedule(Time delay)
 {
     NS_LOG_FUNCTION(this << delay);
     NS_ASSERT(m_impl != nullptr);
-    if (m_event.IsRunning())
+    if (m_event.IsPending())
     {
         NS_FATAL_ERROR("Event is still running while re-scheduling.");
     }

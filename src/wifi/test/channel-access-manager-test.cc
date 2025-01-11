@@ -20,9 +20,13 @@
 #include "ns3/adhoc-wifi-mac.h"
 #include "ns3/channel-access-manager.h"
 #include "ns3/frame-exchange-manager.h"
+#include "ns3/interference-helper.h"
+#include "ns3/multi-model-spectrum-channel.h"
+#include "ns3/pointer.h"
 #include "ns3/qos-txop.h"
 #include "ns3/simulator.h"
 #include "ns3/spectrum-wifi-phy.h"
+#include "ns3/string.h"
 #include "ns3/test.h"
 
 #include <list>
@@ -84,7 +88,8 @@ class TxopTest : public TxopType
         uint64_t at;     //!< at
         uint32_t nSlots; //!< number of slots
     };
-    typedef std::list<struct ExpectedBackoff> ExpectedBackoffs; //!< expected backoffs typedef
+
+    typedef std::list<ExpectedBackoff> ExpectedBackoffs; //!< expected backoffs typedef
 
     ExpectedBackoffs m_expectedInternalCollision; //!< expected backoff due to an internal collision
     ExpectedBackoffs m_expectedBackoff; //!< expected backoff (not due to an internal collision)
@@ -191,7 +196,7 @@ class FrameExchangeManagerStub : public FrameExchangeManager
      * \param allowedWidth the maximum allowed TX width in MHz
      * \return true if a frame exchange sequence was started, false otherwise
      */
-    bool StartTransmission(Ptr<Txop> dcf, uint16_t allowedWidth) override
+    bool StartTransmission(Ptr<Txop> dcf, ChannelWidthMhz allowedWidth) override
     {
         dcf->NotifyChannelAccessed(0);
         return true;
@@ -259,7 +264,7 @@ class ChannelAccessManagerTest : public TestCase
                    uint64_t sifs,
                    uint64_t eifsNoDifsNoSifs,
                    uint32_t ackTimeoutValue = 20,
-                   uint16_t chWidth = 20);
+                   ChannelWidthMhz chWidth = 20);
     /**
      * Add Txop function
      * \param aifsn the AIFSN
@@ -367,11 +372,11 @@ class ChannelAccessManagerTest : public TestCase
      * \param ackDelay the delay of the Ack after txEnd
      * \param from the index of the requesting Txop
      */
-    void AddAccessRequestWithSuccessfullAck(uint64_t at,
-                                            uint64_t txTime,
-                                            uint64_t expectedGrantTime,
-                                            uint32_t ackDelay,
-                                            uint32_t from);
+    void AddAccessRequestWithSuccessfulAck(uint64_t at,
+                                           uint64_t txTime,
+                                           uint64_t expectedGrantTime,
+                                           uint32_t ackDelay,
+                                           uint32_t from);
     /**
      * Add access request with successful Ack
      * \param txTime the transmit time
@@ -409,7 +414,7 @@ class ChannelAccessManagerTest : public TestCase
 
     Ptr<FrameExchangeManagerStub<TxopType>> m_feManager;  //!< the Frame Exchange Manager stubbed
     Ptr<ChannelAccessManagerStub> m_ChannelAccessManager; //!< the channel access manager
-    Ptr<WifiPhy> m_phy;                                   //!< the PHY object
+    Ptr<SpectrumWifiPhy> m_phy;                           //!< the PHY object
     TxopTests m_txop;                                     //!< the vector of Txop test instances
     uint32_t m_ackTimeoutValue;                           //!< the Ack timeout value
 };
@@ -606,7 +611,7 @@ ChannelAccessManagerTest<TxopType>::StartTest(uint64_t slotTime,
                                               uint64_t sifs,
                                               uint64_t eifsNoDifsNoSifs,
                                               uint32_t ackTimeoutValue,
-                                              uint16_t chWidth)
+                                              ChannelWidthMhz chWidth)
 {
     m_ChannelAccessManager = CreateObject<ChannelAccessManagerStub>();
     m_feManager = CreateObject<FrameExchangeManagerStub<TxopType>>(this);
@@ -620,6 +625,8 @@ ChannelAccessManagerTest<TxopType>::StartTest(uint64_t slotTime,
     // SetupPhyListener(), requires an attached PHY to determine the channel types
     // to initialize
     m_phy = CreateObject<SpectrumWifiPhy>();
+    m_phy->SetInterferenceHelper(CreateObject<InterferenceHelper>());
+    m_phy->AddChannel(CreateObject<MultiModelSpectrumChannel>());
     m_phy->SetOperatingChannel(WifiPhy::ChannelTuple{0, chWidth, WIFI_PHY_BAND_UNSPECIFIED, 0});
     m_phy->ConfigureStandard(WIFI_STANDARD_80211ac); // required to use 160 MHz channels
     m_ChannelAccessManager->SetupPhyListener(m_phy);
@@ -633,7 +640,9 @@ ChannelAccessManagerTest<TxopType>::AddTxop(uint32_t aifsn)
     m_txop.push_back(txop);
     m_ChannelAccessManager->Add(txop);
     // the following causes the creation of a link for the txop object
-    auto mac = CreateObject<AdhocWifiMac>();
+    auto mac = CreateObjectWithAttributes<AdhocWifiMac>(
+        "Txop",
+        PointerValue(CreateObjectWithAttributes<Txop>("AcIndex", StringValue("AC_BE_NQOS"))));
     mac->SetWifiPhys({nullptr});
     txop->SetWifiMac(mac);
     txop->SetAifsn(aifsn);
@@ -645,7 +654,7 @@ ChannelAccessManagerTest<TxopType>::EndTest()
 {
     Simulator::Run();
 
-    for (typename TxopTests::const_iterator i = m_txop.begin(); i != m_txop.end(); i++)
+    for (auto i = m_txop.begin(); i != m_txop.end(); i++)
     {
         Ptr<TxopTest<TxopType>> state = *i;
         NS_TEST_EXPECT_MSG_EQ(state->m_expectedGrants.empty(), true, "Have no expected grants");
@@ -759,7 +768,7 @@ ChannelAccessManagerTest<TxopType>::AddAccessRequest(uint64_t at,
                                                      uint64_t expectedGrantTime,
                                                      uint32_t from)
 {
-    AddAccessRequestWithSuccessfullAck(at, txTime, expectedGrantTime, 0, from);
+    AddAccessRequestWithSuccessfulAck(at, txTime, expectedGrantTime, 0, from);
 }
 
 template <typename TxopType>
@@ -779,11 +788,11 @@ ChannelAccessManagerTest<TxopType>::AddAccessRequestWithAckTimeout(uint64_t at,
 
 template <typename TxopType>
 void
-ChannelAccessManagerTest<TxopType>::AddAccessRequestWithSuccessfullAck(uint64_t at,
-                                                                       uint64_t txTime,
-                                                                       uint64_t expectedGrantTime,
-                                                                       uint32_t ackDelay,
-                                                                       uint32_t from)
+ChannelAccessManagerTest<TxopType>::AddAccessRequestWithSuccessfulAck(uint64_t at,
+                                                                      uint64_t txTime,
+                                                                      uint64_t expectedGrantTime,
+                                                                      uint32_t ackDelay,
+                                                                      uint32_t from)
 {
     NS_ASSERT(ackDelay < m_ackTimeoutValue);
     Simulator::Schedule(MicroSeconds(at) - Now(),
@@ -801,11 +810,12 @@ ChannelAccessManagerTest<TxopType>::DoAccessRequest(uint64_t txTime,
                                                     uint64_t expectedGrantTime,
                                                     Ptr<TxopTest<TxopType>> state)
 {
-    if (m_ChannelAccessManager->NeedBackoffUponAccess(state))
+    auto hadFramesToTransmit = state->HasFramesToTransmit(SINGLE_LINK_OP_ID);
+    state->QueueTx(txTime, expectedGrantTime);
+    if (m_ChannelAccessManager->NeedBackoffUponAccess(state, hadFramesToTransmit, true))
     {
         state->GenerateBackoff(0);
     }
-    state->QueueTx(txTime, expectedGrantTime);
     m_ChannelAccessManager->RequestAccess(state);
 }
 
@@ -831,6 +841,7 @@ ChannelAccessManagerTest<TxopType>::AddSwitchingEvt(uint64_t at, uint64_t durati
     Simulator::Schedule(MicroSeconds(at) - Now(),
                         &ChannelAccessManager::NotifySwitchingStartNow,
                         m_ChannelAccessManager,
+                        nullptr,
                         MicroSeconds(duration));
 }
 
@@ -1043,7 +1054,7 @@ ChannelAccessManagerTest<Txop>::DoRun()
     StartTest(4, 6, 10);
     AddTxop(0); // high priority DCF
     AddTxop(2); // low priority DCF
-    AddAccessRequestWithSuccessfullAck(20, 20, 34, 2, 1);
+    AddAccessRequestWithSuccessfulAck(20, 20, 34, 2, 1);
     AddAccessRequest(55, 10, 62, 0);
     EndTest();
 
@@ -1339,10 +1350,10 @@ class LargestIdlePrimaryChannelTest : public TestCase
      * \param chWidth the operating channel width
      * \param busyChannel the busy channel type
      */
-    void RunOne(uint16_t chWidth, WifiChannelListType busyChannel);
+    void RunOne(ChannelWidthMhz chWidth, WifiChannelListType busyChannel);
 
     Ptr<ChannelAccessManager> m_cam; //!< channel access manager
-    Ptr<WifiPhy> m_phy;              //!< PHY object
+    Ptr<SpectrumWifiPhy> m_phy;      //!< PHY object
 };
 
 LargestIdlePrimaryChannelTest::LargestIdlePrimaryChannelTest()
@@ -1351,7 +1362,7 @@ LargestIdlePrimaryChannelTest::LargestIdlePrimaryChannelTest()
 }
 
 void
-LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busyChannel)
+LargestIdlePrimaryChannelTest::RunOne(ChannelWidthMhz chWidth, WifiChannelListType busyChannel)
 {
     /**
      *                 <  Interval1  >< Interval2 >
@@ -1381,17 +1392,17 @@ LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busy
                         m_cam,
                         ccaBusyDuration,
                         busyChannel,
-                        std::vector<Time>(chWidth / 20, Seconds(0)));
+                        std::vector<Time>(chWidth == 20 ? 0 : chWidth / 20, Seconds(0)));
 
     // During any interval ending within CCA_BUSY period, the idle channel is the
     // primary channel contiguous to the busy secondary channel, if the busy channel
     // is a secondary channel, or there is no idle channel, otherwise.
-    uint16_t idleWidth = (busyChannel == WifiChannelListType::WIFI_CHANLIST_PRIMARY)
-                             ? 0
-                             : ((1 << (busyChannel - 1)) * 20);
+    ChannelWidthMhz idleWidth = (busyChannel == WifiChannelListType::WIFI_CHANLIST_PRIMARY)
+                                    ? 0
+                                    : ((1 << (busyChannel - 1)) * 20);
 
     Time checkTime1 = start + ccaBusyStartDelay + ccaBusyDuration / 2;
-    Simulator::Schedule(checkTime1 - start, [=]() {
+    Simulator::Schedule(checkTime1 - start, [=, this]() {
         Time interval1 = (ccaBusyStartDelay + ccaBusyDuration) / 2;
         NS_TEST_EXPECT_MSG_EQ(m_cam->GetLargestIdlePrimaryChannel(interval1, checkTime1),
                               idleWidth,
@@ -1404,7 +1415,7 @@ LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busy
     // same as the previous case
     Time ccaBusyRxInterval = MilliSeconds(1);
     Time checkTime2 = start + ccaBusyStartDelay + ccaBusyDuration + ccaBusyRxInterval / 2;
-    Simulator::Schedule(checkTime2 - start, [=]() {
+    Simulator::Schedule(checkTime2 - start, [=, this]() {
         Time interval2 = (ccaBusyDuration + ccaBusyRxInterval) / 2;
         NS_TEST_EXPECT_MSG_EQ(m_cam->GetLargestIdlePrimaryChannel(interval2, checkTime2),
                               idleWidth,
@@ -1423,7 +1434,7 @@ LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busy
     // At RX end, we check the status of the channel during an interval immediately
     // preceding RX start and overlapping the CCA_BUSY period.
     Time checkTime3 = start + ccaBusyStartDelay + ccaBusyDuration + ccaBusyRxInterval + rxDuration;
-    Simulator::Schedule(checkTime3 - start, [=]() {
+    Simulator::Schedule(checkTime3 - start, [=, this]() {
         Time interval3 = ccaBusyDuration / 2 + ccaBusyRxInterval;
         Time end3 = checkTime3 - rxDuration;
         NS_TEST_EXPECT_MSG_EQ(m_cam->GetLargestIdlePrimaryChannel(interval3, end3),
@@ -1436,9 +1447,9 @@ LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busy
 
     // At RX end, we check the status of the channel during the interval following
     // the CCA_BUSY period and preceding RX start. The entire operating channel is idle.
-    Time checkTime4 = checkTime3;
-    Simulator::Schedule(checkTime4 - start, [=]() {
-        Time interval4 = ccaBusyRxInterval;
+    const Time& checkTime4 = checkTime3;
+    Simulator::Schedule(checkTime4 - start, [=, this]() {
+        const Time& interval4 = ccaBusyRxInterval;
         Time end4 = checkTime4 - rxDuration;
         NS_TEST_EXPECT_MSG_EQ(m_cam->GetLargestIdlePrimaryChannel(interval4, end4),
                               chWidth,
@@ -1452,7 +1463,7 @@ LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busy
     // overlap the RX period
     Time interval5 = MilliSeconds(1);
     Time checkTime5 = checkTime4 + interval5;
-    Simulator::Schedule(checkTime5 - start, [=]() {
+    Simulator::Schedule(checkTime5 - start, [=, this]() {
         NS_TEST_EXPECT_MSG_EQ(m_cam->GetLargestIdlePrimaryChannel(interval5, checkTime5),
                               chWidth,
                               "Incorrect width of the idle channel in an interval "
@@ -1461,8 +1472,8 @@ LargestIdlePrimaryChannelTest::RunOne(uint16_t chWidth, WifiChannelListType busy
     });
 
     // After RX end, no channel is idle if the interval overlaps the RX period
-    Time checkTime6 = checkTime5;
-    Simulator::Schedule(checkTime6 - start, [=]() {
+    const Time& checkTime6 = checkTime5;
+    Simulator::Schedule(checkTime6 - start, [=, this]() {
         Time interval6 = interval5 + rxDuration / 2;
         NS_TEST_EXPECT_MSG_EQ(m_cam->GetLargestIdlePrimaryChannel(interval6, checkTime6),
                               0,
@@ -1480,13 +1491,13 @@ LargestIdlePrimaryChannelTest::DoRun()
     uint8_t channel = 0;
     std::list<WifiChannelListType> busyChannels;
 
-    for (uint16_t chWidth : {20, 40, 80, 160})
+    for (ChannelWidthMhz chWidth : {20, 40, 80, 160})
     {
         busyChannels.push_back(static_cast<WifiChannelListType>(channel));
 
         for (const auto busyChannel : busyChannels)
         {
-            Simulator::Schedule(Seconds(delay), [this, chWidth, busyChannel]() {
+            Simulator::Schedule(Seconds(delay), [=, this]() {
                 // reset PHY
                 if (m_phy)
                 {
@@ -1495,6 +1506,8 @@ LargestIdlePrimaryChannelTest::DoRun()
                 }
                 // create a new PHY operating on a channel of the current width
                 m_phy = CreateObject<SpectrumWifiPhy>();
+                m_phy->SetInterferenceHelper(CreateObject<InterferenceHelper>());
+                m_phy->AddChannel(CreateObject<MultiModelSpectrumChannel>());
                 m_phy->SetOperatingChannel(
                     WifiPhy::ChannelTuple{0, chWidth, WIFI_PHY_BAND_5GHZ, 0});
                 m_phy->ConfigureStandard(WIFI_STANDARD_80211ax);
@@ -1529,9 +1542,9 @@ class TxopTestSuite : public TestSuite
 };
 
 TxopTestSuite::TxopTestSuite()
-    : TestSuite("wifi-devices-dcf", UNIT)
+    : TestSuite("wifi-devices-dcf", Type::UNIT)
 {
-    AddTestCase(new ChannelAccessManagerTest<Txop>, TestCase::QUICK);
+    AddTestCase(new ChannelAccessManagerTest<Txop>, TestCase::Duration::QUICK);
 }
 
 static TxopTestSuite g_dcfTestSuite;
@@ -1549,9 +1562,9 @@ class QosTxopTestSuite : public TestSuite
 };
 
 QosTxopTestSuite::QosTxopTestSuite()
-    : TestSuite("wifi-devices-edca", UNIT)
+    : TestSuite("wifi-devices-edca", Type::UNIT)
 {
-    AddTestCase(new ChannelAccessManagerTest<QosTxop>, TestCase::QUICK);
+    AddTestCase(new ChannelAccessManagerTest<QosTxop>, TestCase::Duration::QUICK);
 }
 
 static QosTxopTestSuite g_edcaTestSuite;
@@ -1569,9 +1582,9 @@ class ChannelAccessManagerTestSuite : public TestSuite
 };
 
 ChannelAccessManagerTestSuite::ChannelAccessManagerTestSuite()
-    : TestSuite("wifi-channel-access-manager", UNIT)
+    : TestSuite("wifi-channel-access-manager", Type::UNIT)
 {
-    AddTestCase(new LargestIdlePrimaryChannelTest, TestCase::QUICK);
+    AddTestCase(new LargestIdlePrimaryChannelTest, TestCase::Duration::QUICK);
 }
 
 static ChannelAccessManagerTestSuite g_camTestSuite;

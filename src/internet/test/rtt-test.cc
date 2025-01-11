@@ -28,7 +28,6 @@ NS_LOG_COMPONENT_DEFINE("RttEstimatorTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief RTT estimator Test
  */
@@ -181,7 +180,6 @@ RttEstimatorTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief RTT estimator TestSuite
  */
@@ -189,9 +187,9 @@ class RttEstimatorTestSuite : public TestSuite
 {
   public:
     RttEstimatorTestSuite()
-        : TestSuite("rtt-estimator", UNIT)
+        : TestSuite("rtt-estimator", Type::UNIT)
     {
-        AddTestCase(new RttEstimatorTestCase, TestCase::QUICK);
+        AddTestCase(new RttEstimatorTestCase, TestCase::Duration::QUICK);
     }
 };
 

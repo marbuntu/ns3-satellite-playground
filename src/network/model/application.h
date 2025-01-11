@@ -20,8 +20,9 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include "node.h"
+
 #include "ns3/event-id.h"
-#include "ns3/node.h"
 #include "ns3/nstime.h"
 #include "ns3/object.h"
 #include "ns3/ptr.h"
@@ -74,7 +75,7 @@ class Application : public Object
      *        relative to the current simulation time.
      *
      * Applications start at various times in the simulation scenario.
-     * The Start method specifies when the application should be
+     * This method specifies when the application should be
      * started.  The application subclasses should override the
      * private "StartApplication" method defined below, which is called at the
      * time specified, to cause the application to begin.
@@ -87,7 +88,7 @@ class Application : public Object
      *        current simulation time.
      *
      * Once an application has started, it is sometimes useful
-     * to stop the application.  The Stop method specifies when an
+     * to stop the application.  This method specifies when an
      * application is to stop.  The application subclasses should override
      * the private StopApplication method, to be notified when that
      * time has come.
@@ -103,6 +104,15 @@ class Application : public Object
      * \param node the node to which this Application object is attached.
      */
     void SetNode(Ptr<Node> node);
+
+    /**
+     * \brief Assign a fixed random variable stream number to the random variables
+     * used by this Application object.
+     *
+     * \param stream first stream index to use
+     * \return the number of stream indices assigned by this Application object
+     */
+    virtual int64_t AssignStreams(int64_t stream);
 
     /**
      * \brief Common callback signature for packet delay and address.

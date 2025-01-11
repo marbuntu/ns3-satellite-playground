@@ -21,7 +21,8 @@
 #ifndef LTE_ENB_CPHY_SAP_H
 #define LTE_ENB_CPHY_SAP_H
 
-#include <ns3/lte-rrc-sap.h>
+#include "lte-rrc-sap.h"
+
 #include <ns3/ptr.h>
 
 #include <stdint.h>
@@ -158,6 +159,9 @@ class MemberLteEnbCphySapProvider : public LteEnbCphySapProvider
      */
     MemberLteEnbCphySapProvider(C* owner);
 
+    // Delete default constructor to avoid misuse
+    MemberLteEnbCphySapProvider() = delete;
+
     // inherited from LteEnbCphySapProvider
     void SetCellId(uint16_t cellId) override;
     void SetBandwidth(uint16_t ulBandwidth, uint16_t dlBandwidth) override;
@@ -172,18 +176,12 @@ class MemberLteEnbCphySapProvider : public LteEnbCphySapProvider
     int8_t GetReferenceSignalPower() override;
 
   private:
-    MemberLteEnbCphySapProvider();
     C* m_owner; ///< the owner class
 };
 
 template <class C>
 MemberLteEnbCphySapProvider<C>::MemberLteEnbCphySapProvider(C* owner)
     : m_owner(owner)
-{
-}
-
-template <class C>
-MemberLteEnbCphySapProvider<C>::MemberLteEnbCphySapProvider()
 {
 }
 
@@ -280,21 +278,18 @@ class MemberLteEnbCphySapUser : public LteEnbCphySapUser
      */
     MemberLteEnbCphySapUser(C* owner);
 
+    // Delete default constructor to avoid misuse
+    MemberLteEnbCphySapUser() = delete;
+
     // methods inherited from LteEnbCphySapUser go here
 
   private:
-    MemberLteEnbCphySapUser();
     C* m_owner; ///< the owner class
 };
 
 template <class C>
 MemberLteEnbCphySapUser<C>::MemberLteEnbCphySapUser(C* owner)
     : m_owner(owner)
-{
-}
-
-template <class C>
-MemberLteEnbCphySapUser<C>::MemberLteEnbCphySapUser()
 {
 }
 

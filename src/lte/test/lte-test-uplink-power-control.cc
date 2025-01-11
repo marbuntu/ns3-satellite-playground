@@ -53,28 +53,33 @@ NS_LOG_COMPONENT_DEFINE("LteUplinkPowerControlTest");
  */
 
 LteUplinkPowerControlTestSuite::LteUplinkPowerControlTestSuite()
-    : TestSuite("lte-uplink-power-control", SYSTEM)
+    : TestSuite("lte-uplink-power-control", Type::SYSTEM)
 {
     //  LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_DEBUG);
     //  LogComponentEnable ("LteUplinkPowerControlTest", logLevel);
     NS_LOG_INFO("Creating LteUplinkPowerControlTestSuite");
 
-    AddTestCase(new LteUplinkOpenLoopPowerControlTestCase("OpenLoopTest1"), TestCase::QUICK);
+    AddTestCase(new LteUplinkOpenLoopPowerControlTestCase("OpenLoopTest1"),
+                TestCase::Duration::QUICK);
     AddTestCase(
         new LteUplinkClosedLoopPowerControlAbsoluteModeTestCase("ClosedLoopAbsoluteModeTest1"),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
     AddTestCase(new LteUplinkClosedLoopPowerControlAccumulatedModeTestCase(
                     "ClosedLoopAccumulatedModeTest1"),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteUplinkPowerControlTestSuite lteUplinkPowerControlTestSuite;
 
 /**
  * TestCase Data
  */
 void
-PuschTxPowerNofitication(LteUplinkPowerControlTestCase* testcase,
+PuschTxPowerNotification(LteUplinkPowerControlTestCase* testcase,
                          uint16_t cellId,
                          uint16_t rnti,
                          double txPower)
@@ -83,7 +88,7 @@ PuschTxPowerNofitication(LteUplinkPowerControlTestCase* testcase,
 }
 
 void
-PucchTxPowerNofitication(LteUplinkPowerControlTestCase* testcase,
+PucchTxPowerNotification(LteUplinkPowerControlTestCase* testcase,
                          uint16_t cellId,
                          uint16_t rnti,
                          double txPower)
@@ -92,7 +97,7 @@ PucchTxPowerNofitication(LteUplinkPowerControlTestCase* testcase,
 }
 
 void
-SrsTxPowerNofitication(LteUplinkPowerControlTestCase* testcase,
+SrsTxPowerNotification(LteUplinkPowerControlTestCase* testcase,
                        uint16_t cellId,
                        uint16_t rnti,
                        double txPower)
@@ -265,17 +270,17 @@ LteUplinkOpenLoopPowerControlTestCase::DoRun()
     m_ueUpc = uePhy->GetUplinkPowerControl();
 
     m_ueUpc->TraceConnectWithoutContext("ReportPuschTxPower",
-                                        MakeBoundCallback(&PuschTxPowerNofitication, this));
+                                        MakeBoundCallback(&PuschTxPowerNotification, this));
     m_ueUpc->TraceConnectWithoutContext("ReportPucchTxPower",
-                                        MakeBoundCallback(&PucchTxPowerNofitication, this));
+                                        MakeBoundCallback(&PucchTxPowerNotification, this));
     m_ueUpc->TraceConnectWithoutContext("ReportSrsTxPower",
-                                        MakeBoundCallback(&SrsTxPowerNofitication, this));
+                                        MakeBoundCallback(&SrsTxPowerNotification, this));
 
     // Attach a UE to a eNB
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate a data radio bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -448,17 +453,17 @@ LteUplinkClosedLoopPowerControlAbsoluteModeTestCase::DoRun()
     m_ueUpc = uePhy->GetUplinkPowerControl();
 
     m_ueUpc->TraceConnectWithoutContext("ReportPuschTxPower",
-                                        MakeBoundCallback(&PuschTxPowerNofitication, this));
+                                        MakeBoundCallback(&PuschTxPowerNotification, this));
     m_ueUpc->TraceConnectWithoutContext("ReportPucchTxPower",
-                                        MakeBoundCallback(&PucchTxPowerNofitication, this));
+                                        MakeBoundCallback(&PucchTxPowerNotification, this));
     m_ueUpc->TraceConnectWithoutContext("ReportSrsTxPower",
-                                        MakeBoundCallback(&SrsTxPowerNofitication, this));
+                                        MakeBoundCallback(&SrsTxPowerNotification, this));
 
     // Attach a UE to a eNB
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate a data radio bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -612,17 +617,17 @@ LteUplinkClosedLoopPowerControlAccumulatedModeTestCase::DoRun()
     m_ueUpc = uePhy->GetUplinkPowerControl();
 
     m_ueUpc->TraceConnectWithoutContext("ReportPuschTxPower",
-                                        MakeBoundCallback(&PuschTxPowerNofitication, this));
+                                        MakeBoundCallback(&PuschTxPowerNotification, this));
     m_ueUpc->TraceConnectWithoutContext("ReportPucchTxPower",
-                                        MakeBoundCallback(&PucchTxPowerNofitication, this));
+                                        MakeBoundCallback(&PucchTxPowerNotification, this));
     m_ueUpc->TraceConnectWithoutContext("ReportSrsTxPower",
-                                        MakeBoundCallback(&SrsTxPowerNofitication, this));
+                                        MakeBoundCallback(&SrsTxPowerNotification, this));
 
     // Attach a UE to a eNB
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate a data radio bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 

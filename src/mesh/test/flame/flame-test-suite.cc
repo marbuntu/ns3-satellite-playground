@@ -28,7 +28,6 @@ using namespace flame;
 
 /**
  * \ingroup flame-test
- * \ingroup tests
  *
  * \brief Built-in self test for FlameHeader
  */
@@ -62,7 +61,6 @@ FlameHeaderTest::DoRun()
 
 /**
  * \ingroup flame-test
- * \ingroup tests
  *
  * \brief Unit test for FlameRtable
  */
@@ -143,7 +141,6 @@ FlameRtableTest::DoRun()
 
 /**
  * \ingroup flame-test
- * \ingroup tests
  *
  * \brief Flame Test Suite
  */
@@ -154,10 +151,10 @@ class FlameTestSuite : public TestSuite
 };
 
 FlameTestSuite::FlameTestSuite()
-    : TestSuite("devices-mesh-flame", UNIT)
+    : TestSuite("devices-mesh-flame", Type::UNIT)
 {
-    AddTestCase(new FlameHeaderTest, TestCase::QUICK);
-    AddTestCase(new FlameRtableTest, TestCase::QUICK);
+    AddTestCase(new FlameHeaderTest, TestCase::Duration::QUICK);
+    AddTestCase(new FlameRtableTest, TestCase::Duration::QUICK);
 }
 
 static FlameTestSuite g_flameTestSuite; ///< the test suite

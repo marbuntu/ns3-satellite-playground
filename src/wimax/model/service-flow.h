@@ -129,7 +129,7 @@ class ServiceFlow
      *
      * \param direction the direction
      */
-    ServiceFlow(enum Direction direction);
+    ServiceFlow(Direction direction);
     /**
      * Constructor
      *
@@ -143,7 +143,7 @@ class ServiceFlow
      * \param direction the direction
      * \param connection the connection object
      */
-    ServiceFlow(uint32_t sfid, enum Direction direction, Ptr<WimaxConnection> connection);
+    ServiceFlow(uint32_t sfid, Direction direction, Ptr<WimaxConnection> connection);
     /**
      * Destructor.
      */
@@ -163,12 +163,12 @@ class ServiceFlow
      * Set direction
      * \param direction the direction value
      */
-    void SetDirection(enum Direction direction);
+    void SetDirection(Direction direction);
     /**
      * Get direction
      * \returns the direction
      */
-    enum Direction GetDirection() const;
+    Direction GetDirection() const;
     /**
      * Copy parameters from another service flow
      * \param sf the service flow
@@ -179,12 +179,12 @@ class ServiceFlow
      * Set type of service flow
      * \param type the type value
      */
-    void SetType(enum Type type);
+    void SetType(Type type);
     /**
      * Get type of service flow
      * \returns the type
      */
-    enum Type GetType() const;
+    Type GetType() const;
     /**
      * Set connection
      * \param connection the connection
@@ -229,7 +229,7 @@ class ServiceFlow
      * Get scheduling type
      * \returns the scheduling type
      */
-    enum ServiceFlow::SchedulingType GetSchedulingType() const;
+    ServiceFlow::SchedulingType GetSchedulingType() const;
     /**
      * Check if packets are present
      * \returns true if there are packets
@@ -307,7 +307,7 @@ class ServiceFlow
      * Get service scheduling type
      * \returns the scheduling type
      */
-    enum ServiceFlow::SchedulingType GetServiceSchedulingType() const;
+    ServiceFlow::SchedulingType GetServiceSchedulingType() const;
     /**
      * Get request transmission policy
      * \returns the request transmission policy
@@ -387,7 +387,7 @@ class ServiceFlow
      * Get CS specification
      * \returns the CS specification
      */
-    enum CsSpecification GetCsSpecification() const;
+    CsSpecification GetCsSpecification() const;
     /**
      * Get convergence sublayer
      * \returns the convergence sublayer
@@ -412,7 +412,7 @@ class ServiceFlow
      * Get modulation
      * \returns the modulation
      */
-    enum WimaxPhy::ModulationType GetModulation() const;
+    WimaxPhy::ModulationType GetModulation() const;
 
     /**
      * Set SFID
@@ -458,7 +458,7 @@ class ServiceFlow
      * Set service scheduling type
      * \param schedType the service scheduling type
      */
-    void SetServiceSchedulingType(enum ServiceFlow::SchedulingType schedType);
+    void SetServiceSchedulingType(ServiceFlow::SchedulingType schedType);
     /**
      * Set request transmission policy
      * \param policy the request transmission policy
@@ -538,7 +538,7 @@ class ServiceFlow
      * Set CS specification
      * \param spec the CS specification
      */
-    void SetCsSpecification(enum CsSpecification spec);
+    void SetCsSpecification(CsSpecification spec);
     /**
      * Set convergence sublayer parameters
      * \param csparam the convergence sublayer parameters
@@ -564,43 +564,43 @@ class ServiceFlow
      * Set modulation
      * \param modulationType the modulation type
      */
-    void SetModulation(enum WimaxPhy::ModulationType modulationType);
+    void SetModulation(WimaxPhy::ModulationType modulationType);
 
   private:
-    uint32_t m_sfid;                                   ///< SFID
-    std::string m_serviceClassName;                    ///< service class name
-    uint8_t m_qosParamSetType;                         ///< QOS parameter type
-    uint8_t m_trafficPriority;                         ///< traffic priority
-    uint32_t m_maxSustainedTrafficRate;                ///< maximum sustained traffic rate
-    uint32_t m_maxTrafficBurst;                        ///< maximum traffic burst
-    uint32_t m_minReservedTrafficRate;                 ///< minimum reserved traffic rate
-    uint32_t m_minTolerableTrafficRate;                ///< minimum tolerable traffic rate
-    enum ServiceFlow::SchedulingType m_schedulingType; ///< scheduling type
-    uint32_t m_requestTransmissionPolicy;              ///< request transmission policy
-    uint32_t m_toleratedJitter;                        ///< tolerated jitter
-    uint32_t m_maximumLatency;                         ///< maximum latency
-    uint8_t m_fixedversusVariableSduIndicator;         ///< fixed versus variable SDI indicator
-    uint8_t m_sduSize;                                 ///< SDU size
-    uint16_t m_targetSAID;                             ///< target SAID
-    uint8_t m_arqEnable;                               ///< ARQ enable
-    uint16_t m_arqWindowSize;                          ///< ARQ window size
-    uint16_t m_arqRetryTimeoutTx;                      ///< ARQ retry timeout transmit
-    uint16_t m_arqRetryTimeoutRx;                      ///< ARQ retry timeout receive
-    uint16_t m_arqBlockLifeTime;                       ///< ARQ block life time
-    uint16_t m_arqSyncLoss;                            ///< ARQ sync loss
-    uint8_t m_arqDeliverInOrder;                       ///< ARQ deliver in order
-    uint16_t m_arqPurgeTimeout;                        ///< ARQ purge timeout
-    uint16_t m_arqBlockSize;                           ///< ARQ block size
-    enum CsSpecification m_csSpecification;            ///< CS specification
-    CsParameters m_convergenceSublayerParam;           ///< convergence sublayer parameters
-    uint16_t m_unsolicitedGrantInterval;               ///< unsolicited grant interval
-    uint16_t m_unsolicitedPollingInterval;             ///< unsolicited polling interval
-    Direction m_direction;                             ///< direction
-    Type m_type;                                       ///< type
-    Ptr<WimaxConnection> m_connection;                 ///< connection
-    bool m_isEnabled;                                  ///< is enabled?
-    bool m_isMulticast;                                ///< is multicast?
-    enum WimaxPhy::ModulationType m_modulationType;    ///< modulation type
+    uint32_t m_sfid;                              ///< SFID
+    std::string m_serviceClassName;               ///< service class name
+    uint8_t m_qosParamSetType;                    ///< QOS parameter type
+    uint8_t m_trafficPriority;                    ///< traffic priority
+    uint32_t m_maxSustainedTrafficRate;           ///< maximum sustained traffic rate
+    uint32_t m_maxTrafficBurst;                   ///< maximum traffic burst
+    uint32_t m_minReservedTrafficRate;            ///< minimum reserved traffic rate
+    uint32_t m_minTolerableTrafficRate;           ///< minimum tolerable traffic rate
+    ServiceFlow::SchedulingType m_schedulingType; ///< scheduling type
+    uint32_t m_requestTransmissionPolicy;         ///< request transmission policy
+    uint32_t m_toleratedJitter;                   ///< tolerated jitter
+    uint32_t m_maximumLatency;                    ///< maximum latency
+    uint8_t m_fixedversusVariableSduIndicator;    ///< fixed versus variable SDI indicator
+    uint8_t m_sduSize;                            ///< SDU size
+    uint16_t m_targetSAID;                        ///< target SAID
+    uint8_t m_arqEnable;                          ///< ARQ enable
+    uint16_t m_arqWindowSize;                     ///< ARQ window size
+    uint16_t m_arqRetryTimeoutTx;                 ///< ARQ retry timeout transmit
+    uint16_t m_arqRetryTimeoutRx;                 ///< ARQ retry timeout receive
+    uint16_t m_arqBlockLifeTime;                  ///< ARQ block life time
+    uint16_t m_arqSyncLoss;                       ///< ARQ sync loss
+    uint8_t m_arqDeliverInOrder;                  ///< ARQ deliver in order
+    uint16_t m_arqPurgeTimeout;                   ///< ARQ purge timeout
+    uint16_t m_arqBlockSize;                      ///< ARQ block size
+    CsSpecification m_csSpecification;            ///< CS specification
+    CsParameters m_convergenceSublayerParam;      ///< convergence sublayer parameters
+    uint16_t m_unsolicitedGrantInterval;          ///< unsolicited grant interval
+    uint16_t m_unsolicitedPollingInterval;        ///< unsolicited polling interval
+    Direction m_direction;                        ///< direction
+    Type m_type;                                  ///< type
+    Ptr<WimaxConnection> m_connection;            ///< connection
+    bool m_isEnabled;                             ///< is enabled?
+    bool m_isMulticast;                           ///< is multicast?
+    WimaxPhy::ModulationType m_modulationType;    ///< modulation type
     // will be used by the BS
     ServiceFlowRecord* m_record; ///< service flow record
 };

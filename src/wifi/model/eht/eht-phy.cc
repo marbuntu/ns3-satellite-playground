@@ -26,6 +26,9 @@
 #include "ns3/wifi-psdu.h"
 #include "ns3/wifi-utils.h"
 
+#undef NS_LOG_APPEND_CONTEXT
+#define NS_LOG_APPEND_CONTEXT WIFI_PHY_NS_LOG_APPEND_CONTEXT(m_wifiPhy)
+
 namespace ns3
 {
 
@@ -98,6 +101,19 @@ EhtPhy::GetSigMode(WifiPpduField field, const WifiTxVector& txVector) const
     }
 }
 
+WifiMode
+EhtPhy::GetSigBMode(const WifiTxVector& txVector) const
+{
+    if (txVector.IsDlMu())
+    {
+        return HePhy::GetSigBMode(txVector);
+    }
+    // we get here in case of EHT SU transmission
+    // TODO fix the MCS used for EHT-SIG
+    auto smallestMcs = std::min<uint8_t>(5, txVector.GetMode().GetMcsValue());
+    return VhtPhy::GetVhtMcs(smallestMcs);
+}
+
 Time
 EhtPhy::GetDuration(WifiPpduField field, const WifiTxVector& txVector) const
 {
@@ -116,6 +132,41 @@ EhtPhy::GetDuration(WifiPpduField field, const WifiTxVector& txVector) const
     }
 }
 
+uint32_t
+EhtPhy::GetSigBSize(const WifiTxVector& txVector) const
+{
+    if (ns3::IsDlMu(txVector.GetPreambleType()) && ns3::IsEht(txVector.GetPreambleType()))
+    {
+        return EhtPpdu::GetEhtSigFieldSize(
+            txVector.GetChannelWidth(),
+            txVector.GetRuAllocation(
+                m_wifiPhy ? m_wifiPhy->GetOperatingChannel().GetPrimaryChannelIndex(20) : 0),
+            txVector.GetEhtPpduType(),
+            txVector.IsSigBCompression(),
+            txVector.IsSigBCompression() ? txVector.GetHeMuUserInfoMap().size() : 0);
+    }
+    return HePhy::GetSigBSize(txVector);
+}
+
+Time
+EhtPhy::CalculateNonHeDurationForHeTb(const WifiTxVector& txVector) const
+{
+    Time duration = GetDuration(WIFI_PPDU_FIELD_PREAMBLE, txVector) +
+                    GetDuration(WIFI_PPDU_FIELD_NON_HT_HEADER, txVector) +
+                    GetDuration(WIFI_PPDU_FIELD_U_SIG, txVector);
+    return duration;
+}
+
+Time
+EhtPhy::CalculateNonHeDurationForHeMu(const WifiTxVector& txVector) const
+{
+    Time duration = GetDuration(WIFI_PPDU_FIELD_PREAMBLE, txVector) +
+                    GetDuration(WIFI_PPDU_FIELD_NON_HT_HEADER, txVector) +
+                    GetDuration(WIFI_PPDU_FIELD_U_SIG, txVector) +
+                    GetDuration(WIFI_PPDU_FIELD_EHT_SIG, txVector);
+    return duration;
+}
+
 const PhyEntity::PpduFormats&
 EhtPhy::GetPpduFormats() const
 {
@@ -128,13 +179,10 @@ EhtPhy::BuildPpdu(const WifiConstPsduMap& psdus, const WifiTxVector& txVector, T
     NS_LOG_FUNCTION(this << psdus << txVector << ppduDuration);
     return Create<EhtPpdu>(psdus,
                            txVector,
-                           m_wifiPhy->GetOperatingChannel().GetPrimaryChannelCenterFrequency(
-                               txVector.GetChannelWidth()),
+                           m_wifiPhy->GetOperatingChannel(),
                            ppduDuration,
-                           m_wifiPhy->GetPhyBand(),
                            ObtainNextUid(txVector),
-                           HePpdu::PSD_NON_HE_PORTION,
-                           m_wifiPhy->GetOperatingChannel().GetPrimaryChannelIndex(20));
+                           HePpdu::PSD_NON_HE_PORTION);
 }
 
 PhyEntity::PhyFieldRxStatus
@@ -226,7 +274,7 @@ EhtPhy::GetEhtMcs(uint8_t index)
     {                                                                                              \
         static WifiMode mcs = CreateEhtMcs(x);                                                     \
         return mcs;                                                                                \
-    };
+    }
 
 GET_EHT_MCS(0)
 GET_EHT_MCS(1)
@@ -289,7 +337,10 @@ EhtPhy::GetConstellationSize(uint8_t mcsValue)
 }
 
 uint64_t
-EhtPhy::GetPhyRate(uint8_t mcsValue, uint16_t channelWidth, uint16_t guardInterval, uint8_t nss)
+EhtPhy::GetPhyRate(uint8_t mcsValue,
+                   ChannelWidthMhz channelWidth,
+                   uint16_t guardInterval,
+                   uint8_t nss)
 {
     WifiCodeRate codeRate = GetCodeRate(mcsValue);
     uint64_t dataRate = GetDataRate(mcsValue, channelWidth, guardInterval, nss);
@@ -299,7 +350,7 @@ EhtPhy::GetPhyRate(uint8_t mcsValue, uint16_t channelWidth, uint16_t guardInterv
 uint64_t
 EhtPhy::GetPhyRateFromTxVector(const WifiTxVector& txVector, uint16_t staId /* = SU_STA_ID */)
 {
-    uint16_t bw = txVector.GetChannelWidth();
+    auto bw = txVector.GetChannelWidth();
     if (txVector.IsMu())
     {
         bw = HeRu::GetBandwidth(txVector.GetRu(staId).GetRuType());
@@ -313,7 +364,7 @@ EhtPhy::GetPhyRateFromTxVector(const WifiTxVector& txVector, uint16_t staId /* =
 uint64_t
 EhtPhy::GetDataRateFromTxVector(const WifiTxVector& txVector, uint16_t staId /* = SU_STA_ID */)
 {
-    uint16_t bw = txVector.GetChannelWidth();
+    auto bw = txVector.GetChannelWidth();
     if (txVector.IsMu())
     {
         bw = HeRu::GetBandwidth(txVector.GetRu(staId).GetRuType());
@@ -325,7 +376,10 @@ EhtPhy::GetDataRateFromTxVector(const WifiTxVector& txVector, uint16_t staId /* 
 }
 
 uint64_t
-EhtPhy::GetDataRate(uint8_t mcsValue, uint16_t channelWidth, uint16_t guardInterval, uint8_t nss)
+EhtPhy::GetDataRate(uint8_t mcsValue,
+                    ChannelWidthMhz channelWidth,
+                    uint16_t guardInterval,
+                    uint8_t nss)
 {
     NS_ASSERT(guardInterval == 800 || guardInterval == 1600 || guardInterval == 3200);
     NS_ASSERT(nss <= 8);

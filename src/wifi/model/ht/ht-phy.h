@@ -37,6 +37,9 @@ namespace ns3
  */
 #define HT_PHY 127
 
+/// Maximum number of supported NSS by HT PHY
+constexpr uint8_t HT_MAX_NSS = 4;
+
 /**
  * \brief PHY entity for HT (11n)
  * \ingroup wifi
@@ -400,7 +403,7 @@ class HtPhy : public OfdmPhy
      * \return the physical bit rate of this signal in bps.
      */
     static uint64_t GetPhyRate(uint8_t mcsValue,
-                               uint16_t channelWidth,
+                               ChannelWidthMhz channelWidth,
                                uint16_t guardInterval,
                                uint8_t nss);
     /**
@@ -438,7 +441,7 @@ class HtPhy : public OfdmPhy
      * \return the data bit rate in bps.
      */
     static uint64_t GetDataRate(uint8_t mcsValue,
-                                uint16_t channelWidth,
+                                ChannelWidthMhz channelWidth,
                                 uint16_t guardInterval,
                                 uint8_t nss);
     /**
@@ -464,8 +467,7 @@ class HtPhy : public OfdmPhy
     bool IsAllConfigSupported(WifiPpduField field, Ptr<const WifiPpdu> ppdu) const override;
     bool IsConfigSupported(Ptr<const WifiPpdu> ppdu) const override;
     Ptr<SpectrumValue> GetTxPowerSpectralDensity(double txPowerW,
-                                                 Ptr<const WifiPpdu> ppdu,
-                                                 const WifiTxVector& txVector) const override;
+                                                 Ptr<const WifiPpdu> ppdu) const override;
     uint32_t GetMaxPsduSize() const override;
     CcaIndication GetCcaIndication(const Ptr<const WifiPpdu> ppdu) override;
 
@@ -537,15 +539,9 @@ class HtPhy : public OfdmPhy
 
     /**
      * \param channelWidth the channel width in MHz
-     * \return the symbol duration excluding guard interval
-     */
-    static Time GetSymbolDuration(uint16_t channelWidth);
-
-    /**
-     * \param channelWidth the channel width in MHz
      * \return the number of usable subcarriers for data
      */
-    static uint16_t GetUsableSubcarriers(uint16_t channelWidth);
+    static uint16_t GetUsableSubcarriers(ChannelWidthMhz channelWidth);
 
     /**
      * \param guardInterval the guard interval duration

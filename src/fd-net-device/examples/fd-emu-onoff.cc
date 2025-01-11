@@ -103,7 +103,6 @@
 //
 
 #include "ns3/applications-module.h"
-#include "ns3/config-store-module.h"
 #include "ns3/core-module.h"
 #include "ns3/fd-net-device-module.h"
 #include "ns3/internet-module.h"
@@ -201,7 +200,7 @@ main(int argc, char* argv[])
 #ifdef HAVE_PACKET_H
     if (emuMode == "raw")
     {
-        EmuFdNetDeviceHelper* raw = new EmuFdNetDeviceHelper;
+        auto raw = new EmuFdNetDeviceHelper;
         raw->SetDeviceName(deviceName);
         helper = raw;
     }
@@ -218,7 +217,7 @@ main(int argc, char* argv[])
     if (emuMode == "dpdk")
     {
         DpdkNetDeviceHelper* dpdk = new DpdkNetDeviceHelper();
-        // Use e1000 driver library (this is for IGb PMD supproting Intel 1GbE NIC)
+        // Use e1000 driver library (this is for IGb PMD supporting Intel 1GbE NIC)
         // NOTE: DPDK supports multiple Poll Mode Drivers (PMDs) and you can use it
         // based on your NIC. You just need to set pmd library as follows:
         dpdk->SetPmdLibrary("librte_pmd_e1000.so");

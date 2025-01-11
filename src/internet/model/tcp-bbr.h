@@ -22,11 +22,12 @@
 #ifndef TCPBBR_H
 #define TCPBBR_H
 
+#include "tcp-congestion-ops.h"
+#include "windowed-filter.h"
+
 #include "ns3/data-rate.h"
 #include "ns3/random-variable-stream.h"
-#include "ns3/tcp-congestion-ops.h"
 #include "ns3/traced-value.h"
-#include "ns3/windowed-filter.h"
 
 class TcpBbrCheckGainValuesTest;
 
@@ -74,13 +75,13 @@ class TcpBbr : public TcpCongestionOps
     /**
      * \brief BBR has the following 4 modes for deciding how fast to send:
      */
-    typedef enum
+    enum BbrMode_t
     {
         BBR_STARTUP,   /**< Ramp up sending rate rapidly to fill pipe */
         BBR_DRAIN,     /**< Drain any queue created during startup */
         BBR_PROBE_BW,  /**< Discover, share bw: pace around estimated bw */
         BBR_PROBE_RTT, /**< Cut inflight to min to probe min_rtt */
-    } BbrMode_t;
+    };
 
     typedef WindowedFilter<DataRate,
                            MaxFilter<DataRate>,
@@ -217,18 +218,18 @@ class TcpBbr : public TcpCongestionOps
     uint32_t InFlight(Ptr<TcpSocketState> tcb, double gain);
 
     /**
-     * \brief Intializes the full pipe estimator.
+     * \brief Initializes the full pipe estimator.
      */
     void InitFullPipe();
 
     /**
-     * \brief Intializes the pacing rate.
+     * \brief Initializes the pacing rate.
      * \param tcb  the socket state.
      */
     void InitPacingRate(Ptr<TcpSocketState> tcb);
 
     /**
-     * \brief Intializes the round counting related variables.
+     * \brief Initializes the round counting related variables.
      */
     void InitRoundCounting();
 
@@ -292,7 +293,7 @@ class TcpBbr : public TcpCongestionOps
      * \param tcb the socket state.
      * \param rs rate sample.
      */
-    void UpdateBtlBw(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
+    void UpdateBottleneckBandwidth(Ptr<TcpSocketState> tcb, const TcpRateOps::TcpRateSample& rs);
 
     /**
      * \brief Updates control parameters congestion windowm, pacing rate, send quantum.
@@ -351,8 +352,8 @@ class TcpBbr : public TcpCongestionOps
     MaxBandwidthFilter_t m_maxBwFilter;        //!< Maximum bandwidth filter
     uint32_t m_bandwidthWindowLength{0}; //!< A constant specifying the length of the BBR.BtlBw max
                                          //!< filter window, default 10 packet-timed round trips.
-    double m_pacingGain{0};              //!< The dynamic pacing gain factor
-    double m_cWndGain{0};                //!< The dynamic congestion window gain factor
+    TracedValue<double> m_pacingGain{0}; //!< The dynamic pacing gain factor
+    TracedValue<double> m_cWndGain{0};   //!< The dynamic congestion window gain factor
     double m_highGain{0};       //!< A constant specifying highest gain factor, default is 2.89
     bool m_isPipeFilled{false}; //!< A boolean that records whether BBR has filled the pipe
     uint32_t m_minPipeCwnd{
@@ -372,25 +373,23 @@ class TcpBbr : public TcpCongestionOps
     uint32_t m_targetCWnd{0}; //!< Target value for congestion window, adapted to the estimated BDP
     DataRate m_fullBandwidth{0};      //!< Value of full bandwidth recorded
     uint32_t m_fullBandwidthCount{0}; //!< Count of full bandwidth recorded consistently
-    Time m_rtProp{
+    TracedValue<Time> m_minRtt{
         Time::Max()}; //!< Estimated two-way round-trip propagation delay of the path, estimated
                       //!< from the windowed minimum recent round-trip delay sample.
     uint32_t m_sendQuantum{
         0}; //!< The maximum size of a data aggregate scheduled and transmitted together
     Time m_cycleStamp{Seconds(0)};       //!< Last time gain cycle updated
     uint32_t m_cycleIndex{0};            //!< Current index of gain cycle
-    bool m_rtPropExpired{false};         //!< A boolean recording whether the BBR.RTprop has expired
-    Time m_rtPropFilterLen{Seconds(10)}; //!< A constant specifying the length of the RTProp min
+    bool m_minRttExpired{false};         //!< A boolean recording whether the BBR.RTprop has expired
+    Time m_minRttFilterLen{Seconds(10)}; //!< A constant specifying the length of the RTProp min
                                          //!< filter window, default 10 secs.
-    Time m_rtPropStamp{
+    Time m_minRttStamp{
         Seconds(0)}; //!< The wall clock time at which the current BBR.RTProp sample was obtained
-    bool m_isInitialized{false}; //!< Set to true after first time initializtion variables
+    bool m_isInitialized{false}; //!< Set to true after first time initialization variables
     Ptr<UniformRandomVariable> m_uv{nullptr}; //!< Uniform Random Variable
     uint64_t m_delivered{0}; //!< The total amount of data in bytes delivered so far
     uint32_t m_appLimited{
         0}; //!< The index of the last transmitted packet marked as application-limited
-    uint32_t m_txItemDelivered{
-        0}; //!< The number of bytes already delivered at the time of new packet transmission
     uint32_t m_extraAckedGain{1};         //!< Gain factor for adding extra ack to cwnd
     uint32_t m_extraAcked[2]{0, 0};       //!< Maximum excess data acked in epoch
     uint32_t m_extraAckedWinRtt{0};       //!< Age of extra acked in rtt
@@ -401,6 +400,8 @@ class TcpBbr : public TcpCongestionOps
     Time m_ackEpochTime{Seconds(0)}; //!< Starting of ACK sampling epoch time
     uint32_t m_ackEpochAcked{0};     //!< Bytes ACked in sampling epoch
     bool m_hasSeenRtt{false};        //!< Have we seen RTT sample yet?
+    double m_pacingMargin{0.01}; //!< BBR intentionally reduces the pacing rate by 1% to drain any
+                                 //!< standing queues. See `bbr_rate_bytes_per_sec` in Linux.
 };
 
 } // namespace ns3

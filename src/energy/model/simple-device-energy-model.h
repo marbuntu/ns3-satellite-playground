@@ -20,11 +20,14 @@
 #ifndef SIMPLE_DEVICE_ENERGY_MODEL_H
 #define SIMPLE_DEVICE_ENERGY_MODEL_H
 
-#include "ns3/device-energy-model.h"
+#include "device-energy-model.h"
+
 #include "ns3/nstime.h"
 #include "ns3/traced-value.h"
 
 namespace ns3
+{
+namespace energy
 {
 
 /**
@@ -65,7 +68,7 @@ class SimpleDeviceEnergyModel : public DeviceEnergyModel
     virtual Ptr<Node> GetNode() const;
 
     /**
-     * \brief Sets pointer to EnergySouce installed on node.
+     * \brief Sets pointer to EnergySource installed on node.
      *
      * \param source Pointer to EnergySource installed on node.
      *
@@ -140,6 +143,7 @@ class SimpleDeviceEnergyModel : public DeviceEnergyModel
     TracedValue<double> m_totalEnergyConsumption; //!< Total energy consumption trace
 };
 
+} // namespace energy
 } // namespace ns3
 
 #endif /* SIMPLE_DEVICE_ENERGY_MODEL_H */

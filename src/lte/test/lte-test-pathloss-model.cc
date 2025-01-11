@@ -66,7 +66,7 @@ LteTestPathlossDlSchedCallback(LtePathlossModelSystemTestCase* testcase,
 }
 
 LtePathlossModelTestSuite::LtePathlossModelTestSuite()
-    : TestSuite("lte-pathloss-model", SYSTEM)
+    : TestSuite("lte-pathloss-model", Type::SYSTEM)
 {
     // LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_ALL);
     // LogComponentEnable ("LteHelper", logLevel);
@@ -137,10 +137,14 @@ LtePathlossModelTestSuite::LtePathlossModelTestSuite()
         name << " snr= " << sinrDb << " dB, "
              << " mcs= " << snrEfficiencyMcs[i].mcsIndex;
         AddTestCase(new LtePathlossModelSystemTestCase(name.str(), sinrDb, dist[i], mcs),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LtePathlossModelTestSuite ltePathlossModelTestSuite;
 
 LtePathlossModelSystemTestCase::LtePathlossModelSystemTestCase(std::string name,
@@ -234,7 +238,7 @@ LtePathlossModelSystemTestCase::DoRun()
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 

@@ -22,7 +22,8 @@
 #ifndef RANDOM_WALK_2D_OUTDOOR_MOBILITY_MODEL_H
 #define RANDOM_WALK_2D_OUTDOOR_MOBILITY_MODEL_H
 
-#include "ns3/building.h"
+#include "building.h"
+
 #include "ns3/constant-velocity-helper.h"
 #include "ns3/event-id.h"
 #include "ns3/mobility-model.h"
@@ -35,7 +36,9 @@ namespace ns3
 {
 
 /**
+ * \ingroup buildings
  * \ingroup mobility
+ *
  * \brief 2D random walk mobility model which avoids buildings.
  *
  * This class reuses most of the code of RandomWalk2dMobilityModel,
@@ -124,7 +127,7 @@ class RandomWalk2dOutdoorMobilityModel : public MobilityModel
 
     ConstantVelocityHelper m_helper;       //!< helper for this object
     EventId m_event;                       //!< stored event ID
-    enum Mode m_mode;                      //!< whether in time or distance mode
+    Mode m_mode;                           //!< whether in time or distance mode
     double m_modeDistance;                 //!< Change direction and speed after this distance
     Time m_modeTime;                       //!< Change current direction and speed after this delay
     Ptr<RandomVariableStream> m_speed;     //!< rv for picking speed

@@ -50,12 +50,12 @@ class SixlowpanIphcStatefulImplTest : public TestCase
     /**
      * \brief Structure to hold the Rx/Tx packets.
      */
-    typedef struct
+    struct Data
     {
         Ptr<Packet> packet; /**< Packet data */
         Address src;        /**< Source address */
         Address dst;        /**< Destination address */
-    } Data;
+    };
 
     std::vector<Data> m_txPackets; //!< Transmitted packets
     std::vector<Data> m_rxPackets; //!< Received packets
@@ -390,9 +390,9 @@ class SixlowpanIphcStatefulTestSuite : public TestSuite
 };
 
 SixlowpanIphcStatefulTestSuite::SixlowpanIphcStatefulTestSuite()
-    : TestSuite("sixlowpan-iphc-stateful", UNIT)
+    : TestSuite("sixlowpan-iphc-stateful", Type::UNIT)
 {
-    AddTestCase(new SixlowpanIphcStatefulImplTest(), TestCase::QUICK);
+    AddTestCase(new SixlowpanIphcStatefulImplTest(), TestCase::Duration::QUICK);
 }
 
 static SixlowpanIphcStatefulTestSuite

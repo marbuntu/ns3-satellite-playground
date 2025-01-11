@@ -35,7 +35,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions Test: Empty option field.
  */
@@ -76,7 +75,6 @@ class TestEmptyOptionField : public TestCase
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions Test: Option without alignment.
  */
@@ -100,7 +98,6 @@ class OptionWithoutAlignmentHeader : public Ipv6OptionHeader
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions Test: Test the option without alignment.
  */
@@ -151,7 +148,6 @@ class TestOptionWithoutAlignment : public TestCase
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions Test: Option with alignment.
  */
@@ -174,13 +170,12 @@ class OptionWithAlignmentHeader : public Ipv6OptionHeader
 
     Alignment GetAlignment() const override
     {
-        return (Alignment){4, 0};
+        return Alignment{4, 0};
     }
 };
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions Test: Test the option with alignment.
  */
@@ -238,7 +233,6 @@ class TestOptionWithAlignment : public TestCase
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions Test: Test an option already aligned.
  */
@@ -278,7 +272,6 @@ class TestFulfilledAlignment : public TestCase
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 extensions TestSuite.
  */
@@ -286,12 +279,12 @@ class Ipv6ExtensionHeaderTestSuite : public TestSuite
 {
   public:
     Ipv6ExtensionHeaderTestSuite()
-        : TestSuite("ipv6-extension-header", UNIT)
+        : TestSuite("ipv6-extension-header", Type::UNIT)
     {
-        AddTestCase(new TestEmptyOptionField, TestCase::QUICK);
-        AddTestCase(new TestOptionWithoutAlignment, TestCase::QUICK);
-        AddTestCase(new TestOptionWithAlignment, TestCase::QUICK);
-        AddTestCase(new TestFulfilledAlignment, TestCase::QUICK);
+        AddTestCase(new TestEmptyOptionField, TestCase::Duration::QUICK);
+        AddTestCase(new TestOptionWithoutAlignment, TestCase::Duration::QUICK);
+        AddTestCase(new TestOptionWithAlignment, TestCase::Duration::QUICK);
+        AddTestCase(new TestFulfilledAlignment, TestCase::Duration::QUICK);
     }
 };
 

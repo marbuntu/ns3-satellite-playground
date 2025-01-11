@@ -36,7 +36,7 @@ NS_LOG_COMPONENT_DEFINE("TcpRateOpsTestSuite");
 class MimicCongControl;
 
 /**
- * \ingroup internet-tests
+ * \ingroup internet-test
  * \ingroup tests
  *
  * \brief The TcpRateLinux Basic Test
@@ -184,7 +184,6 @@ TcpRateLinuxBasicTest::SkbDelivered(TcpTxItem* skb)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Behaves as NewReno except HasCongControl returns true
  */
@@ -218,7 +217,7 @@ MimicCongControl::GetTypeId()
 }
 
 /**
- * \ingroup internet-tests
+ * \ingroup internet-test
  * \ingroup tests
  *
  * \brief The TcpRateLinux Test uses sender-receiver model to test its functionality.
@@ -344,7 +343,7 @@ Ptr<ErrorModel>
 TcpRateLinuxWithSocketsTest::CreateReceiverErrorModel()
 {
     Ptr<TcpSeqErrorModel> m_errorModel = CreateObject<TcpSeqErrorModel>();
-    for (std::vector<uint32_t>::iterator it = m_toDrop.begin(); it != m_toDrop.end(); ++it)
+    for (auto it = m_toDrop.begin(); it != m_toDrop.end(); ++it)
     {
         m_errorModel->AddSeqToKill(SequenceNumber32(*it));
     }
@@ -436,10 +435,10 @@ TcpRateLinuxWithSocketsTest::FinalChecks()
 }
 
 /**
- * \ingroup internet-tests
+ * \ingroup internet-test
  * \ingroup tests
  *
- * \brief The TcpRateLinuxWithBufferTest tests rate sample functionality with arbitary SACK
+ * \brief The TcpRateLinuxWithBufferTest tests rate sample functionality with arbitrary SACK
  * scenario. Check the value of delivered against a home-made guess
  */
 class TcpRateLinuxWithBufferTest : public TestCase
@@ -471,7 +470,7 @@ class TcpRateLinuxWithBufferTest : public TestCase
     /** \brief Test with acks without drop */
     void TestWithStraightAcks();
 
-    /** \brief Test with arbitary SACK scenario */
+    /** \brief Test with arbitrary SACK scenario */
     void TestWithSackBlocks();
 
     uint32_t m_expectedDelivered{0};   //!< Amount of expected delivered data
@@ -595,7 +594,6 @@ TcpRateLinuxWithBufferTest::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief the TestSuite for the TcpRateLinux test case
  */
@@ -603,21 +601,21 @@ class TcpRateOpsTestSuite : public TestSuite
 {
   public:
     TcpRateOpsTestSuite()
-        : TestSuite("tcp-rate-ops", UNIT)
+        : TestSuite("tcp-rate-ops", Type::UNIT)
     {
         AddTestCase(new TcpRateLinuxBasicTest(1000,
                                               SequenceNumber32(20),
                                               SequenceNumber32(11),
                                               1,
                                               "Testing SkbDelivered and SkbSent"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(
             new TcpRateLinuxBasicTest(1000,
                                       SequenceNumber32(11),
                                       SequenceNumber32(11),
                                       2,
                                       "Testing SkbDelivered and SkbSent with app limited data"),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
 
         std::vector<uint32_t> toDrop;
         toDrop.push_back(4001);
@@ -625,35 +623,35 @@ class TcpRateOpsTestSuite : public TestSuite
             new TcpRateLinuxWithSocketsTest("Checking Rate sample value without SACK, one drop",
                                             false,
                                             toDrop),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
 
         AddTestCase(
             new TcpRateLinuxWithSocketsTest("Checking Rate sample value with SACK, one drop",
                                             true,
                                             toDrop),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         toDrop.push_back(4001);
         AddTestCase(
             new TcpRateLinuxWithSocketsTest("Checking Rate sample value without SACK, two drop",
                                             false,
                                             toDrop),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
 
         AddTestCase(
             new TcpRateLinuxWithSocketsTest("Checking Rate sample value with SACK, two drop",
                                             true,
                                             toDrop),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
 
         AddTestCase(
             new TcpRateLinuxWithBufferTest(1000,
-                                           "Checking rate sample values with arbitary SACK Block"),
-            TestCase::QUICK);
+                                           "Checking rate sample values with arbitrary SACK Block"),
+            TestCase::Duration::QUICK);
 
         AddTestCase(
             new TcpRateLinuxWithBufferTest(500,
-                                           "Checking rate sample values with arbitary SACK Block"),
-            TestCase::QUICK);
+                                           "Checking rate sample values with arbitrary SACK Block"),
+            TestCase::Duration::QUICK);
     }
 };
 

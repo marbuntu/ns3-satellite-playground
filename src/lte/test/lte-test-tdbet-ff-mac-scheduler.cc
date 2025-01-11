@@ -56,7 +56,7 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("LenaTestTdBetFfMacScheduler");
 
 LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
-    : TestSuite("lte-tdbet-ff-mac-scheduler", SYSTEM)
+    : TestSuite("lte-tdbet-ff-mac-scheduler", Type::SYSTEM)
 {
     NS_LOG_INFO("creating LenaTestTdBetFfMacSchedulerSuite");
 
@@ -78,13 +78,13 @@ LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
     // after the patch enforcing min 3 PRBs per UE:
     // 12 users -> 3 PRB at Itbs 26 -> 277 bytes * 8/12 UE/TTI -> 184670 bytes/sec
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 0, 2196000, 2292000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(3, 0, 732000, 749000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(6, 0, 366000, 373000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(12, 0, 183000, 184670, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // DOWNLINK - DISTANCE 4800 -> MCS 22 -> Itbs 20 (from table 7.1.7.2.1-1 of 36.213)
     // 1 user -> 24 PRB at Itbs 20 -> 1383 -> 1383000 bytes/sec
@@ -98,13 +98,13 @@ LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
     // after the patch enforcing min 3 PRBs per UE:
     // 12 users -> 3 PRB at Itbs 13 -> 93  bytes * 8/12 UE/TTI  -> 62000 bytes/sec
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 4800, 1383000, 807000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(3, 4800, 461000, 253000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(6, 4800, 230500, 125000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(12, 4800, 115250, 62000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // DOWNLINK - DISTANCE 6000 -> MCS 20 -> Itbs 18 (from table 7.1.7.2.1-1 of 36.213)
     // 1 user -> 24 PRB at Itbs 18 -> 1191 -> 1191000 byte/sec
@@ -117,13 +117,13 @@ LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
     // 6 users -> 4 PRB at Itbs 11 -> 97 -> 97000 bytes/sec
     // 12 users -> 3 PRB at Itbs 11 -> 73 bytes * 8/12 UE/TTI -> 48667 bytes/sec
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 6000, 1191000, 621000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(3, 6000, 397000, 201000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(6, 6000, 198500, 97000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(12, 6000, 99250, 48667, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // DOWNLINK - DISTANCE 10000 -> MCS 14 -> Itbs 13 (from table 7.1.7.2.1-1 of 36.213)
     // 1 user -> 24 PRB at Itbs 13 -> 775 -> 775000 byte/sec
@@ -137,13 +137,13 @@ LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
     // after the patch enforcing min 3 PRBs per UE:
     // 12 users -> 3 PRB at Itbs 8 -> 49 bytes * 8/12 UE/TTI -> 32667 bytes/sec
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 10000, 775000, 421000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(3, 10000, 258333, 137000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(6, 10000, 129166, 67000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(12, 10000, 64583, 32667, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // DOWNLINK - DISTANCE 20000 -> MCS 8 -> Itbs 8 (from table 7.1.7.2.1-1 of 36.213)
     // 1 user -> 24 PRB at Itbs 8 -> 421 -> 421000 bytes/sec
@@ -157,17 +157,18 @@ LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
     // after the patch enforcing min 3 PRBs per UE:
     // 12 users -> 3 PRB at Itbs 2 -> 18 bytes * 8/12 UE/TTI -> 12000 bytes/sec
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 20000, 421000, 137000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(3, 20000, 140333, 41000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(6, 20000, 70166, 22000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(12, 20000, 35083, 12000, errorModel),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // DOWNLINK - DISTANCE 100000 -> CQI == 0 -> out of range -> 0 bytes/sec
     // UPLINK - DISTANCE 100000 -> CQI == 0 -> out of range -> 0 bytes/sec
-    AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 100000, 0, 0, errorModel), TestCase::QUICK);
+    AddTestCase(new LenaTdBetFfMacSchedulerTestCase1(1, 100000, 0, 0, errorModel),
+                TestCase::Duration::QUICK);
 
     // Test Case 2: fairness check
 
@@ -191,9 +192,13 @@ LenaTestTdBetFfMacSchedulerSuite::LenaTestTdBetFfMacSchedulerSuite()
     estThrTdBetUl.push_back(26000);  // User 4 estimated TTI throughput from TDBET
     AddTestCase(
         new LenaTdBetFfMacSchedulerTestCase2(dist, estAchievableRateDl, estThrTdBetUl, errorModel),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LenaTestTdBetFfMacSchedulerSuite lenaTestTdBetFfMacSchedulerSuite;
 
 // --------------- T E S T - C A S E   # 1 ------------------------------
@@ -279,7 +284,7 @@ LenaTdBetFfMacSchedulerTestCase1::DoRun()
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -384,7 +389,7 @@ LenaTdBetFfMacSchedulerTestCase2::BuildNameString(uint16_t nUser, std::vector<do
 {
     std::ostringstream oss;
     oss << "distances (m) = [ ";
-    for (std::vector<double>::iterator it = dist.begin(); it != dist.end(); ++it)
+    for (auto it = dist.begin(); it != dist.end(); ++it)
     {
         oss << *it << " ";
     }
@@ -463,7 +468,7 @@ LenaTdBetFfMacSchedulerTestCase2::DoRun()
     lteHelper->Attach(ueDevs, enbDevs.Get(0));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -524,7 +529,7 @@ LenaTdBetFfMacSchedulerTestCase2::DoRun()
      */
     for (int i = 0; i < m_nUser; i++)
     {
-        double thrRatio = (double)1 / m_nUser;
+        double thrRatio = 1.0 / m_nUser;
         double estThrRatio = (double)dlDataRxed.at(i) / totalData;
         NS_LOG_INFO("\tUser " << i << " thrRatio " << thrRatio << " estThrRatio " << estThrRatio);
         NS_TEST_ASSERT_MSG_EQ_TOL(estThrRatio, thrRatio, tolerance, " Unfair Throughput!");

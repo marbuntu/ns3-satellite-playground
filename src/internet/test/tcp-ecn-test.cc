@@ -42,7 +42,6 @@ NS_LOG_COMPONENT_DEFINE("TcpEcnTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief checks if ECT, CWR and ECE bits are set correctly in different scenarios
  *
@@ -81,7 +80,6 @@ class TcpEcnTest : public TcpGeneralTest
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief A TCP socket which sends certain data packets with CE flags set for tests 5 and 6.
  *
@@ -197,11 +195,8 @@ TcpSocketCongestedRouter::SendDataPacket(SequenceNumber32 seq, uint32_t maxSize,
     if (GetIpTos())
     {
         SocketIpTosTag ipTosTag;
-        if (m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3))
-        {
-            ipTosTag.SetTos(MarkEcnCe(GetIpTos()));
-        }
-        else if (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5))
+        if ((m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3)) ||
+            (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5)))
         {
             ipTosTag.SetTos(MarkEcnCe(GetIpTos()));
         }
@@ -221,11 +216,8 @@ TcpSocketCongestedRouter::SendDataPacket(SequenceNumber32 seq, uint32_t maxSize,
     else
     {
         SocketIpTosTag ipTosTag;
-        if (m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3))
-        {
-            ipTosTag.SetTos(MarkEcnCe(GetIpTos()));
-        }
-        else if (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5))
+        if ((m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3)) ||
+            (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5)))
         {
             ipTosTag.SetTos(MarkEcnCe(GetIpTos()));
         }
@@ -242,11 +234,8 @@ TcpSocketCongestedRouter::SendDataPacket(SequenceNumber32 seq, uint32_t maxSize,
     if (IsManualIpv6Tclass())
     {
         SocketIpv6TclassTag ipTclassTag;
-        if (m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3))
-        {
-            ipTclassTag.SetTclass(MarkEcnCe(GetIpv6Tclass()));
-        }
-        else if (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5))
+        if ((m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3)) ||
+            (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5)))
         {
             ipTclassTag.SetTclass(MarkEcnCe(GetIpv6Tclass()));
         }
@@ -266,11 +255,8 @@ TcpSocketCongestedRouter::SendDataPacket(SequenceNumber32 seq, uint32_t maxSize,
     else
     {
         SocketIpv6TclassTag ipTclassTag;
-        if (m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3))
-        {
-            ipTclassTag.SetTclass(MarkEcnCe(GetIpv6Tclass()));
-        }
-        else if (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5))
+        if ((m_testcase == 5 && (m_dataPacketSent == 1 || m_dataPacketSent == 3)) ||
+            (m_testcase == 6 && (m_dataPacketSent == 4 || m_dataPacketSent == 5)))
         {
             ipTclassTag.SetTclass(MarkEcnCe(GetIpv6Tclass()));
         }
@@ -580,7 +566,6 @@ TcpEcnTest::CreateSenderSocket(Ptr<Node> node)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP ECN TestSuite
  */
@@ -588,33 +573,33 @@ class TcpEcnTestSuite : public TestSuite
 {
   public:
     TcpEcnTestSuite()
-        : TestSuite("tcp-ecn-test", UNIT)
+        : TestSuite("tcp-ecn-test", Type::UNIT)
     {
         AddTestCase(new TcpEcnTest(
                         1,
                         "ECN Negotiation Test : ECN incapable sender and ECN incapable receiver"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(
             new TcpEcnTest(2,
                            "ECN Negotiation Test : ECN capable sender and ECN incapable receiver"),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         AddTestCase(
             new TcpEcnTest(3,
                            "ECN Negotiation Test : ECN incapable sender and ECN capable receiver"),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         AddTestCase(
             new TcpEcnTest(4, "ECN Negotiation Test : ECN capable sender and ECN capable receiver"),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         AddTestCase(
             new TcpEcnTest(
                 5,
                 "ECE and CWR Functionality Test: ECN capable sender and ECN capable receiver"),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
         AddTestCase(
             new TcpEcnTest(
                 6,
                 "Congestion Window Reduction Test :ECN capable sender and ECN capable receiver"),
-            TestCase::QUICK);
+            TestCase::Duration::QUICK);
     }
 };
 

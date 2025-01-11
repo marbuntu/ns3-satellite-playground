@@ -114,9 +114,9 @@ class Experiment
      *
      * \return true if routing is enabled.
      */
-    bool IsRouting()
+    bool IsRouting() const
     {
-        return (m_enableRouting == 1) ? 1 : 0;
+        return m_enableRouting;
     }
 
     /**
@@ -124,9 +124,9 @@ class Experiment
      *
      * \return true if mobility is enabled.
      */
-    bool IsMobility()
+    bool IsMobility() const
     {
-        return (m_enableMobility == 1) ? 1 : 0;
+        return m_enableMobility;
     }
 
     /**
@@ -134,7 +134,7 @@ class Experiment
      *
      * \return the scenario number.
      */
-    uint32_t GetScenario()
+    uint32_t GetScenario() const
     {
         return m_scenario;
     }
@@ -144,7 +144,7 @@ class Experiment
      *
      * \return the RTS Threshold.
      */
-    std::string GetRtsThreshold()
+    std::string GetRtsThreshold() const
     {
         return m_rtsThreshold;
     }
@@ -154,7 +154,7 @@ class Experiment
      *
      * \return the Output File Name.
      */
-    std::string GetOutputFileName()
+    std::string GetOutputFileName() const
     {
         return m_outputFileName;
     }
@@ -164,7 +164,7 @@ class Experiment
      *
      * \return the Rate Manager.
      */
-    std::string GetRateManager()
+    std::string GetRateManager() const
     {
         return m_rateManager;
     }
@@ -239,7 +239,7 @@ class Experiment
     uint32_t m_gridSize;     //!< Grid size.
     uint32_t m_nodeDistance; //!< Node distance.
     uint32_t m_port;         //!< Listening port.
-    uint32_t m_scenario;     //!< Scnario number.
+    uint32_t m_scenario;     //!< Scenario number.
 
     bool m_enablePcap;     //!< True if PCAP output is enabled.
     bool m_enableTracing;  //!< True if tracing output is enabled.
@@ -480,7 +480,7 @@ Experiment::ApplicationSetup(Ptr<Node> client, Ptr<Node> server, double start, d
     // Equipping the source  node with OnOff Application used for sending
     OnOffHelper onoff("ns3::UdpSocketFactory",
                       Address(InetSocketAddress(Ipv4Address("10.0.0.1"), m_port)));
-    onoff.SetConstantRate(DataRate(60000000));
+    onoff.SetConstantRate(DataRate(54000000));
     onoff.SetAttribute("PacketSize", UintegerValue(m_packetSize));
     onoff.SetAttribute("Remote", AddressValue(InetSocketAddress(ipv4AddrServer, m_port)));
 
@@ -505,8 +505,7 @@ Experiment::Run(const WifiHelper& wifi,
     YansWifiPhyHelper phy = wifiPhy;
     phy.SetChannel(wifiChannel.Create());
 
-    WifiMacHelper mac = wifiMac;
-    NetDeviceContainer devices = wifi.Install(phy, mac, c);
+    NetDeviceContainer devices = wifi.Install(phy, wifiMac, c);
 
     OlsrHelper olsr;
     Ipv4StaticRoutingHelper staticRouting;

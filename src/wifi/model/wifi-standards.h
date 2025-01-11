@@ -21,6 +21,7 @@
 #define WIFI_STANDARD_H
 
 #include "wifi-phy-band.h"
+#include "wifi-types.h"
 
 #include "ns3/abort.h"
 
@@ -45,7 +46,8 @@ enum WifiStandard
     WIFI_STANDARD_80211ac,
     WIFI_STANDARD_80211ad,
     WIFI_STANDARD_80211ax,
-    WIFI_STANDARD_80211be
+    WIFI_STANDARD_80211be,
+    WIFI_STANDARD_COUNT
 };
 
 /**
@@ -86,27 +88,7 @@ operator<<(std::ostream& os, WifiStandard standard)
 /**
  * \brief map a given standard configured by the user to the allowed PHY bands
  */
-const std::map<WifiStandard, std::list<WifiPhyBand>> wifiStandards = {
-    {WIFI_STANDARD_80211a, {WIFI_PHY_BAND_5GHZ}},
-    {WIFI_STANDARD_80211b, {WIFI_PHY_BAND_2_4GHZ}},
-    {WIFI_STANDARD_80211g, {WIFI_PHY_BAND_2_4GHZ}},
-    {WIFI_STANDARD_80211p, {WIFI_PHY_BAND_5GHZ}},
-    {WIFI_STANDARD_80211n, {WIFI_PHY_BAND_2_4GHZ, WIFI_PHY_BAND_5GHZ}},
-    {WIFI_STANDARD_80211ac, {WIFI_PHY_BAND_5GHZ}},
-    {WIFI_STANDARD_80211ad, {WIFI_PHY_BAND_60GHZ}},
-    {WIFI_STANDARD_80211ax, {WIFI_PHY_BAND_2_4GHZ, WIFI_PHY_BAND_5GHZ, WIFI_PHY_BAND_6GHZ}},
-    {WIFI_STANDARD_80211be, {WIFI_PHY_BAND_2_4GHZ, WIFI_PHY_BAND_5GHZ, WIFI_PHY_BAND_6GHZ}}};
-
-/**
- * \ingroup wifi
- * \brief Enumeration of frequency channel types
- */
-enum FrequencyChannelType : uint8_t
-{
-    WIFI_PHY_DSSS_CHANNEL = 0,
-    WIFI_PHY_OFDM_CHANNEL,
-    WIFI_PHY_80211p_CHANNEL
-};
+extern const std::map<WifiStandard, std::list<WifiPhyBand>> wifiStandards;
 
 /**
  * Get the type of the frequency channel for the given standard
@@ -120,43 +102,11 @@ GetFrequencyChannelType(WifiStandard standard)
     switch (standard)
     {
     case WIFI_STANDARD_80211b:
-        return WIFI_PHY_DSSS_CHANNEL;
+        return FrequencyChannelType::DSSS;
     case WIFI_STANDARD_80211p:
-        return WIFI_PHY_80211p_CHANNEL;
+        return FrequencyChannelType::CH_80211P;
     default:
-        return WIFI_PHY_OFDM_CHANNEL;
-    }
-}
-
-/**
- * Get the maximum channel width in MHz allowed for the given standard.
- *
- * \param standard the standard
- * \return the maximum channel width in MHz allowed for the given standard
- */
-inline uint16_t
-GetMaximumChannelWidth(WifiStandard standard)
-{
-    switch (standard)
-    {
-    case WIFI_STANDARD_80211b:
-        return 22;
-    case WIFI_STANDARD_80211p:
-        return 10;
-    case WIFI_STANDARD_80211a:
-    case WIFI_STANDARD_80211g:
-        return 20;
-    case WIFI_STANDARD_80211n:
-        return 40;
-    case WIFI_STANDARD_80211ac:
-    case WIFI_STANDARD_80211ax:
-    case WIFI_STANDARD_80211be:
-        return 160;
-    case WIFI_STANDARD_80211ad:
-        return 2160;
-    default:
-        NS_ABORT_MSG("Unknown standard: " << standard);
-        return 0;
+        return FrequencyChannelType::OFDM;
     }
 }
 
@@ -167,7 +117,7 @@ GetMaximumChannelWidth(WifiStandard standard)
  * \param band the given PHY band
  * \return the default channel width (MHz) for the given standard
  */
-inline uint16_t
+inline ChannelWidthMhz
 GetDefaultChannelWidth(WifiStandard standard, WifiPhyBand band)
 {
     switch (standard)
@@ -210,6 +160,39 @@ GetDefaultPhyBand(WifiStandard standard)
     default:
         return WIFI_PHY_BAND_2_4GHZ;
     }
+}
+
+/**
+ * Get the TypeId name for the FrameExchangeManager corresponding to the given standard.
+ *
+ * \param standard the given standard
+ * \param qosSupported whether QoS is supported (ignored if standard is at least HT)
+ * \return the TypeId name for the FrameExchangeManager corresponding to the given standard
+ */
+inline std::string
+GetFrameExchangeManagerTypeIdName(WifiStandard standard, bool qosSupported)
+{
+    if (standard >= WIFI_STANDARD_80211be)
+    {
+        return "ns3::EhtFrameExchangeManager";
+    }
+    if (standard >= WIFI_STANDARD_80211ax)
+    {
+        return "ns3::HeFrameExchangeManager";
+    }
+    if (standard >= WIFI_STANDARD_80211ac)
+    {
+        return "ns3::VhtFrameExchangeManager";
+    }
+    if (standard >= WIFI_STANDARD_80211n)
+    {
+        return "ns3::HtFrameExchangeManager";
+    }
+    if (qosSupported)
+    {
+        return "ns3::QosFrameExchangeManager";
+    }
+    return "ns3::FrameExchangeManager";
 }
 
 } // namespace ns3

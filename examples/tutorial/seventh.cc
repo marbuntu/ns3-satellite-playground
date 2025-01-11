@@ -69,7 +69,7 @@ NS_LOG_COMPONENT_DEFINE("SeventhScriptExample");
 /**
  * Congestion window change callback
  *
- * \param stream The ouput stream file.
+ * \param stream The output stream file.
  * \param oldCwnd Old congestion window.
  * \param newCwnd New congestion window.
  */
@@ -84,7 +84,7 @@ CwndChange(Ptr<OutputStreamWrapper> stream, uint32_t oldCwnd, uint32_t newCwnd)
 /**
  * Rx drop callback
  *
- * \param file The ouput PCAP file.
+ * \param file The output PCAP file.
  * \param p The dropped packet.
  */
 static void
@@ -125,7 +125,7 @@ main(int argc, char* argv[])
     Address anyAddress;
     std::string probeType;
     std::string tracePath;
-    if (useV6 == false)
+    if (!useV6)
     {
         Ipv4AddressHelper address;
         address.SetBase("10.1.1.0", "255.255.255.0");

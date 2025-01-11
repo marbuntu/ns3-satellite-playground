@@ -84,20 +84,15 @@ cell_data_function_col_0(GtkTreeViewColumn* col,
                      node->object->GetInstanceTypeId().GetName().c_str(),
                      nullptr);
         break;
+    case ModelNode::NODE_ATTRIBUTE:
     case ModelNode::NODE_POINTER:
-        g_object_set(renderer, "text", node->name.c_str(), nullptr);
-        break;
     case ModelNode::NODE_VECTOR:
         g_object_set(renderer, "text", node->name.c_str(), nullptr);
         break;
-    case ModelNode::NODE_VECTOR_ITEM: {
+    case ModelNode::NODE_VECTOR_ITEM:
         std::stringstream oss;
         oss << node->index;
         g_object_set(renderer, "text", oss.str().c_str(), nullptr);
-    }
-    break;
-    case ModelNode::NODE_ATTRIBUTE:
-        g_object_set(renderer, "text", node->name.c_str(), nullptr);
         break;
     }
 }
@@ -240,7 +235,7 @@ cell_tooltip_callback(GtkWidget* widget,
         }
         else
         {
-            struct TypeId::AttributeInformation info = tid.GetAttribute(attrIndex);
+            TypeId::AttributeInformation info = tid.GetAttribute(attrIndex);
             Ptr<const AttributeChecker> checker = info.checker;
             std::string tip;
             tip = "This attribute is of type " + checker->GetValueTypeName();

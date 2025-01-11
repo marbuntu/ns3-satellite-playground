@@ -29,7 +29,6 @@
  */
 
 #include "ns3/applications-module.h"
-#include "ns3/config-store-module.h"
 #include "ns3/core-module.h"
 #include "ns3/dsdv-helper.h"
 #include "ns3/internet-module.h"
@@ -47,9 +46,13 @@ uint16_t port = 9;
 NS_LOG_COMPONENT_DEFINE("DsdvManetExample");
 
 /**
+ * \defgroup dsdv-examples DSDV Examples
  * \ingroup dsdv
- * \ingroup dsdv-examples
  * \ingroup examples
+ */
+
+/**
+ * \ingroup dsdv-examples
  *
  * \brief DSDV Manet example
  */
@@ -377,7 +380,7 @@ DsdvManetExample::InstallInternetStack(std::string tr_name)
     {
         Ptr<OutputStreamWrapper> routingStream =
             Create<OutputStreamWrapper>((tr_name + ".routes"), std::ios::out);
-        dsdv.PrintRoutingTableAllAt(Seconds(m_periodicUpdateInterval), routingStream);
+        Ipv4RoutingHelper::PrintRoutingTableAllAt(Seconds(m_periodicUpdateInterval), routingStream);
     }
 }
 

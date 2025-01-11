@@ -23,6 +23,13 @@
 
 #include <cmath>
 
+#ifdef HAVE_GSL
+#include <gsl/gsl_cdf.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_sf_bessel.h>
+#endif
+
 namespace ns3
 {
 
@@ -37,8 +44,8 @@ double
 DsssErrorRateModel::DqpskFunction(double x)
 {
     NS_LOG_FUNCTION_NOARGS();
-    return ((std::sqrt(2.0) + 1.0) / std::sqrt(8.0 * M_PI * std::sqrt(2.0))) *
-           (1.0 / std::sqrt(x)) * std::exp(-(2.0 - std::sqrt(2.0)) * x);
+    return ((M_SQRT2 + 1.0) / std::sqrt(8.0 * M_PI * M_SQRT2)) * (1.0 / std::sqrt(x)) *
+           std::exp(-(2.0 - M_SQRT2) * x);
 }
 
 double

@@ -52,7 +52,6 @@ NS_LOG_COMPONENT_DEFINE("EpcTestS1uUplink");
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * A Udp client. Sends UDP packet carrying sequence number and time
  * stamp but also including the EpsBearerTag. This tag is normally
@@ -125,11 +124,12 @@ EpsBearerTagUdpClient::GetTypeId()
         TypeId("ns3::EpsBearerTagUdpClient")
             .SetParent<Application>()
             .AddConstructor<EpsBearerTagUdpClient>()
-            .AddAttribute("MaxPackets",
-                          "The maximum number of packets the application will send",
-                          UintegerValue(100),
-                          MakeUintegerAccessor(&EpsBearerTagUdpClient::m_count),
-                          MakeUintegerChecker<uint32_t>())
+            .AddAttribute(
+                "MaxPackets",
+                "The maximum number of packets the application will send (zero means infinite)",
+                UintegerValue(100),
+                MakeUintegerAccessor(&EpsBearerTagUdpClient::m_count),
+                MakeUintegerChecker<uint32_t>())
             .AddAttribute("Interval",
                           "The time to wait between packets",
                           TimeValue(Seconds(1.0)),
@@ -241,7 +241,7 @@ EpsBearerTagUdpClient::Send()
         NS_LOG_INFO("Error while sending " << m_size << " bytes to " << m_peerAddress);
     }
 
-    if (m_sent < m_count)
+    if (m_sent < m_count || m_count == 0)
     {
         m_sendEvent = Simulator::Schedule(m_interval, &EpsBearerTagUdpClient::Send, this);
     }
@@ -249,7 +249,6 @@ EpsBearerTagUdpClient::Send()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Custom test structure to hold information of data transmitted in the uplink per UE
  */
@@ -284,7 +283,6 @@ UeUlTestData::UeUlTestData(uint32_t n, uint32_t s, uint16_t r, uint8_t l)
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Custom structure containing information about data sent in the uplink
  * of eNodeB. Includes the information of the data sent in the uplink per UE.
@@ -296,7 +294,6 @@ struct EnbUlTestData
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief EpcS1uUlTestCase class
  */
@@ -369,9 +366,7 @@ EpcS1uUlTestCase::DoRun()
     uint16_t cellIdCounter = 0;
     uint64_t imsiCounter = 0;
 
-    for (std::vector<EnbUlTestData>::iterator enbit = m_enbUlTestData.begin();
-         enbit < m_enbUlTestData.end();
-         ++enbit)
+    for (auto enbit = m_enbUlTestData.begin(); enbit < m_enbUlTestData.end(); ++enbit)
     {
         Ptr<Node> enb = CreateObject<Node>();
         enbs.Add(enb);
@@ -489,12 +484,9 @@ EpcS1uUlTestCase::DoRun()
 
     Simulator::Run();
 
-    for (std::vector<EnbUlTestData>::iterator enbit = m_enbUlTestData.begin();
-         enbit < m_enbUlTestData.end();
-         ++enbit)
+    for (auto enbit = m_enbUlTestData.begin(); enbit < m_enbUlTestData.end(); ++enbit)
     {
-        for (std::vector<UeUlTestData>::iterator ueit = enbit->ues.begin(); ueit < enbit->ues.end();
-             ++ueit)
+        for (auto ueit = enbit->ues.begin(); ueit < enbit->ues.end(); ++ueit)
         {
             NS_TEST_ASSERT_MSG_EQ(ueit->serverApp->GetTotalRx(),
                                   (ueit->numPkts) * (ueit->pktSize),
@@ -516,14 +508,14 @@ class EpcS1uUlTestSuite : public TestSuite
 } g_epcS1uUlTestSuiteInstance;
 
 EpcS1uUlTestSuite::EpcS1uUlTestSuite()
-    : TestSuite("epc-s1u-uplink", SYSTEM)
+    : TestSuite("epc-s1u-uplink", Type::SYSTEM)
 {
     std::vector<EnbUlTestData> v1;
     EnbUlTestData e1;
     UeUlTestData f1(1, 100, 1, 1);
     e1.ues.push_back(f1);
     v1.push_back(e1);
-    AddTestCase(new EpcS1uUlTestCase("1 eNB, 1UE", v1), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("1 eNB, 1UE", v1), TestCase::Duration::QUICK);
 
     std::vector<EnbUlTestData> v2;
     EnbUlTestData e2;
@@ -532,12 +524,12 @@ EpcS1uUlTestSuite::EpcS1uUlTestSuite()
     UeUlTestData f2_2(2, 200, 2, 1);
     e2.ues.push_back(f2_2);
     v2.push_back(e2);
-    AddTestCase(new EpcS1uUlTestCase("1 eNB, 2UEs", v2), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("1 eNB, 2UEs", v2), TestCase::Duration::QUICK);
 
     std::vector<EnbUlTestData> v3;
     v3.push_back(e1);
     v3.push_back(e2);
-    AddTestCase(new EpcS1uUlTestCase("2 eNBs", v3), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("2 eNBs", v3), TestCase::Duration::QUICK);
 
     EnbUlTestData e3;
     UeUlTestData f3_1(3, 50, 1, 1);
@@ -550,33 +542,37 @@ EpcS1uUlTestSuite::EpcS1uUlTestSuite()
     v4.push_back(e3);
     v4.push_back(e1);
     v4.push_back(e2);
-    AddTestCase(new EpcS1uUlTestCase("3 eNBs", v4), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("3 eNBs", v4), TestCase::Duration::QUICK);
 
     std::vector<EnbUlTestData> v5;
     EnbUlTestData e5;
     UeUlTestData f5(10, 3000, 1, 1);
     e5.ues.push_back(f5);
     v5.push_back(e5);
-    AddTestCase(new EpcS1uUlTestCase("1 eNB, 10 pkts 3000 bytes each", v5), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("1 eNB, 10 pkts 3000 bytes each", v5),
+                TestCase::Duration::QUICK);
 
     std::vector<EnbUlTestData> v6;
     EnbUlTestData e6;
     UeUlTestData f6(50, 3000, 1, 1);
     e6.ues.push_back(f6);
     v6.push_back(e6);
-    AddTestCase(new EpcS1uUlTestCase("1 eNB, 50 pkts 3000 bytes each", v6), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("1 eNB, 50 pkts 3000 bytes each", v6),
+                TestCase::Duration::QUICK);
 
     std::vector<EnbUlTestData> v7;
     EnbUlTestData e7;
     UeUlTestData f7(10, 15000, 1, 1);
     e7.ues.push_back(f7);
     v7.push_back(e7);
-    AddTestCase(new EpcS1uUlTestCase("1 eNB, 10 pkts 15000 bytes each", v7), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("1 eNB, 10 pkts 15000 bytes each", v7),
+                TestCase::Duration::QUICK);
 
     std::vector<EnbUlTestData> v8;
     EnbUlTestData e8;
     UeUlTestData f8(100, 15000, 1, 1);
     e8.ues.push_back(f8);
     v8.push_back(e8);
-    AddTestCase(new EpcS1uUlTestCase("1 eNB, 100 pkts 15000 bytes each", v8), TestCase::QUICK);
+    AddTestCase(new EpcS1uUlTestCase("1 eNB, 100 pkts 15000 bytes each", v8),
+                TestCase::Duration::QUICK);
 }

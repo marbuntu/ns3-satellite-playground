@@ -21,11 +21,11 @@
 #include "ns3/ipv6-routing-protocol.h"
 #include "ns3/test.h"
 
-using namespace ns3;
+namespace ns3
+{
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 dummy routing class (A)
  */
@@ -43,10 +43,10 @@ class Ipv6ARouting : public Ipv6RoutingProtocol
     bool RouteInput(Ptr<const Packet> p,
                     const Ipv6Header& header,
                     Ptr<const NetDevice> idev,
-                    UnicastForwardCallback ucb,
-                    MulticastForwardCallback mcb,
-                    LocalDeliverCallback lcb,
-                    ErrorCallback ecb) override
+                    const UnicastForwardCallback& ucb,
+                    const MulticastForwardCallback& mcb,
+                    const LocalDeliverCallback& lcb,
+                    const ErrorCallback& ecb) override
     {
         return false;
     }
@@ -92,7 +92,6 @@ class Ipv6ARouting : public Ipv6RoutingProtocol
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 dummy routing class (B)
  */
@@ -110,10 +109,10 @@ class Ipv6BRouting : public Ipv6RoutingProtocol
     bool RouteInput(Ptr<const Packet> p,
                     const Ipv6Header& header,
                     Ptr<const NetDevice> idev,
-                    UnicastForwardCallback ucb,
-                    MulticastForwardCallback mcb,
-                    LocalDeliverCallback lcb,
-                    ErrorCallback ecb) override
+                    const UnicastForwardCallback& ucb,
+                    const MulticastForwardCallback& mcb,
+                    const LocalDeliverCallback& lcb,
+                    const ErrorCallback& ecb) override
     {
         return false;
     }
@@ -159,7 +158,6 @@ class Ipv6BRouting : public Ipv6RoutingProtocol
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 ListRouting negative test.
  */
@@ -194,7 +192,6 @@ Ipv6ListRoutingNegativeTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 ListRouting positive test.
  */
@@ -234,7 +231,6 @@ Ipv6ListRoutingPositiveTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 ListRouting TestSuite
  */
@@ -242,12 +238,14 @@ class Ipv6ListRoutingTestSuite : public TestSuite
 {
   public:
     Ipv6ListRoutingTestSuite()
-        : TestSuite("ipv6-list-routing", UNIT)
+        : TestSuite("ipv6-list-routing", Type::UNIT)
     {
-        AddTestCase(new Ipv6ListRoutingPositiveTestCase(), TestCase::QUICK);
-        AddTestCase(new Ipv6ListRoutingNegativeTestCase(), TestCase::QUICK);
+        AddTestCase(new Ipv6ListRoutingPositiveTestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new Ipv6ListRoutingNegativeTestCase(), TestCase::Duration::QUICK);
     }
 };
 
 static Ipv6ListRoutingTestSuite
     g_ipv6ListRoutingTestSuite; //!< Static variable for test initialization
+
+} // namespace ns3

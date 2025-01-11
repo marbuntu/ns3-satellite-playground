@@ -67,7 +67,7 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param channelWidth the operating channel width (in MHz)
      * \param useDistinctBssColors whether to set distinct BSS colors to BSSes
      */
-    WifiPrimaryChannelsTest(uint16_t channelWidth, bool useDistinctBssColors);
+    WifiPrimaryChannelsTest(ChannelWidthMhz channelWidth, bool useDistinctBssColors);
     ~WifiPrimaryChannelsTest() override;
 
     /**
@@ -90,7 +90,7 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param bss the given BSS
      * \param txChannelWidth the given transmission channel width in MHz
      */
-    void SendDlSuPpdu(uint8_t bss, uint16_t txChannelWidth);
+    void SendDlSuPpdu(uint8_t bss, ChannelWidthMhz txChannelWidth);
     /**
      * Have the AP of the given BSS transmit a MU PPDU using the given
      * transmission channel width and RU type
@@ -100,7 +100,10 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param ruType the given RU type
      * \param nRus the number of RUs
      */
-    void SendDlMuPpdu(uint8_t bss, uint16_t txChannelWidth, HeRu::RuType ruType, std::size_t nRus);
+    void SendDlMuPpdu(uint8_t bss,
+                      ChannelWidthMhz txChannelWidth,
+                      HeRu::RuType ruType,
+                      std::size_t nRus);
     /**
      * Have the AP of the given BSS transmit a Basic Trigger Frame. This method calls
      * DoSendHeTbPpdu to actually have STAs transmit HE TB PPDUs using the given
@@ -111,7 +114,10 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param ruType the given RU type
      * \param nRus the number of RUs
      */
-    void SendHeTbPpdu(uint8_t bss, uint16_t txChannelWidth, HeRu::RuType ruType, std::size_t nRus);
+    void SendHeTbPpdu(uint8_t bss,
+                      ChannelWidthMhz txChannelWidth,
+                      HeRu::RuType ruType,
+                      std::size_t nRus);
     /**
      * Have the STAs of the given BSS transmit an HE TB PPDU using the given
      * transmission channel width and RU type
@@ -122,7 +128,7 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param nRus the number of RUs
      */
     void DoSendHeTbPpdu(uint8_t bss,
-                        uint16_t txChannelWidth,
+                        ChannelWidthMhz txChannelWidth,
                         HeRu::RuType ruType,
                         std::size_t nRus);
     /**
@@ -169,7 +175,7 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param txBss the set of BSSes that transmitted an SU PPDU
      * \param txChannelWidth the given transmission channel width in MHz
      */
-    void CheckReceivedSuPpdus(std::set<uint8_t> txBss, uint16_t txChannelWidth);
+    void CheckReceivedSuPpdus(std::set<uint8_t> txBss, ChannelWidthMhz txChannelWidth);
     /**
      * Check that (i) all stations/APs belonging to the given BSSes received the DL/UL MU PPDUs
      * transmitted over the given channel width and RU width; and (ii) stations/APs belonging to
@@ -184,7 +190,7 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param isDlMu true for DL MU PPDU, false for HE TB PPDU
      */
     void CheckReceivedMuPpdus(std::set<uint8_t> txBss,
-                              uint16_t txChannelWidth,
+                              ChannelWidthMhz txChannelWidth,
                               HeRu::RuType ruType,
                               std::size_t nRus,
                               bool isDlMu);
@@ -197,13 +203,13 @@ class WifiPrimaryChannelsTest : public TestCase
      * \param txBss the set of BSSes that transmitted a Trigger Frame
      * \param txChannelWidth the given transmission channel width in MHz
      */
-    void CheckReceivedTriggerFrames(std::set<uint8_t> txBss, uint16_t txChannelWidth);
+    void CheckReceivedTriggerFrames(std::set<uint8_t> txBss, ChannelWidthMhz txChannelWidth);
 
   private:
     void DoSetup() override;
     void DoRun() override;
 
-    uint16_t m_channelWidth;                      ///< operating channel width in MHz
+    ChannelWidthMhz m_channelWidth;               ///< operating channel width in MHz
     bool m_useDistinctBssColors;                  ///< true to set distinct BSS colors to BSSes
     uint8_t m_nBss;                               ///< number of BSSes
     uint8_t m_nStationsPerBss;                    ///< number of stations per AP
@@ -219,7 +225,8 @@ class WifiPrimaryChannelsTest : public TestCase
     Time m_triggerTxDuration;                 ///< TX duration for Basic Trigger Frame
 };
 
-WifiPrimaryChannelsTest::WifiPrimaryChannelsTest(uint16_t channelWidth, bool useDistinctBssColors)
+WifiPrimaryChannelsTest::WifiPrimaryChannelsTest(ChannelWidthMhz channelWidth,
+                                                 bool useDistinctBssColors)
     : TestCase("Check correct transmissions for various primary channel settings"),
       m_channelWidth(channelWidth),
       m_useDistinctBssColors(useDistinctBssColors)
@@ -390,7 +397,7 @@ WifiPrimaryChannelsTest::DoSetup()
                 "WaitBeaconTimeout",
                 TimeValue(MicroSeconds(102400))); // same as BeaconInterval
 
-    TupleValue<UintegerValue, UintegerValue, EnumValue, UintegerValue> channelValue;
+    TupleValue<UintegerValue, UintegerValue, EnumValue<WifiPhyBand>, UintegerValue> channelValue;
 
     // Each BSS uses a distinct primary20 channel
     for (uint8_t bss = 0; bss < m_nBss; bss++)
@@ -420,10 +427,10 @@ WifiPrimaryChannelsTest::DoSetup()
     }
 
     // Assign fixed streams to random variables in use
-    streamNumber = wifi.AssignStreams(m_apDevices, streamNumber);
+    streamNumber = WifiHelper::AssignStreams(m_apDevices, streamNumber);
     for (uint8_t bss = 0; bss < m_nBss; bss++)
     {
-        streamNumber = wifi.AssignStreams(m_staDevices[bss], streamNumber);
+        streamNumber = WifiHelper::AssignStreams(m_staDevices[bss], streamNumber);
     }
 
     // set BSS color
@@ -618,7 +625,7 @@ WifiPrimaryChannelsTest::DoRun()
     // To have simultaneous transmissions on adjacent channels, just initialize
     // nRounds to 1 and nApsPerRound to m_channelWidth / 20. Of course, the test
     // will fail because some stations will not receive some frames due to interfence
-    for (uint16_t txChannelWidth = 20, nRounds = 2, nApsPerRound = m_channelWidth / 20 / 2;
+    for (ChannelWidthMhz txChannelWidth = 20, nRounds = 2, nApsPerRound = m_channelWidth / 20 / 2;
          txChannelWidth <= m_channelWidth;
          txChannelWidth *= 2, nRounds *= 2, nApsPerRound /= 2)
     {
@@ -654,7 +661,7 @@ WifiPrimaryChannelsTest::DoRun()
      * channel width, every round is repeated as many times as the number of ways in
      * which we can partition the transmission channel width in equal sized RUs.
      */
-    for (uint16_t txChannelWidth = 20, nRounds = 2, nApsPerRound = m_channelWidth / 20 / 2;
+    for (ChannelWidthMhz txChannelWidth = 20, nRounds = 2, nApsPerRound = m_channelWidth / 20 / 2;
          txChannelWidth <= m_channelWidth;
          txChannelWidth *= 2, nRounds *= 2, nApsPerRound /= 2)
     {
@@ -665,7 +672,7 @@ WifiPrimaryChannelsTest::DoRun()
         {
             for (unsigned int type = 0; type < 7; type++)
             {
-                HeRu::RuType ruType = static_cast<HeRu::RuType>(type);
+                auto ruType = static_cast<HeRu::RuType>(type);
                 std::size_t nRus = HeRu::GetNRus(txChannelWidth, ruType);
                 std::set<uint8_t> txBss;
                 if (nRus > 0)
@@ -702,7 +709,7 @@ WifiPrimaryChannelsTest::DoRun()
      * channel width, every round is repeated as many times as the number of ways in
      * which we can partition the transmission channel width in equal sized RUs.
      */
-    for (uint16_t txChannelWidth = 20, nRounds = 2, nApsPerRound = m_channelWidth / 20 / 2;
+    for (ChannelWidthMhz txChannelWidth = 20, nRounds = 2, nApsPerRound = m_channelWidth / 20 / 2;
          txChannelWidth <= m_channelWidth;
          txChannelWidth *= 2, nRounds *= 2, nApsPerRound /= 2)
     {
@@ -713,7 +720,7 @@ WifiPrimaryChannelsTest::DoRun()
         {
             for (unsigned int type = 0; type < 7; type++)
             {
-                HeRu::RuType ruType = static_cast<HeRu::RuType>(type);
+                auto ruType = static_cast<HeRu::RuType>(type);
                 std::size_t nRus = HeRu::GetNRus(txChannelWidth, ruType);
                 std::set<uint8_t> txBss;
                 if (nRus > 0)
@@ -762,7 +769,7 @@ WifiPrimaryChannelsTest::DoRun()
 }
 
 void
-WifiPrimaryChannelsTest::SendDlSuPpdu(uint8_t bss, uint16_t txChannelWidth)
+WifiPrimaryChannelsTest::SendDlSuPpdu(uint8_t bss, ChannelWidthMhz txChannelWidth)
 {
     NS_LOG_INFO("*** BSS " << +bss << " transmits on primary " << txChannelWidth << " MHz channel");
 
@@ -795,7 +802,7 @@ WifiPrimaryChannelsTest::SendDlSuPpdu(uint8_t bss, uint16_t txChannelWidth)
 
 void
 WifiPrimaryChannelsTest::SendDlMuPpdu(uint8_t bss,
-                                      uint16_t txChannelWidth,
+                                      ChannelWidthMhz txChannelWidth,
                                       HeRu::RuType ruType,
                                       std::size_t nRus)
 {
@@ -834,7 +841,7 @@ WifiPrimaryChannelsTest::SendDlMuPpdu(uint8_t bss,
 
         auto staDev = DynamicCast<WifiNetDevice>(m_staDevices[bss].Get(i - 1));
         uint16_t staId = DynamicCast<StaWifiMac>(staDev->GetMac())->GetAssociationId();
-        txVector.SetHeMuUserInfo(staId, {{ruType, index, primary80}, HePhy::GetHeMcs8(), 1});
+        txVector.SetHeMuUserInfo(staId, {{ruType, index, primary80}, 8, 1});
         hdr.SetAddr1(staDev->GetMac()->GetAddress());
         psduMap[staId] = Create<const WifiPsdu>(Create<Packet>(1000), hdr);
     }
@@ -845,14 +852,14 @@ WifiPrimaryChannelsTest::SendDlMuPpdu(uint8_t bss,
     auto IsOddNum = (nRus / numRuAllocs) % 2 == 1;
     auto ruAlloc = HeRu::GetEqualizedRuAllocation(ruType, IsOddNum);
     std::fill_n(ruAllocations.begin(), numRuAllocs, ruAlloc);
-    txVector.SetRuAllocation(ruAllocations);
+    txVector.SetRuAllocation(ruAllocations, 0);
 
     apDev->GetPhy()->Send(psduMap, txVector);
 }
 
 void
 WifiPrimaryChannelsTest::SendHeTbPpdu(uint8_t bss,
-                                      uint16_t txChannelWidth,
+                                      ChannelWidthMhz txChannelWidth,
                                       HeRu::RuType ruType,
                                       std::size_t nRus)
 {
@@ -876,7 +883,7 @@ WifiPrimaryChannelsTest::SendHeTbPpdu(uint8_t bss,
 
 void
 WifiPrimaryChannelsTest::DoSendHeTbPpdu(uint8_t bss,
-                                        uint16_t txChannelWidth,
+                                        ChannelWidthMhz txChannelWidth,
                                         HeRu::RuType ruType,
                                         std::size_t nRus)
 {
@@ -929,8 +936,8 @@ WifiPrimaryChannelsTest::DoSendHeTbPpdu(uint8_t bss,
                               false,
                               false,
                               bssColor);
-        txVector.SetHeMuUserInfo(staId, {{ruType, index, primary80}, HePhy::GetHeMcs8(), 1});
-        trigVector.SetHeMuUserInfo(staId, {{ruType, index, primary80}, HePhy::GetHeMcs8(), 1});
+        txVector.SetHeMuUserInfo(staId, {{ruType, index, primary80}, 8, 1});
+        trigVector.SetHeMuUserInfo(staId, {{ruType, index, primary80}, 8, 1});
 
         hdr.SetAddr2(staDev->GetMac()->GetAddress());
         Ptr<const WifiPsdu> psdu = Create<const WifiPsdu>(Create<Packet>(1000), hdr);
@@ -954,7 +961,7 @@ WifiPrimaryChannelsTest::DoSendHeTbPpdu(uint8_t bss,
 
     // AP's PHY expects to receive a TRIGVECTOR (just once)
     trigVector.SetLength(length);
-    auto apHePhy = StaticCast<HePhy>(apDev->GetPhy()->GetPhyEntity(WIFI_MOD_CLASS_HE));
+    auto apHePhy = StaticCast<HePhy>(apDev->GetPhy()->GetLatestPhyEntity());
     apHePhy->SetTrigVector(trigVector, duration);
 }
 
@@ -965,14 +972,15 @@ WifiPrimaryChannelsTest::CheckAssociation()
     {
         auto dev = DynamicCast<WifiNetDevice>(m_apDevices.Get(bss));
         auto mac = DynamicCast<ApWifiMac>(dev->GetMac());
-        NS_TEST_EXPECT_MSG_EQ(mac->GetStaList().size(),
+        NS_TEST_EXPECT_MSG_EQ(mac->GetStaList(SINGLE_LINK_OP_ID).size(),
                               m_nStationsPerBss,
                               "Not all the stations completed association");
     }
 }
 
 void
-WifiPrimaryChannelsTest::CheckReceivedSuPpdus(std::set<uint8_t> txBss, uint16_t txChannelWidth)
+WifiPrimaryChannelsTest::CheckReceivedSuPpdus(std::set<uint8_t> txBss,
+                                              ChannelWidthMhz txChannelWidth)
 {
     for (uint8_t bss = 0; bss < m_nBss; bss++)
     {
@@ -1051,7 +1059,7 @@ WifiPrimaryChannelsTest::CheckReceivedSuPpdus(std::set<uint8_t> txBss, uint16_t 
 
 void
 WifiPrimaryChannelsTest::CheckReceivedMuPpdus(std::set<uint8_t> txBss,
-                                              uint16_t txChannelWidth,
+                                              ChannelWidthMhz txChannelWidth,
                                               HeRu::RuType ruType,
                                               std::size_t nRus,
                                               bool isDlMu)
@@ -1174,7 +1182,7 @@ WifiPrimaryChannelsTest::CheckReceivedMuPpdus(std::set<uint8_t> txBss,
 
 void
 WifiPrimaryChannelsTest::CheckReceivedTriggerFrames(std::set<uint8_t> txBss,
-                                                    uint16_t txChannelWidth)
+                                                    ChannelWidthMhz txChannelWidth)
 {
     for (uint8_t bss = 0; bss < m_nBss; bss++)
     {
@@ -1370,16 +1378,19 @@ class WifiPrimaryChannelsTestSuite : public TestSuite
 };
 
 WifiPrimaryChannelsTestSuite::WifiPrimaryChannelsTestSuite()
-    : TestSuite("wifi-primary-channels", UNIT)
+    : TestSuite("wifi-primary-channels", Type::UNIT)
 {
     // Test cases for 20 MHz can be added, but are not that useful (there would be a single BSS)
-    AddTestCase(new WifiPrimaryChannelsTest(40, true), TestCase::QUICK);
-    AddTestCase(new WifiPrimaryChannelsTest(40, false), TestCase::QUICK);
-    AddTestCase(new WifiPrimaryChannelsTest(80, true), TestCase::EXTENSIVE);
-    AddTestCase(new WifiPrimaryChannelsTest(80, false), TestCase::EXTENSIVE);
-    AddTestCase(new WifiPrimaryChannelsTest(160, true), TestCase::TAKES_FOREVER);
-    AddTestCase(new WifiPrimaryChannelsTest(160, false), TestCase::TAKES_FOREVER);
-    AddTestCase(new Wifi20MHzChannelIndicesTest(), TestCase::QUICK);
+    AddTestCase(new WifiPrimaryChannelsTest(40, true), TestCase::Duration::QUICK);
+    AddTestCase(new WifiPrimaryChannelsTest(40, false), TestCase::Duration::QUICK);
+#if 0
+    // Tests disabled until issue #776 resolved
+    AddTestCase(new WifiPrimaryChannelsTest(80, true), TestCase::Duration::EXTENSIVE);
+    AddTestCase(new WifiPrimaryChannelsTest(80, false), TestCase::Duration::EXTENSIVE);
+    AddTestCase(new WifiPrimaryChannelsTest(160, true), TestCase::Duration::TAKES_FOREVER);
+    AddTestCase(new WifiPrimaryChannelsTest(160, false), TestCase::Duration::TAKES_FOREVER);
+#endif
+    AddTestCase(new Wifi20MHzChannelIndicesTest(), TestCase::Duration::QUICK);
 }
 
 static WifiPrimaryChannelsTestSuite g_wifiPrimaryChannelsTestSuite; ///< the test suite

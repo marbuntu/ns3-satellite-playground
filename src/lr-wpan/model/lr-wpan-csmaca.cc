@@ -22,6 +22,8 @@
 
 #include "lr-wpan-csmaca.h"
 
+#include "lr-wpan-constants.h"
+
 #include <ns3/log.h>
 #include <ns3/random-variable-stream.h>
 #include <ns3/simulator.h>
@@ -29,13 +31,15 @@
 #include <algorithm>
 
 #undef NS_LOG_APPEND_CONTEXT
-#define NS_LOG_APPEND_CONTEXT std::clog << "[address " << m_mac->GetShortAddress() << "] ";
+#define NS_LOG_APPEND_CONTEXT                                                                      \
+    std::clog << "[" << m_mac->GetShortAddress() << " | " << m_mac->GetExtendedAddress() << "] ";
 
 namespace ns3
 {
+namespace lrwpan
+{
 
 NS_LOG_COMPONENT_DEFINE("LrWpanCsmaCa");
-
 NS_OBJECT_ENSURE_REGISTERED(LrWpanCsmaCa);
 
 TypeId
@@ -59,7 +63,6 @@ LrWpanCsmaCa::LrWpanCsmaCa()
     m_macMinBE = 3;
     m_macMaxBE = 5;
     m_macMaxCSMABackoffs = 4;
-    m_aUnitBackoffPeriod = 20; // symbols
     m_random = CreateObject<UniformRandomVariable>();
     m_BE = m_macMinBE;
     m_ccaRequestRunning = false;
@@ -75,7 +78,7 @@ LrWpanCsmaCa::~LrWpanCsmaCa()
 void
 LrWpanCsmaCa::DoDispose()
 {
-    m_lrWpanMacStateCallback = MakeNullCallback<void, LrWpanMacState>();
+    m_lrWpanMacStateCallback = MakeNullCallback<void, MacState>();
     m_lrWpanMacTransCostCallback = MakeNullCallback<void, uint32_t>();
 
     Cancel();
@@ -97,29 +100,25 @@ LrWpanCsmaCa::GetMac() const
 void
 LrWpanCsmaCa::SetSlottedCsmaCa()
 {
-    NS_LOG_FUNCTION(this);
     m_isSlotted = true;
 }
 
 void
 LrWpanCsmaCa::SetUnSlottedCsmaCa()
 {
-    NS_LOG_FUNCTION(this);
     m_isSlotted = false;
 }
 
 bool
 LrWpanCsmaCa::IsSlottedCsmaCa() const
 {
-    NS_LOG_FUNCTION(this);
-    return (m_isSlotted);
+    return m_isSlotted;
 }
 
 bool
 LrWpanCsmaCa::IsUnSlottedCsmaCa() const
 {
-    NS_LOG_FUNCTION(this);
-    return (!m_isSlotted);
+    return !m_isSlotted;
 }
 
 void
@@ -169,20 +168,6 @@ LrWpanCsmaCa::GetMacMaxCSMABackoffs() const
     return m_macMaxCSMABackoffs;
 }
 
-void
-LrWpanCsmaCa::SetUnitBackoffPeriod(uint64_t unitBackoffPeriod)
-{
-    NS_LOG_FUNCTION(this << unitBackoffPeriod);
-    m_aUnitBackoffPeriod = unitBackoffPeriod;
-}
-
-uint64_t
-LrWpanCsmaCa::GetUnitBackoffPeriod() const
-{
-    NS_LOG_FUNCTION(this);
-    return m_aUnitBackoffPeriod;
-}
-
 Time
 LrWpanCsmaCa::GetTimeToNextSlot() const
 {
@@ -219,8 +204,8 @@ LrWpanCsmaCa::GetTimeToNextSlot() const
 
     // get a close value to the the boundary in symbols
     elapsedSuperframeSymbols = elapsedSuperframe.GetSeconds() * symbolRate;
-    symbolsToBoundary =
-        m_aUnitBackoffPeriod - std::fmod((double)elapsedSuperframeSymbols, m_aUnitBackoffPeriod);
+    symbolsToBoundary = lrwpan::aUnitBackoffPeriod -
+                        std::fmod((double)elapsedSuperframeSymbols, lrwpan::aUnitBackoffPeriod);
 
     timeAtBoundary = Seconds((double)(elapsedSuperframeSymbols + symbolsToBoundary) / symbolRate);
 
@@ -244,6 +229,8 @@ LrWpanCsmaCa::Start()
     m_NB = 0;
     if (IsSlottedCsmaCa())
     {
+        NS_LOG_DEBUG("Using Slotted CSMA-CA");
+
         // TODO: Check if the current PHY is using the Japanese band 950 Mhz:
         //       (IEEE_802_15_4_950MHZ_BPSK and IEEE_802_15_4_950MHZ_2GFSK)
         //       if in use, m_CW = 1.
@@ -264,7 +251,7 @@ LrWpanCsmaCa::Start()
         }
 
         // m_coorDest to decide between incoming and outgoing superframes times
-        m_coorDest = m_mac->isCoordDest();
+        m_coorDest = m_mac->IsCoordDest();
 
         // Locate backoff period boundary. (i.e. a time delay to align with the next backoff period
         // boundary)
@@ -274,6 +261,7 @@ LrWpanCsmaCa::Start()
     }
     else
     {
+        NS_LOG_DEBUG("Using Unslotted CSMA-CA");
         m_BE = m_macMinBE;
         m_randomBackoffEvent = Simulator::ScheduleNow(&LrWpanCsmaCa::RandomBackoffDelay, this);
     }
@@ -308,7 +296,7 @@ LrWpanCsmaCa::RandomBackoffDelay()
     }
 
     randomBackoff =
-        Seconds((double)(m_randomBackoffPeriodsLeft * GetUnitBackoffPeriod()) / symbolRate);
+        Seconds((double)(m_randomBackoffPeriodsLeft * lrwpan::aUnitBackoffPeriod) / symbolRate);
 
     if (IsUnSlottedCsmaCa())
     {
@@ -330,14 +318,14 @@ LrWpanCsmaCa::RandomBackoffDelay()
                      << randomBackoff.As(Time::S) << ")");
 
         NS_LOG_DEBUG("Backoff periods left in CAP: "
-                     << ((timeLeftInCap.GetSeconds() * symbolRate) / m_aUnitBackoffPeriod) << " ("
-                     << (timeLeftInCap.GetSeconds() * symbolRate) << " symbols or "
+                     << ((timeLeftInCap.GetSeconds() * symbolRate) / lrwpan::aUnitBackoffPeriod)
+                     << " (" << (timeLeftInCap.GetSeconds() * symbolRate) << " symbols or "
                      << timeLeftInCap.As(Time::S) << ")");
 
         if (randomBackoff >= timeLeftInCap)
         {
             uint64_t usedBackoffs =
-                (double)(timeLeftInCap.GetSeconds() * symbolRate) / m_aUnitBackoffPeriod;
+                (double)(timeLeftInCap.GetSeconds() * symbolRate) / lrwpan::aUnitBackoffPeriod;
             m_randomBackoffPeriodsLeft -= usedBackoffs;
             NS_LOG_DEBUG("No time in CAP to complete backoff delay, deferring to the next CAP");
             m_endCapEvent =
@@ -416,7 +404,7 @@ LrWpanCsmaCa::CanProceed()
 
     transactionSymbols = ccaSymbols + m_mac->GetTxPacketSymbols();
 
-    if (m_mac->isTxAckReq())
+    if (m_mac->IsTxAckReq())
     {
         NS_LOG_DEBUG("ACK duration symbols: " << m_mac->GetMacAckWaitDuration());
         transactionSymbols += m_mac->GetMacAckWaitDuration();
@@ -424,7 +412,7 @@ LrWpanCsmaCa::CanProceed()
     else
     {
         // time the PHY takes to switch from Rx to Tx and Tx to Rx
-        transactionSymbols += (m_mac->GetPhy()->aTurnaroundTime * 2);
+        transactionSymbols += (lrwpan::aTurnaroundTime * 2);
     }
     transactionSymbols += m_mac->GetIfsSize();
 
@@ -471,7 +459,7 @@ LrWpanCsmaCa::DeferCsmaTimeout()
 }
 
 void
-LrWpanCsmaCa::PlmeCcaConfirm(LrWpanPhyEnumeration status)
+LrWpanCsmaCa::PlmeCcaConfirm(PhyEnumeration status)
 {
     NS_LOG_FUNCTION(this << status);
 
@@ -571,15 +559,16 @@ LrWpanCsmaCa::AssignStreams(int64_t stream)
 }
 
 uint8_t
-LrWpanCsmaCa::GetNB()
+LrWpanCsmaCa::GetNB() const
 {
     return m_NB;
 }
 
 bool
-LrWpanCsmaCa::GetBatteryLifeExtension()
+LrWpanCsmaCa::GetBatteryLifeExtension() const
 {
     return m_macBattLifeExt;
 }
 
+} // namespace lrwpan
 } // namespace ns3

@@ -23,7 +23,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 network number Test
  */
@@ -84,7 +83,6 @@ NetworkNumberAllocatorTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 address allocator Test
  */
@@ -142,7 +140,6 @@ AddressAllocatorTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 network and address allocator Test
  */
@@ -214,7 +211,6 @@ NetworkAndAddressTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 AddressGenerator example (sort of) Test
  */
@@ -273,7 +269,6 @@ ExampleAddressGeneratorTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 address collision Test
  */
@@ -328,25 +323,34 @@ AddressCollisionTestCase::DoRun()
     Ipv4AddressGenerator::AddAllocated("0.0.0.16");
 
     Ipv4AddressGenerator::TestMode();
+    bool allocated = Ipv4AddressGenerator::IsAddressAllocated("0.0.0.21");
+    NS_TEST_EXPECT_MSG_EQ(allocated, false, "0.0.0.21 should not be already allocated");
     bool added = Ipv4AddressGenerator::AddAllocated("0.0.0.21");
     NS_TEST_EXPECT_MSG_EQ(added, true, "400");
 
+    allocated = Ipv4AddressGenerator::IsAddressAllocated("0.0.0.4");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0.0.0.4 should be already allocated");
     added = Ipv4AddressGenerator::AddAllocated("0.0.0.4");
     NS_TEST_EXPECT_MSG_EQ(added, false, "401");
 
+    allocated = Ipv4AddressGenerator::IsAddressAllocated("0.0.0.9");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0.0.0.9 should be already allocated");
     added = Ipv4AddressGenerator::AddAllocated("0.0.0.9");
     NS_TEST_EXPECT_MSG_EQ(added, false, "402");
 
+    allocated = Ipv4AddressGenerator::IsAddressAllocated("0.0.0.16");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0.0.0.16 should be already allocated");
     added = Ipv4AddressGenerator::AddAllocated("0.0.0.16");
     NS_TEST_EXPECT_MSG_EQ(added, false, "403");
 
+    allocated = Ipv4AddressGenerator::IsAddressAllocated("0.0.0.21");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0.0.0.21 should be already allocated");
     added = Ipv4AddressGenerator::AddAllocated("0.0.0.21");
     NS_TEST_EXPECT_MSG_EQ(added, false, "404");
 }
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 Address Generator TestSuite
  */
@@ -359,13 +363,13 @@ class Ipv4AddressGeneratorTestSuite : public TestSuite
 };
 
 Ipv4AddressGeneratorTestSuite::Ipv4AddressGeneratorTestSuite()
-    : TestSuite("ipv4-address-generator", UNIT)
+    : TestSuite("ipv4-address-generator", Type::UNIT)
 {
-    AddTestCase(new NetworkNumberAllocatorTestCase(), TestCase::QUICK);
-    AddTestCase(new AddressAllocatorTestCase(), TestCase::QUICK);
-    AddTestCase(new NetworkAndAddressTestCase(), TestCase::QUICK);
-    AddTestCase(new ExampleAddressGeneratorTestCase(), TestCase::QUICK);
-    AddTestCase(new AddressCollisionTestCase(), TestCase::QUICK);
+    AddTestCase(new NetworkNumberAllocatorTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new AddressAllocatorTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new NetworkAndAddressTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new ExampleAddressGeneratorTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new AddressCollisionTestCase(), TestCase::Duration::QUICK);
 }
 
 static Ipv4AddressGeneratorTestSuite

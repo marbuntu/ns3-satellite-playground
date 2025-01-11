@@ -271,9 +271,10 @@ class Time
      * - `d`  (days)
      * - `y`  (years)
      *
-     * There can be no white space between the numerical portion
-     * and the units.  Any otherwise malformed string causes a fatal error to
-     * occur.
+     * There must be no whitespace between the numerical portion
+     * and the unit. If the string only contains a number, it is treated as seconds.
+     * Any otherwise malformed string causes a fatal error to occur.
+     *
      * \param [in] s The string to parse into a Time
      */
     explicit Time(const std::string& s);
@@ -465,11 +466,11 @@ class Time
      * user-provided time values in Time objects and Time objects
      * in user-expected time units.
      */
-    static void SetResolution(enum Unit resolution);
+    static void SetResolution(Unit resolution);
     /**
      * \returns The current global resolution.
      */
-    static enum Unit GetResolution();
+    static Unit GetResolution();
 
     /**
      * Create a Time in the current unit.
@@ -495,9 +496,9 @@ class Time
      * \param [in] unit The unit of \pname{value}
      * \return The Time representing \pname{value} in \c unit
      */
-    inline static Time FromInteger(uint64_t value, enum Unit unit)
+    inline static Time FromInteger(uint64_t value, Unit unit)
     {
-        struct Information* info = PeekInformation(unit);
+        Information* info = PeekInformation(unit);
 
         NS_ASSERT_MSG(info->isValid, "Attempted a conversion from an unavailable unit.");
 
@@ -512,14 +513,14 @@ class Time
         return Time(value);
     }
 
-    inline static Time FromDouble(double value, enum Unit unit)
+    inline static Time FromDouble(double value, Unit unit)
     {
         return From(int64x64_t(value), unit);
     }
 
-    inline static Time From(const int64x64_t& value, enum Unit unit)
+    inline static Time From(const int64x64_t& value, Unit unit)
     {
-        struct Information* info = PeekInformation(unit);
+        Information* info = PeekInformation(unit);
 
         NS_ASSERT_MSG(info->isValid, "Attempted a conversion from an unavailable unit.");
 
@@ -551,9 +552,9 @@ class Time
      * \param [in] unit The desired unit
      * \return The Time expressed in \pname{unit}
      */
-    inline int64_t ToInteger(enum Unit unit) const
+    inline int64_t ToInteger(Unit unit) const
     {
-        struct Information* info = PeekInformation(unit);
+        Information* info = PeekInformation(unit);
 
         NS_ASSERT_MSG(info->isValid, "Attempted a conversion to an unavailable unit.");
 
@@ -569,18 +570,18 @@ class Time
         return v;
     }
 
-    inline double ToDouble(enum Unit unit) const
+    inline double ToDouble(Unit unit) const
     {
         return To(unit).GetDouble();
     }
 
-    inline int64x64_t To(enum Unit unit) const
+    inline int64x64_t To(Unit unit) const
     {
-        struct Information* info = PeekInformation(unit);
+        Information* info = PeekInformation(unit);
 
         NS_ASSERT_MSG(info->isValid, "Attempted a conversion to an unavailable unit.");
 
-        int64x64_t retval = int64x64_t(m_data);
+        int64x64_t retval(m_data);
         if (info->toMul)
         {
             retval *= info->timeTo;
@@ -600,7 +601,7 @@ class Time
      * \param [in] unit The unit to round to.
      * \return The Time rounded to the specific unit.
      */
-    Time RoundTo(enum Unit unit) const
+    Time RoundTo(Unit unit) const
     {
         return From(this->To(unit).Round(), unit);
     }
@@ -618,7 +619,7 @@ class Time
      * \param [in] unit The unit to use.
      * \return The Time with embedded unit.
      */
-    TimeWithUnit As(const enum Unit unit = Time::AUTO) const;
+    TimeWithUnit As(const Unit unit = Time::AUTO) const;
 
     /**
      * TracedCallback signature for Time
@@ -642,8 +643,8 @@ class Time
     /** Current time unit, and conversion info. */
     struct Resolution
     {
-        struct Information info[LAST]; //!<  Conversion info from current unit
-        enum Time::Unit unit;          //!<  Current time unit
+        Information info[LAST]; //!<  Conversion info from current unit
+        Time::Unit unit;        //!<  Current time unit
     };
 
     /**
@@ -651,9 +652,9 @@ class Time
      *
      *  \return A pointer to the current Resolution
      */
-    static inline struct Resolution* PeekResolution()
+    static inline Resolution* PeekResolution()
     {
-        static struct Time::Resolution& resolution{SetDefaultNsResolution()};
+        static Time::Resolution& resolution{SetDefaultNsResolution()};
         return &resolution;
     }
 
@@ -663,7 +664,7 @@ class Time
      *  \param [in] timeUnit The Unit to get Information for
      *  \return The Information for \pname{timeUnit}
      */
-    static inline struct Information* PeekInformation(enum Unit timeUnit)
+    static inline Information* PeekInformation(Unit timeUnit)
     {
         return &(PeekResolution()->info[timeUnit]);
     }
@@ -673,7 +674,7 @@ class Time
      *
      *  \return The Resolution object for the default resolution.
      */
-    static struct Resolution& SetDefaultNsResolution();
+    static Resolution& SetDefaultNsResolution();
     /**
      *  Set the current Resolution.
      *
@@ -681,9 +682,7 @@ class Time
      *  \param [in,out] resolution The Resolution record to update.
      *  \param [in] convert Whether to convert existing Time objects to the new resolution.
      */
-    static void SetResolution(enum Unit unit,
-                              struct Resolution* resolution,
-                              const bool convert = true);
+    static void SetResolution(Unit unit, Resolution* resolution, const bool convert = true);
 
     /**
      *  Record all instances of Time, so we can rescale them when
@@ -762,7 +761,7 @@ class Time
      *  Convert existing Times to the new unit.
      *  \param [in] unit The Unit to convert existing Times to.
      */
-    static void ConvertTimes(const enum Unit unit);
+    static void ConvertTimes(const Unit unit);
 
     // Operator and related functions which need access
 
@@ -794,21 +793,15 @@ class Time
     friend Time Rem(const Time& lhs, const Time& rhs);
 
     template <class T>
-    friend typename std::enable_if<std::is_integral<T>::value, Time>::type operator*(
-        const Time& lhs,
-        T rhs);
+    friend std::enable_if_t<std::is_integral_v<T>, Time> operator*(const Time& lhs, T rhs);
 
     // Reversed arg version (forwards to `rhs * lhs`)
     // Accepts both integers and decimal types
     template <class T>
-    friend typename std::enable_if<std::is_arithmetic<T>::value, Time>::type operator*(
-        T lhs,
-        const Time& rhs);
+    friend std::enable_if_t<std::is_arithmetic_v<T>, Time> operator*(T lhs, const Time& rhs);
 
     template <class T>
-    friend typename std::enable_if<std::is_integral<T>::value, Time>::type operator/(
-        const Time& lhs,
-        T rhs);
+    friend std::enable_if_t<std::is_integral_v<T>, Time> operator/(const Time& lhs, T rhs);
 
     friend Time Abs(const Time& time);
     friend Time Max(const Time& timeA, const Time& timeB);
@@ -818,13 +811,9 @@ class Time
 
     // Leave undocumented
     template <class T>
-    friend typename std::enable_if<std::is_floating_point<T>::value, Time>::type operator*(
-        const Time& lhs,
-        T rhs);
+    friend std::enable_if_t<std::is_floating_point_v<T>, Time> operator*(const Time& lhs, T rhs);
     template <class T>
-    friend typename std::enable_if<std::is_floating_point<T>::value, Time>::type operator/(
-        const Time& lhs,
-        T rhs);
+    friend std::enable_if_t<std::is_floating_point_v<T>, Time> operator/(const Time& lhs, T rhs);
 
     /**
      * \name Compound assignment operators
@@ -850,13 +839,6 @@ namespace TracedValueCallback
 typedef void (*Time)(Time oldValue, Time newValue);
 
 } // namespace TracedValueCallback
-
-/**
- * Force static initialization order of Time in each compilation unit.
- * This is internal to the Time implementation.
- * \relates Time
- */
-static bool g_TimeStaticInit [[maybe_unused]] = Time::StaticInit();
 
 /**
  * Equality operator for Time.
@@ -1019,18 +1001,17 @@ operator*(const int64x64_t& lhs, const Time& rhs)
  * \returns A new Time instance containing the scaled value
  */
 template <class T>
-typename std::enable_if<std::is_integral<T>::value, Time>::type
+std::enable_if_t<std::is_integral_v<T>, Time>
 operator*(const Time& lhs, T rhs)
 {
-    static_assert(!std::is_same<T, bool>::value,
-                  "Multiplying a Time by a boolean is not supported");
+    static_assert(!std::is_same_v<T, bool>, "Multiplying a Time by a boolean is not supported");
 
     return Time(lhs.m_data * rhs);
 }
 
 // Leave undocumented
 template <class T>
-typename std::enable_if<std::is_floating_point<T>::value, Time>::type
+std::enable_if_t<std::is_floating_point_v<T>, Time>
 operator*(const Time& lhs, T rhs)
 {
     return lhs * int64x64_t(rhs);
@@ -1050,7 +1031,7 @@ operator*(const Time& lhs, T rhs)
  * \returns A new Time instance containing the scaled value
  */
 template <class T>
-typename std::enable_if<std::is_arithmetic<T>::value, Time>::type
+std::enable_if_t<std::is_arithmetic_v<T>, Time>
 operator*(T lhs, const Time& rhs)
 {
     return rhs * lhs;
@@ -1060,7 +1041,7 @@ operator*(T lhs, const Time& rhs)
  * Exact division, returning a dimensionless fixed point number.
  *
  * This can be truncated to integer, or converted to double
- * (with loss of precison).  Assuming `ta` and `tb` are Times:
+ * (with loss of precision).  Assuming `ta` and `tb` are Times:
  *
  * \code
  *     int64x64_t ratio = ta / tb;
@@ -1106,17 +1087,17 @@ operator/(const Time& lhs, const int64x64_t& rhs)
  * \returns A new Time instance containing the scaled value
  */
 template <class T>
-typename std::enable_if<std::is_integral<T>::value, Time>::type
+std::enable_if_t<std::is_integral_v<T>, Time>
 operator/(const Time& lhs, T rhs)
 {
-    static_assert(!std::is_same<T, bool>::value, "Dividing a Time by a boolean is not supported");
+    static_assert(!std::is_same_v<T, bool>, "Dividing a Time by a boolean is not supported");
 
     return Time(lhs.m_data / rhs);
 }
 
 // Leave undocumented
 template <class T>
-typename std::enable_if<std::is_floating_point<T>::value, Time>::type
+std::enable_if_t<std::is_floating_point_v<T>, Time>
 operator/(const Time& lhs, T rhs)
 {
     return lhs / int64x64_t(rhs);
@@ -1426,9 +1407,9 @@ ATTRIBUTE_VALUE_DEFINE(Time);
 ATTRIBUTE_ACCESSOR_DEFINE(Time);
 
 /**
- *  \ingroup attribute_time
- *  Helper to make a Time checker with bounded range.
- *  Both limits are inclusive
+ * \ingroup attribute_Time
+ * Helper to make a Time checker with bounded range.
+ * Both limits are inclusive
  *
  * \param [in] min Minimum allowed value.
  * \param [in] max Maximum allowed value.
@@ -1437,7 +1418,7 @@ ATTRIBUTE_ACCESSOR_DEFINE(Time);
 Ptr<const AttributeChecker> MakeTimeChecker(const Time min, const Time max);
 
 /**
- * \ingroup attribute_time
+ * \ingroup attribute_Time
  * Helper to make an unbounded Time checker.
  *
  * \return The AttributeChecker
@@ -1449,7 +1430,7 @@ MakeTimeChecker()
 }
 
 /**
- * \ingroup attribute_time
+ * \ingroup attribute_Time
  * Helper to make a Time checker with a lower bound.
  *
  * \param [in] min Minimum allowed value.
@@ -1501,6 +1482,27 @@ class TimeWithUnit
  * \returns The type name as a string.
  */
 TYPENAMEGET_DEFINE(Time);
+
+/**
+ * \ingroup time
+ *
+ * \brief Helper class to force static initialization
+ * of Time in each compilation unit, ensuring it is
+ * initialized before usage.
+ * This is internal to the Time implementation.
+ * \relates Time
+ */
+class TimeInitializationHelper
+{
+  public:
+    /** Default constructor calls Time::StaticInit */
+    TimeInitializationHelper()
+    {
+        Time::StaticInit();
+    }
+};
+
+static TimeInitializationHelper g_timeInitHelper; ///< Instance of Time static initialization helper
 
 } // namespace ns3
 

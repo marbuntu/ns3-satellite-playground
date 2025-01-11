@@ -51,13 +51,13 @@ class SampleEmitter : public Object
     }
 
     /// \return the time delta of the next report.
-    double GetTime()
+    double GetTime() const
     {
         return m_time;
     }
 
     /// \return a random variable, different for each reschedule.
-    double GetValue()
+    double GetValue() const
     {
         return aux;
     }
@@ -210,9 +210,9 @@ class ProbeTestSuite : public TestSuite
 };
 
 ProbeTestSuite::ProbeTestSuite()
-    : TestSuite("double-probe", UNIT)
+    : TestSuite("double-probe", Type::UNIT)
 {
-    AddTestCase(new ProbeTestCase1, TestCase::QUICK);
+    AddTestCase(new ProbeTestCase1, TestCase::Duration::QUICK);
 }
 
 /// Static variable for test initialization

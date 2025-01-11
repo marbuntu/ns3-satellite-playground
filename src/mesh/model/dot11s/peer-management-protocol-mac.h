@@ -186,7 +186,7 @@ class PeerManagementProtocolMac : public MeshWifiInterfaceMacPlugin
      * Set peer manager protocol function
      * \param protocol the peer manager protocol
      */
-    void SetPeerManagerProtcol(Ptr<PeerManagementProtocol> protocol);
+    void SetPeerManagerProtocol(Ptr<PeerManagementProtocol> protocol);
     /**
      * Send peer link management frame function
      * \param peerAddress the peer MAC address
@@ -233,7 +233,7 @@ class PeerManagementProtocolMac : public MeshWifiInterfaceMacPlugin
     };
 
   private:
-    struct Statistics m_stats; ///< statistics
+    Statistics m_stats; ///< statistics
     ///\name Information about MAC and protocol:
     Ptr<MeshWifiInterfaceMac> m_parent;     ///< parent
     uint32_t m_ifIndex;                     ///< IF index

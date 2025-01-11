@@ -75,9 +75,10 @@ isNumeric(const std::string& s)
     bool exponentSeen = false;
     char last = '\0';
 
-    for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
+    for (auto it = s.begin(); it != s.end(); it++)
     {
-        if ((*it == '.') && (decimalPtSeen))
+        if ((*it == '.' && decimalPtSeen) || (*it == 'e' && exponentSeen) ||
+            (*it == '-' && it != s.begin() && last != 'e'))
         {
             return false;
         }
@@ -85,18 +86,10 @@ isNumeric(const std::string& s)
         {
             decimalPtSeen = true;
         }
-        else if ((*it == 'e') && exponentSeen)
-        {
-            return false;
-        }
         else if (*it == 'e')
         {
             exponentSeen = true;
             decimalPtSeen = false;
-        }
-        else if (*it == '-' && it != s.begin() && last != 'e')
-        {
-            return false;
         }
 
         last = *it;
@@ -120,7 +113,7 @@ OmnetDataOutput::Output(DataCollector& dc)
     scalarFile << "attr measurement \"" << dc.GetInputLabel() << "\"" << std::endl;
     scalarFile << "attr description \"" << dc.GetDescription() << "\"" << std::endl;
 
-    for (MetadataList::iterator i = dc.MetadataBegin(); i != dc.MetadataEnd(); i++)
+    for (auto i = dc.MetadataBegin(); i != dc.MetadataEnd(); i++)
     {
         std::pair<std::string, std::string> blob = (*i);
         scalarFile << "attr \"" << blob.first << "\" \"" << blob.second << "\"" << std::endl;
@@ -131,7 +124,7 @@ OmnetDataOutput::Output(DataCollector& dc)
     {
         scalarFile << "scalar . measurement \"" << dc.GetInputLabel() << "\"" << std::endl;
     }
-    for (MetadataList::iterator i = dc.MetadataBegin(); i != dc.MetadataEnd(); i++)
+    for (auto i = dc.MetadataBegin(); i != dc.MetadataEnd(); i++)
     {
         std::pair<std::string, std::string> blob = (*i);
         if (isNumeric(blob.second))
@@ -142,8 +135,7 @@ OmnetDataOutput::Output(DataCollector& dc)
     }
     OmnetOutputCallback callback(&scalarFile);
 
-    for (DataCalculatorList::iterator i = dc.DataCalculatorBegin(); i != dc.DataCalculatorEnd();
-         i++)
+    for (auto i = dc.DataCalculatorBegin(); i != dc.DataCalculatorEnd(); i++)
     {
         (*i)->Output(callback);
     }
@@ -167,11 +159,11 @@ OmnetDataOutput::OmnetOutputCallback::OutputStatistic(std::string context,
 {
     NS_LOG_FUNCTION(this << context << name << statSum);
 
-    if (context == "")
+    if (context.empty())
     {
         context = ".";
     }
-    if (name == "")
+    if (name.empty())
     {
         name = "\"\"";
     }
@@ -213,11 +205,11 @@ OmnetDataOutput::OmnetOutputCallback::OutputSingleton(std::string context,
 {
     NS_LOG_FUNCTION(this << context << name << val);
 
-    if (context == "")
+    if (context.empty())
     {
         context = ".";
     }
-    if (name == "")
+    if (name.empty())
     {
         name = "\"\"";
     }
@@ -232,11 +224,11 @@ OmnetDataOutput::OmnetOutputCallback::OutputSingleton(std::string context,
 {
     NS_LOG_FUNCTION(this << context << name << val);
 
-    if (context == "")
+    if (context.empty())
     {
         context = ".";
     }
-    if (name == "")
+    if (name.empty())
     {
         name = "\"\"";
     }
@@ -251,11 +243,11 @@ OmnetDataOutput::OmnetOutputCallback::OutputSingleton(std::string context,
 {
     NS_LOG_FUNCTION(this << context << name << val);
 
-    if (context == "")
+    if (context.empty())
     {
         context = ".";
     }
-    if (name == "")
+    if (name.empty())
     {
         name = "\"\"";
     }
@@ -270,11 +262,11 @@ OmnetDataOutput::OmnetOutputCallback::OutputSingleton(std::string context,
 {
     NS_LOG_FUNCTION(this << context << name << val);
 
-    if (context == "")
+    if (context.empty())
     {
         context = ".";
     }
-    if (name == "")
+    if (name.empty())
     {
         name = "\"\"";
     }
@@ -289,11 +281,11 @@ OmnetDataOutput::OmnetOutputCallback::OutputSingleton(std::string context,
 {
     NS_LOG_FUNCTION(this << context << name << val);
 
-    if (context == "")
+    if (context.empty())
     {
         context = ".";
     }
-    if (name == "")
+    if (name.empty())
     {
         name = "\"\"";
     }

@@ -41,7 +41,6 @@ using namespace ns3;
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Queue Disc Test Item
  */
@@ -87,7 +86,6 @@ QueueDiscTestItem::Mark()
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Traffic Control Flow Control Test Case
  */
@@ -496,7 +494,6 @@ TcFlowControlTestCase::DoRun()
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Traffic Control Flow Control Test Suite
  */
@@ -504,20 +501,30 @@ static class TcFlowControlTestSuite : public TestSuite
 {
   public:
     TcFlowControlTestSuite()
-        : TestSuite("tc-flow-control", UNIT)
+        : TestSuite("tc-flow-control", Type::UNIT)
     {
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 1, 10), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 5, 10), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 9, 10), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 10, 10), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 11, 10), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 15, 10), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 1, 1), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 2, 1), TestCase::QUICK);
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 5, 1), TestCase::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 1, 10),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 5, 10),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 9, 10),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 10, 10),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 11, 10),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 15, 10),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 1, 1),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 2, 1),
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::PACKETS, 5, 1),
+                    TestCase::Duration::QUICK);
 
         // TODO: Right now, this test only works for 5000B and 10 packets (it's hard coded). Should
         // also be made parametric.
-        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::BYTES, 5000, 10), TestCase::QUICK);
+        AddTestCase(new TcFlowControlTestCase(QueueSizeUnit::BYTES, 5000, 10),
+                    TestCase::Duration::QUICK);
     }
 } g_tcFlowControlTestSuite; ///< the test suite

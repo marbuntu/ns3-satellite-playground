@@ -18,20 +18,20 @@
  */
 
 #include "ns3/applications-module.h"
-#include "ns3/config-store-module.h"
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/lte-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/network-module.h"
 #include "ns3/point-to-point-module.h"
+// #include "ns3/gtk-config-store.h"
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("LenaX2HandoverExample");
 
 /**
- * UE Connection established noticication.
+ * UE Connection established notification.
  *
  * \param context The context.
  * \param imsi The IMSI of the connected terminal.
@@ -82,7 +82,7 @@ NotifyHandoverEndOkUe(std::string context, uint64_t imsi, uint16_t cellid, uint1
 }
 
 /**
- * eNB Connection established noticication.
+ * eNB Connection established notification.
  *
  * \param context The context.
  * \param imsi The IMSI of the connected terminal.

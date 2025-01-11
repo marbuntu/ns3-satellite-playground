@@ -6,8 +6,13 @@
 using namespace ns3;
 
 /**
- * \ingroup configstore-examples
+ * \defgroup configstore-examples Config Store examples
+ * \ingroup configstore
  * \ingroup examples
+ */
+
+/**
+ * \ingroup configstore-examples
  *
  * \brief Example class to demonstrate use of the ns-3 Config Store
  */
@@ -113,4 +118,6 @@ main(int argc, char* argv[])
     Simulator::Run();
 
     Simulator::Destroy();
+
+    return 0;
 }

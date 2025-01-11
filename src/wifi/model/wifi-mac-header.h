@@ -37,6 +37,7 @@ enum WifiMacType
 {
     WIFI_MAC_CTL_TRIGGER = 0,
     WIFI_MAC_CTL_CTLWRAPPER,
+    WIFI_MAC_CTL_PSPOLL,
     WIFI_MAC_CTL_RTS,
     WIFI_MAC_CTL_CTS,
     WIFI_MAC_CTL_ACK,
@@ -118,14 +119,13 @@ class WifiMacHeader : public Header
         ADDR4
     };
 
-    WifiMacHeader();
+    WifiMacHeader() = default;
     /**
      * Construct a MAC header of the given type
      *
      * \param type the MAC header type
      */
     WifiMacHeader(WifiMacType type);
-    ~WifiMacHeader() override;
 
     /**
      * \brief Get the type ID.
@@ -187,7 +187,7 @@ class WifiMacHeader : public Header
      * \param resetToDsFromDs whether the ToDs and FromDs flags
      *        should be reset.
      */
-    void SetType(WifiMacType type, bool resetToDsFromDs = true);
+    virtual void SetType(WifiMacType type, bool resetToDsFromDs = true);
     /**
      * Set the Duration/ID field with the given raw uint16_t value.
      *
@@ -235,6 +235,14 @@ class WifiMacHeader : public Header
      * Un-set the Retry bit in the Frame Control field.
      */
     void SetNoRetry();
+    /**
+     * Set the Power Management bit in the Frame Control field.
+     */
+    void SetPowerManagement();
+    /**
+     * Un-set the Power Management bit in the Frame Control field.
+     */
+    void SetNoPowerManagement();
     /**
      * Set the TID for the QoS header.
      *
@@ -317,11 +325,11 @@ class WifiMacHeader : public Header
      */
     Mac48Address GetAddr4() const;
     /**
-     * Return the type (enum WifiMacType)
+     * Return the type (WifiMacType)
      *
-     * \return the type (enum WifiMacType)
+     * \return the type (WifiMacType)
      */
-    WifiMacType GetType() const;
+    virtual WifiMacType GetType() const;
     /**
      * \return true if From DS bit is set, false otherwise
      */
@@ -382,6 +390,12 @@ class WifiMacHeader : public Header
      * \return true if the header is a CF-End header, false otherwise
      */
     bool IsCfEnd() const;
+    /**
+     * Return true if the header is a PS-POLL header.
+     *
+     * \return true if the header is a PS-POLL header, false otherwise
+     */
+    bool IsPsPoll() const;
     /**
      * Return true if the header is a RTS header.
      *
@@ -534,6 +548,12 @@ class WifiMacHeader : public Header
      */
     bool IsRetry() const;
     /**
+     * Return if the Power Management bit is set.
+     *
+     * \return true if the Power Management bit is set, false otherwise
+     */
+    bool IsPowerManagement() const;
+    /**
      * Return if the More Data bit is set.
      *
      * \return true if the More Data bit is set, false otherwise
@@ -600,13 +620,13 @@ class WifiMacHeader : public Header
      *
      * \return the size of the WifiMacHeader in octets
      */
-    uint32_t GetSize() const;
+    virtual uint32_t GetSize() const;
     /**
      * Return a string corresponds to the header type.
      *
      * \returns a string corresponds to the header type.
      */
-    const char* GetTypeString() const;
+    virtual const char* GetTypeString() const;
 
     /**
      * TracedCallback signature for WifiMacHeader
@@ -615,25 +635,25 @@ class WifiMacHeader : public Header
      */
     typedef void (*TracedCallback)(const WifiMacHeader& header);
 
-  private:
+  protected:
     /**
      * Return the raw Frame Control field.
      *
      * \return the raw Frame Control field
      */
-    uint16_t GetFrameControl() const;
+    virtual uint16_t GetFrameControl() const;
     /**
      * Return the raw QoS Control field.
      *
      * \return the raw QoS Control field
      */
-    uint16_t GetQosControl() const;
+    virtual uint16_t GetQosControl() const;
     /**
      * Set the Frame Control field with the given raw value.
      *
      * \param control the raw Frame Control field value
      */
-    void SetFrameControl(uint16_t control);
+    virtual void SetFrameControl(uint16_t control);
     /**
      * Set the Sequence Control field with the given raw value.
      *
@@ -645,7 +665,7 @@ class WifiMacHeader : public Header
      *
      * \param qos the raw QoS Control field value
      */
-    void SetQosControl(uint16_t qos);
+    virtual void SetQosControl(uint16_t qos);
     /**
      * Print the Frame Control field to the output stream.
      *
@@ -653,29 +673,30 @@ class WifiMacHeader : public Header
      */
     void PrintFrameControl(std::ostream& os) const;
 
-    uint8_t m_ctrlType;     ///< control type
-    uint8_t m_ctrlSubtype;  ///< control subtype
-    uint8_t m_ctrlToDs;     ///< control to DS
-    uint8_t m_ctrlFromDs;   ///< control from DS
-    uint8_t m_ctrlMoreFrag; ///< control more fragments
-    uint8_t m_ctrlRetry;    ///< control retry
-    uint8_t m_ctrlMoreData; ///< control more data
-    uint8_t m_ctrlWep;      ///< control WEP
-    uint8_t m_ctrlOrder;  ///< control order (set to 1 for QoS Data and Management frames to signify
-                          ///< that HT/VHT/HE control field is present, knowing that the latter are
-                          ///< not implemented yet)
-    uint16_t m_duration;  ///< duration
-    Mac48Address m_addr1; ///< address 1
-    Mac48Address m_addr2; ///< address 2
-    Mac48Address m_addr3; ///< address 3
-    uint8_t m_seqFrag;    ///< sequence fragment
-    uint16_t m_seqSeq;    ///< sequence sequence
-    Mac48Address m_addr4; ///< address 4
-    uint8_t m_qosTid;     ///< QoS TID
-    uint8_t m_qosEosp;    ///< QoS EOSP
-    uint8_t m_qosAckPolicy; ///< QoS Ack policy
-    uint8_t m_amsduPresent; ///< A-MSDU present
-    uint8_t m_qosStuff;     ///< QoS stuff
+    uint8_t m_ctrlType{0};            ///< control type
+    uint8_t m_ctrlSubtype{0};         ///< control subtype
+    uint8_t m_ctrlToDs{0};            ///< control to DS
+    uint8_t m_ctrlFromDs{0};          ///< control from DS
+    uint8_t m_ctrlMoreFrag{0};        ///< control more fragments
+    uint8_t m_ctrlRetry{0};           ///< control retry
+    uint8_t m_ctrlPowerManagement{0}; ///< control power management
+    uint8_t m_ctrlMoreData{0};        ///< control more data
+    uint8_t m_ctrlWep{0};             ///< control WEP
+    uint8_t m_ctrlOrder{0}; ///< control order (set to 1 for QoS Data and Management frames to
+                            ///< signify that HT/VHT/HE control field is present, knowing that the
+                            ///< latter are not implemented yet)
+    uint16_t m_duration{0}; ///< duration
+    Mac48Address m_addr1{}; ///< address 1
+    Mac48Address m_addr2{}; ///< address 2
+    Mac48Address m_addr3{}; ///< address 3
+    uint8_t m_seqFrag{0};   ///< sequence fragment
+    uint16_t m_seqSeq{0};   ///< sequence sequence
+    Mac48Address m_addr4{}; ///< address 4
+    uint8_t m_qosTid{0};    ///< QoS TID
+    uint8_t m_qosEosp{0};   ///< QoS EOSP
+    uint8_t m_qosAckPolicy{0}; ///< QoS Ack policy
+    uint8_t m_amsduPresent{0}; ///< A-MSDU present
+    uint8_t m_qosStuff{0};     ///< QoS stuff
 };
 
 } // namespace ns3

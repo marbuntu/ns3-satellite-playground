@@ -43,7 +43,7 @@ PathSplit(std::string str)
 {
     std::vector<std::string> results;
     size_t cutAt;
-    while ((cutAt = str.find_first_of('/')) != str.npos)
+    while ((cutAt = str.find_first_of('/')) != std::string::npos)
     {
         if (cutAt > 0)
         {
@@ -51,7 +51,7 @@ PathSplit(std::string str)
         }
         str = str.substr(cutAt + 1);
     }
-    if (str.length() > 0)
+    if (!str.empty())
     {
         results.push_back(str);
     }
@@ -298,8 +298,7 @@ PyViz::SimulatorRunUntil(Time time)
     Time expirationTime = Simulator::Now() - Seconds(10);
 
     // Clear very old transmission records
-    for (std::map<TxRecordKey, TxRecordValue>::iterator iter = m_txRecords.begin();
-         iter != m_txRecords.end();)
+    for (auto iter = m_txRecords.begin(); iter != m_txRecords.end();)
     {
         if (iter->second.time < expirationTime)
         {
@@ -312,8 +311,7 @@ PyViz::SimulatorRunUntil(Time time)
     }
 
     // Clear very old packets of interest
-    for (std::map<uint32_t, Time>::iterator iter = m_packetsOfInterest.begin();
-         iter != m_packetsOfInterest.end();)
+    for (auto iter = m_packetsOfInterest.begin(); iter != m_packetsOfInterest.end();)
     {
         if (iter->second < expirationTime)
         {
@@ -371,14 +369,7 @@ PyViz::TransmissionSampleKey::operator<(const PyViz::TransmissionSampleKey& othe
     {
         return false;
     }
-    if (this->channel < other.channel)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return this->channel < other.channel;
 }
 
 bool
@@ -392,8 +383,7 @@ PyViz::TransmissionSampleKey::operator==(const PyViz::TransmissionSampleKey& oth
 PyViz::NetDeviceStatistics&
 PyViz::FindNetDeviceStatistics(int node, int interface)
 {
-    std::map<uint32_t, std::vector<NetDeviceStatistics>>::iterator nodeStatsIter =
-        m_nodesStatistics.find(node);
+    auto nodeStatsIter = m_nodesStatistics.find(node);
     std::vector<NetDeviceStatistics>* stats;
     if (nodeStatsIter == m_nodesStatistics.end())
     {
@@ -411,8 +401,7 @@ PyViz::FindNetDeviceStatistics(int node, int interface)
 bool
 PyViz::GetPacketCaptureOptions(uint32_t nodeId, const PacketCaptureOptions** outOptions) const
 {
-    std::map<uint32_t, PacketCaptureOptions>::const_iterator iter =
-        m_packetCaptureOptions.find(nodeId);
+    auto iter = m_packetCaptureOptions.find(nodeId);
     if (iter == m_packetCaptureOptions.end())
     {
         return false;
@@ -451,20 +440,13 @@ PyViz::FilterPacket(Ptr<const Packet> packet, const PacketCaptureOptions& option
         while (metadataIterator.HasNext())
         {
             PacketMetadata::Item item = metadataIterator.Next();
-            std::set<TypeId>::iterator missingIter = missingHeaders.find(item.tid);
+            auto missingIter = missingHeaders.find(item.tid);
             if (missingIter != missingHeaders.end())
             {
                 missingHeaders.erase(missingIter);
             }
         }
-        if (missingHeaders.size() == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return missingHeaders.empty();
     }
 
     default:
@@ -509,7 +491,7 @@ PyViz::TraceDevQueueDrop(std::string context, Ptr<const Packet> packet)
         }
     }
 
-    std::map<Ptr<Node>, uint32_t>::iterator iter = m_packetDrops.find(node);
+    auto iter = m_packetDrops.find(node);
     if (iter == m_packetDrops.end())
     {
         m_packetDrops[node] = packet->GetSize();
@@ -619,21 +601,13 @@ PyViz::TraceNetDevTxWifi(std::string context, Ptr<const Packet> packet)
     WifiMacHeader hdr;
     NS_ABORT_IF(packet->PeekHeader(hdr) == 0);
     Mac48Address destinationAddress;
-    if (hdr.IsToDs() && !hdr.IsFromDs())
+    if (hdr.IsToDs())
     {
         destinationAddress = hdr.GetAddr3();
-    }
-    else if (!hdr.IsToDs() && hdr.IsFromDs())
-    {
-        destinationAddress = hdr.GetAddr1();
-    }
-    else if (!hdr.IsToDs() && !hdr.IsFromDs())
-    {
-        destinationAddress = hdr.GetAddr1();
     }
     else
     {
-        destinationAddress = hdr.GetAddr3();
+        destinationAddress = hdr.GetAddr1();
     }
     TraceNetDevTxCommon(context, packet, destinationAddress);
 }
@@ -712,8 +686,7 @@ PyViz::TraceNetDevRxCommon(const std::string& context,
 
     Ptr<Channel> channel = device->GetChannel();
 
-    std::map<TxRecordKey, TxRecordValue>::iterator recordIter =
-        m_txRecords.find(TxRecordKey(channel, uid));
+    auto recordIter = m_txRecords.find(TxRecordKey(channel, uid));
 
     if (recordIter == m_txRecords.end())
     {
@@ -736,10 +709,7 @@ PyViz::TraceNetDevRxCommon(const std::string& context,
     NS_LOG_DEBUG("m_transmissionSamples begin:");
     if (g_log.IsEnabled(ns3::LOG_DEBUG))
     {
-        for (std::map<TransmissionSampleKey, TransmissionSampleValue>::const_iterator iter =
-                 m_transmissionSamples.begin();
-             iter != m_transmissionSamples.end();
-             iter++)
+        for (auto iter = m_transmissionSamples.begin(); iter != m_transmissionSamples.end(); iter++)
         {
             NS_LOG_DEBUG(iter->first.transmitter
                          << "/" << iter->first.transmitter->GetId() << ", " << iter->first.receiver
@@ -750,8 +720,7 @@ PyViz::TraceNetDevRxCommon(const std::string& context,
     NS_LOG_DEBUG("m_transmissionSamples end.");
 #endif
 
-    std::map<TransmissionSampleKey, TransmissionSampleValue>::iterator iter =
-        m_transmissionSamples.find(key);
+    auto iter = m_transmissionSamples.find(key);
 
     if (iter == m_transmissionSamples.end())
     {
@@ -792,19 +761,15 @@ PyViz::TraceNetDevRxWifi(std::string context, Ptr<const Packet> packet)
     WifiMacHeader hdr;
     NS_ABORT_IF(packet->PeekHeader(hdr) == 0);
     Mac48Address sourceAddress;
-    if (hdr.IsToDs() && !hdr.IsFromDs())
+    if (!hdr.IsFromDs())
     {
         sourceAddress = hdr.GetAddr2();
     }
-    else if (!hdr.IsToDs() && hdr.IsFromDs())
+    else if (!hdr.IsToDs())
     {
         sourceAddress = hdr.GetAddr3();
     }
-    else if (!hdr.IsToDs() && !hdr.IsFromDs())
-    {
-        sourceAddress = hdr.GetAddr2();
-    }
-    else
+    else // if (hdr.IsToDs())
     {
         sourceAddress = hdr.GetAddr4();
     }
@@ -881,10 +846,7 @@ PyViz::GetTransmissionSamples() const
 {
     NS_LOG_DEBUG("GetTransmissionSamples BEGIN");
     TransmissionSampleList list;
-    for (std::map<TransmissionSampleKey, TransmissionSampleValue>::const_iterator iter =
-             m_transmissionSamples.begin();
-         iter != m_transmissionSamples.end();
-         iter++)
+    for (auto iter = m_transmissionSamples.begin(); iter != m_transmissionSamples.end(); iter++)
     {
         TransmissionSample sample;
         sample.transmitter = iter->first.transmitter;
@@ -904,9 +866,7 @@ PyViz::GetPacketDropSamples() const
 {
     NS_LOG_DEBUG("GetPacketDropSamples BEGIN");
     PacketDropSampleList list;
-    for (std::map<Ptr<Node>, uint32_t>::const_iterator iter = m_packetDrops.begin();
-         iter != m_packetDrops.end();
-         iter++)
+    for (auto iter = m_packetDrops.begin(); iter != m_packetDrops.end(); iter++)
     {
         PacketDropSample sample;
         sample.transmitter = iter->first;
@@ -929,10 +889,7 @@ std::vector<PyViz::NodeStatistics>
 PyViz::GetNodesStatistics() const
 {
     std::vector<PyViz::NodeStatistics> retval;
-    for (std::map<uint32_t, std::vector<NetDeviceStatistics>>::const_iterator iter =
-             m_nodesStatistics.begin();
-         iter != m_nodesStatistics.end();
-         iter++)
+    for (auto iter = m_nodesStatistics.begin(); iter != m_nodesStatistics.end(); iter++)
     {
         NodeStatistics stats = {iter->first, iter->second};
         retval.push_back(stats);
@@ -945,7 +902,7 @@ PyViz::GetLastPackets(uint32_t nodeId) const
 {
     NS_LOG_DEBUG("GetLastPackets: " << nodeId);
 
-    std::map<uint32_t, LastPacketsSample>::const_iterator iter = m_lastPackets.find(nodeId);
+    auto iter = m_lastPackets.find(nodeId);
     if (iter != m_lastPackets.end())
     {
         return iter->second;
@@ -986,7 +943,7 @@ class FastClipping
      * Clip start top function
      * \param line the clip line
      */
-    void ClipStartTop(Line& line)
+    void ClipStartTop(Line& line) const
     {
         line.start.x += line.dx * (m_clipMin.y - line.start.y) / line.dy;
         line.start.y = m_clipMin.y;
@@ -996,7 +953,7 @@ class FastClipping
      * Clip start bottom function
      * \param line the clip line
      */
-    void ClipStartBottom(Line& line)
+    void ClipStartBottom(Line& line) const
     {
         line.start.x += line.dx * (m_clipMax.y - line.start.y) / line.dy;
         line.start.y = m_clipMax.y;
@@ -1006,7 +963,7 @@ class FastClipping
      * Clip start right function
      * \param line the clip line
      */
-    void ClipStartRight(Line& line)
+    void ClipStartRight(Line& line) const
     {
         line.start.y += line.dy * (m_clipMax.x - line.start.x) / line.dx;
         line.start.x = m_clipMax.x;
@@ -1016,7 +973,7 @@ class FastClipping
      * Clip start left function
      * \param line the clip line
      */
-    void ClipStartLeft(Line& line)
+    void ClipStartLeft(Line& line) const
     {
         line.start.y += line.dy * (m_clipMin.x - line.start.x) / line.dx;
         line.start.x = m_clipMin.x;
@@ -1026,7 +983,7 @@ class FastClipping
      * Clip end top function
      * \param line the clip line
      */
-    void ClipEndTop(Line& line)
+    void ClipEndTop(Line& line) const
     {
         line.end.x += line.dx * (m_clipMin.y - line.end.y) / line.dy;
         line.end.y = m_clipMin.y;
@@ -1036,7 +993,7 @@ class FastClipping
      * Clip end bottom function
      * \param line the clip line
      */
-    void ClipEndBottom(Line& line)
+    void ClipEndBottom(Line& line) const
     {
         line.end.x += line.dx * (m_clipMax.y - line.end.y) / line.dy;
         line.end.y = m_clipMax.y;
@@ -1046,7 +1003,7 @@ class FastClipping
      * Clip end right function
      * \param line the clip line
      */
-    void ClipEndRight(Line& line)
+    void ClipEndRight(Line& line) const
     {
         line.end.y += line.dy * (m_clipMax.x - line.end.x) / line.dx;
         line.end.x = m_clipMax.x;
@@ -1056,7 +1013,7 @@ class FastClipping
      * Clip end left function
      * \param line the clip line
      */
-    void ClipEndLeft(Line& line)
+    void ClipEndLeft(Line& line) const
     {
         line.end.y += line.dy * (m_clipMin.x - line.end.x) / line.dx;
         line.end.x = m_clipMin.x;

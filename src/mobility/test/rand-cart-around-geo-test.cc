@@ -57,7 +57,6 @@ static const double EARTH_RADIUS = 6371e3;
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Rand Cart Around Geo Test Case
  */
@@ -174,7 +173,6 @@ RandCartAroundGeoTestCase::DoRun()
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Rand Cart Around Geo Test Suite
  */
@@ -185,7 +183,7 @@ class RandCartAroundGeoTestSuite : public TestSuite
 };
 
 RandCartAroundGeoTestSuite::RandCartAroundGeoTestSuite()
-    : TestSuite("rand-cart-around-geo", UNIT)
+    : TestSuite("rand-cart-around-geo", Type::UNIT)
 {
     NS_LOG_INFO("creating RandCartAroundGeoTestSuite");
     Ptr<UniformRandomVariable> uniRand = CreateObject<UniformRandomVariable>();
@@ -203,10 +201,14 @@ RandCartAroundGeoTestSuite::RandCartAroundGeoTestSuite()
                                                           50, // 50 points generated
                                                           maxDistFromOrigin,
                                                           uniRand),
-                            TestCase::QUICK);
+                            TestCase::Duration::QUICK);
             }
         }
     }
 }
 
-static RandCartAroundGeoTestSuite g_RandCartAroundGeoTestSuite; ///< the test suite
+/**
+ * \ingroup mobility-test
+ * Static variable for test initialization
+ */
+static RandCartAroundGeoTestSuite g_RandCartAroundGeoTestSuite;

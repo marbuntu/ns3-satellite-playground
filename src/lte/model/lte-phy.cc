@@ -20,6 +20,7 @@
 
 #include "lte-phy.h"
 
+#include "lte-control-messages.h"
 #include "lte-net-device.h"
 
 #include "ns3/spectrum-error-model.h"
@@ -195,13 +196,13 @@ LtePhy::GetPacketBurst()
         Ptr<PacketBurst> ret = m_packetBurstQueue.at(0)->Copy();
         m_packetBurstQueue.erase(m_packetBurstQueue.begin());
         m_packetBurstQueue.push_back(CreateObject<PacketBurst>());
-        return (ret);
+        return ret;
     }
     else
     {
         m_packetBurstQueue.erase(m_packetBurstQueue.begin());
         m_packetBurstQueue.push_back(CreateObject<PacketBurst>());
-        return (nullptr);
+        return nullptr;
     }
 }
 
@@ -217,13 +218,13 @@ std::list<Ptr<LteControlMessage>>
 LtePhy::GetControlMessages()
 {
     NS_LOG_FUNCTION(this);
-    if (m_controlMessagesQueue.at(0).size() > 0)
+    if (!m_controlMessagesQueue.at(0).empty())
     {
         std::list<Ptr<LteControlMessage>> ret = m_controlMessagesQueue.at(0);
         m_controlMessagesQueue.erase(m_controlMessagesQueue.begin());
         std::list<Ptr<LteControlMessage>> newlist;
         m_controlMessagesQueue.push_back(newlist);
-        return (ret);
+        return ret;
     }
     else
     {
@@ -231,7 +232,7 @@ LtePhy::GetControlMessages()
         std::list<Ptr<LteControlMessage>> newlist;
         m_controlMessagesQueue.push_back(newlist);
         std::list<Ptr<LteControlMessage>> emptylist;
-        return (emptylist);
+        return emptylist;
     }
 }
 
@@ -252,7 +253,7 @@ LtePhy::SetComponentCarrierId(uint8_t index)
 }
 
 uint8_t
-LtePhy::GetComponentCarrierId()
+LtePhy::GetComponentCarrierId() const
 {
     return m_componentCarrierId;
 }

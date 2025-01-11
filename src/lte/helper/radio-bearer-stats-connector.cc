@@ -14,8 +14,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Nicola Baldo <nbaldo@cttc.es>
- *          Manuel Requena <manuel.requena@cttc.es>
+ * Authors:
+ *   Nicola Baldo <nbaldo@cttc.es>
+ *   Manuel Requena <manuel.requena@cttc.es>
  */
 
 #include "radio-bearer-stats-connector.h"
@@ -259,7 +260,7 @@ RadioBearerStatsConnector::ConnectTracesSrb0(std::string context,
     CellIdRnti key;
     key.cellId = cellId;
     key.rnti = rnti;
-    std::map<CellIdRnti, std::string>::iterator it = m_ueManagerPathByCellIdRnti.find(key);
+    auto it = m_ueManagerPathByCellIdRnti.find(key);
     NS_ASSERT(it != m_ueManagerPathByCellIdRnti.end());
     std::string ueManagerPath = it->second;
     NS_LOG_LOGIC("ueManagerPath = " << ueManagerPath);
@@ -290,7 +291,7 @@ RadioBearerStatsConnector::ConnectTracesSrb1(std::string context,
     CellIdRnti key;
     key.cellId = cellId;
     key.rnti = rnti;
-    std::map<CellIdRnti, std::string>::iterator it = m_ueManagerPathByCellIdRnti.find(key);
+    auto it = m_ueManagerPathByCellIdRnti.find(key);
     NS_ASSERT(it != m_ueManagerPathByCellIdRnti.end());
     std::string ueManagerPath = it->second;
     NS_LOG_LOGIC("ueManagerPath = " << ueManagerPath);

@@ -21,13 +21,12 @@
 #ifndef THREE_GPP_CHANNEL_H
 #define THREE_GPP_CHANNEL_H
 
+#include "matrix-based-channel-model.h"
+
 #include "ns3/angles.h"
+#include "ns3/deprecated.h"
 #include <ns3/boolean.h>
 #include <ns3/channel-condition-model.h>
-#include <ns3/matrix-based-channel-model.h>
-#include <ns3/nstime.h>
-#include <ns3/object.h>
-#include <ns3/random-variable-stream.h>
 
 #include <complex.h>
 #include <unordered_map>
@@ -252,15 +251,31 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
      * \param hUT the height of the UT
      * \param distance2D the 2D distance between tx and rx
      * \return the parameters table
+     * \deprecated Use GetThreeGppTable(const Ptr<const MobilityModel> aMob, const Ptr<const
+     *  MobilityModel> bMob, Ptr<const ChannelCondition> channelCondition) instead
      */
-    virtual Ptr<const ParamsTable> GetThreeGppTable(Ptr<const ChannelCondition> channelCondition,
-                                                    double hBS,
-                                                    double hUT,
-                                                    double distance2D) const;
+    NS_DEPRECATED_3_41("Use GetThreeGppTable(const Ptr<const MobilityModel>, const Ptr<const "
+                       "MobilityModel>, Ptr<const ChannelCondition>) instead")
+    Ptr<const ParamsTable> GetThreeGppTable(Ptr<const ChannelCondition> channelCondition,
+                                            double hBS,
+                                            double hUT,
+                                            double distance2D) const;
+
+    /**
+     * Get the parameters needed to apply the channel generation procedure
+     * \param aMob the mobility model of node A
+     * \param bMob the mobility model of node B
+     * \param channelCondition the channel condition
+     * \return the parameters table
+     */
+    virtual Ptr<const ParamsTable> GetThreeGppTable(
+        const Ptr<const MobilityModel> aMob,
+        const Ptr<const MobilityModel> bMob,
+        Ptr<const ChannelCondition> channelCondition) const;
 
     /**
      * Prepare 3gpp channel parameters among the nodes a and b.
-     * The function does the followin steps described in 3GPP 38.901:
+     * The function does the following steps described in 3GPP 38.901:
      *
      * Step 4: Generate large scale parameters. All LSPS are uncorrelated.
      * Step 5: Generate Delays.
@@ -337,6 +352,18 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
     bool ChannelMatrixNeedsUpdate(Ptr<const ThreeGppChannelParams> channelParams,
                                   Ptr<const ChannelMatrix> channelMatrix);
 
+    /**
+     * Check if the channel matrix has to be updated due to
+     * changes in the number of antenna ports
+     * \param aAntenna the antenna array of node a
+     * \param bAntenna the antenna array of node b
+     * \param channelMatrix channel matrix structure
+     * \return true if the channel matrix has to be updated, false otherwise
+     */
+    bool AntennaSetupChanged(Ptr<const PhasedArrayModel> aAntenna,
+                             Ptr<const PhasedArrayModel> bAntenna,
+                             Ptr<const ChannelMatrix> channelMatrix);
+
     std::unordered_map<uint64_t, Ptr<ChannelMatrix>>
         m_channelMatrixMap; //!< map containing the channel realizations per pair of
                             //!< PhasedAntennaArray instances, the key of this map is reciprocal
@@ -364,7 +391,7 @@ class ThreeGppChannelModel : public MatrixBasedChannelModel
     // parameters for the blockage model
     bool m_blockage;               //!< enables the blockage model A
     uint16_t m_numNonSelfBlocking; //!< number of non-self-blocking regions
-    bool m_portraitMode;           //!< true if potrait mode, false if landscape
+    bool m_portraitMode;           //!< true if portrait mode, false if landscape
     double m_blockerSpeed;         //!< the blocker speed
 
     static const uint8_t PHI_INDEX = 0; //!< index of the PHI value in the m_nonSelfBlocking array

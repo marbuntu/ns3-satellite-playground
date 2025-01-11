@@ -116,35 +116,35 @@ LrWpanHelper::EnableLogComponents()
 }
 
 std::string
-LrWpanHelper::LrWpanPhyEnumerationPrinter(LrWpanPhyEnumeration e)
+LrWpanHelper::LrWpanPhyEnumerationPrinter(lrwpan::PhyEnumeration e)
 {
     switch (e)
     {
-    case IEEE_802_15_4_PHY_BUSY:
+    case lrwpan::IEEE_802_15_4_PHY_BUSY:
         return std::string("BUSY");
-    case IEEE_802_15_4_PHY_BUSY_RX:
+    case lrwpan::IEEE_802_15_4_PHY_BUSY_RX:
         return std::string("BUSY_RX");
-    case IEEE_802_15_4_PHY_BUSY_TX:
+    case lrwpan::IEEE_802_15_4_PHY_BUSY_TX:
         return std::string("BUSY_TX");
-    case IEEE_802_15_4_PHY_FORCE_TRX_OFF:
+    case lrwpan::IEEE_802_15_4_PHY_FORCE_TRX_OFF:
         return std::string("FORCE_TRX_OFF");
-    case IEEE_802_15_4_PHY_IDLE:
+    case lrwpan::IEEE_802_15_4_PHY_IDLE:
         return std::string("IDLE");
-    case IEEE_802_15_4_PHY_INVALID_PARAMETER:
+    case lrwpan::IEEE_802_15_4_PHY_INVALID_PARAMETER:
         return std::string("INVALID_PARAMETER");
-    case IEEE_802_15_4_PHY_RX_ON:
+    case lrwpan::IEEE_802_15_4_PHY_RX_ON:
         return std::string("RX_ON");
-    case IEEE_802_15_4_PHY_SUCCESS:
+    case lrwpan::IEEE_802_15_4_PHY_SUCCESS:
         return std::string("SUCCESS");
-    case IEEE_802_15_4_PHY_TRX_OFF:
+    case lrwpan::IEEE_802_15_4_PHY_TRX_OFF:
         return std::string("TRX_OFF");
-    case IEEE_802_15_4_PHY_TX_ON:
+    case lrwpan::IEEE_802_15_4_PHY_TX_ON:
         return std::string("TX_ON");
-    case IEEE_802_15_4_PHY_UNSUPPORTED_ATTRIBUTE:
+    case lrwpan::IEEE_802_15_4_PHY_UNSUPPORTED_ATTRIBUTE:
         return std::string("UNSUPPORTED_ATTRIBUTE");
-    case IEEE_802_15_4_PHY_READ_ONLY:
+    case lrwpan::IEEE_802_15_4_PHY_READ_ONLY:
         return std::string("READ_ONLY");
-    case IEEE_802_15_4_PHY_UNSPECIFIED:
+    case lrwpan::IEEE_802_15_4_PHY_UNSPECIFIED:
         return std::string("UNSPECIFIED");
     default:
         return std::string("INVALID");
@@ -152,17 +152,17 @@ LrWpanHelper::LrWpanPhyEnumerationPrinter(LrWpanPhyEnumeration e)
 }
 
 std::string
-LrWpanHelper::LrWpanMacStatePrinter(LrWpanMacState e)
+LrWpanHelper::LrWpanMacStatePrinter(lrwpan::MacState e)
 {
     switch (e)
     {
-    case MAC_IDLE:
+    case lrwpan::MAC_IDLE:
         return std::string("MAC_IDLE");
-    case CHANNEL_ACCESS_FAILURE:
+    case lrwpan::CHANNEL_ACCESS_FAILURE:
         return std::string("CHANNEL_ACCESS_FAILURE");
-    case CHANNEL_IDLE:
+    case lrwpan::CHANNEL_IDLE:
         return std::string("CHANNEL_IDLE");
-    case SET_PHY_TX_ON:
+    case lrwpan::SET_PHY_TX_ON:
         return std::string("SET_PHY_TX_ON");
     default:
         return std::string("INVALID");
@@ -170,7 +170,7 @@ LrWpanHelper::LrWpanMacStatePrinter(LrWpanMacState e)
 }
 
 void
-LrWpanHelper::AddMobility(Ptr<LrWpanPhy> phy, Ptr<MobilityModel> m)
+LrWpanHelper::AddMobility(Ptr<lrwpan::LrWpanPhy> phy, Ptr<MobilityModel> m)
 {
     phy->SetMobility(m);
 }
@@ -179,11 +179,11 @@ NetDeviceContainer
 LrWpanHelper::Install(NodeContainer c)
 {
     NetDeviceContainer devices;
-    for (NodeContainer::Iterator i = c.Begin(); i != c.End(); i++)
+    for (auto i = c.Begin(); i != c.End(); i++)
     {
         Ptr<Node> node = *i;
 
-        Ptr<LrWpanNetDevice> netDevice = CreateObject<LrWpanNetDevice>();
+        Ptr<lrwpan::LrWpanNetDevice> netDevice = CreateObject<lrwpan::LrWpanNetDevice>();
         netDevice->SetChannel(m_channel);
         node->AddDevice(netDevice);
         netDevice->SetNode(node);
@@ -218,10 +218,10 @@ LrWpanHelper::AssignStreams(NetDeviceContainer c, int64_t stream)
 {
     int64_t currentStream = stream;
     Ptr<NetDevice> netDevice;
-    for (NetDeviceContainer::Iterator i = c.Begin(); i != c.End(); ++i)
+    for (auto i = c.Begin(); i != c.End(); ++i)
     {
         netDevice = (*i);
-        Ptr<LrWpanNetDevice> lrwpan = DynamicCast<LrWpanNetDevice>(netDevice);
+        Ptr<lrwpan::LrWpanNetDevice> lrwpan = DynamicCast<lrwpan::LrWpanNetDevice>(netDevice);
         if (lrwpan)
         {
             currentStream += lrwpan->AssignStreams(currentStream);
@@ -231,85 +231,80 @@ LrWpanHelper::AssignStreams(NetDeviceContainer c, int64_t stream)
 }
 
 void
-LrWpanHelper::AssociateToPan(NetDeviceContainer c, uint16_t panId)
+LrWpanHelper::CreateAssociatedPan(NetDeviceContainer c, uint16_t panId)
 {
     NetDeviceContainer devices;
     uint16_t id = 1;
-    uint8_t idBuf[2];
+    uint8_t idBuf[2] = {0, 0};
+    uint8_t idBuf2[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    Mac16Address address16;
+    Mac64Address address64;
+    Mac16Address coordShortAddr;
+    Mac64Address coordExtAddr;
 
-    for (NetDeviceContainer::Iterator i = c.Begin(); i != c.End(); i++)
+    for (auto i = c.Begin(); i != c.End(); i++)
     {
-        Ptr<LrWpanNetDevice> device = DynamicCast<LrWpanNetDevice>(*i);
+        if (id < 0x0001 || id > 0xFFFD)
+        {
+            NS_ABORT_MSG("Only 65533 addresses supported. Range [00:01]-[FF:FD]");
+        }
+
+        Ptr<lrwpan::LrWpanNetDevice> device = DynamicCast<lrwpan::LrWpanNetDevice>(*i);
         if (device)
         {
             idBuf[0] = (id >> 8) & 0xff;
             idBuf[1] = (id >> 0) & 0xff;
-            Mac16Address address;
-            address.CopyFrom(idBuf);
+            address16.CopyFrom(idBuf);
 
-            device->GetMac()->SetPanId(panId);
-            device->GetMac()->SetShortAddress(address);
+            idBuf2[6] = (id >> 8) & 0xff;
+            idBuf2[7] = (id >> 0) & 0xff;
+            address64.CopyFrom(idBuf2);
+
+            if (address64 == Mac64Address("00:00:00:00:00:00:00:01"))
+            {
+                // We use the first device in the container as coordinator
+                coordShortAddr = address16;
+                coordExtAddr = address64;
+            }
+
+            // TODO: Change this to device->GetAddress() if GetAddress can guarantee a
+            //  an extended address (currently only gives 48 address or 16 bits addresses)
+            device->GetMac()->SetExtendedAddress(address64);
+            device->SetPanAssociation(panId, coordExtAddr, coordShortAddr, address16);
+
             id++;
         }
     }
 }
 
 void
-LrWpanHelper::AssociateToBeaconPan(NetDeviceContainer c,
-                                   uint16_t panId,
-                                   Mac16Address coor,
-                                   uint8_t bcnOrd,
-                                   uint8_t sfrmOrd)
+LrWpanHelper::SetExtendedAddresses(NetDeviceContainer c)
 {
     NetDeviceContainer devices;
-    uint16_t id = 1;
-    uint8_t idBuf[2];
-    Mac16Address address;
+    uint64_t id = 1;
+    uint8_t idBuf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    Mac64Address address64;
 
-    if (bcnOrd > 14)
+    for (auto i = c.Begin(); i != c.End(); i++)
     {
-        NS_LOG_DEBUG("The Beacon Order must be an int between 0 and 14");
-        return;
-    }
-
-    if ((sfrmOrd > 14) || (sfrmOrd > bcnOrd))
-    {
-        NS_LOG_DEBUG("The Superframe Order must be an int between 0 and 14, and less or equal to "
-                     "Beacon Order");
-        return;
-    }
-
-    for (NetDeviceContainer::Iterator i = c.Begin(); i != c.End(); i++)
-    {
-        Ptr<LrWpanNetDevice> device = DynamicCast<LrWpanNetDevice>(*i);
+        Ptr<lrwpan::LrWpanNetDevice> device = DynamicCast<lrwpan::LrWpanNetDevice>(*i);
         if (device)
         {
-            idBuf[0] = (id >> 8) & 0xff;
-            idBuf[1] = (id >> 0) & 0xff;
-            address.CopyFrom(idBuf);
+            idBuf[0] = (id >> 56) & 0xff;
+            idBuf[1] = (id >> 48) & 0xff;
+            idBuf[2] = (id >> 40) & 0xff;
+            idBuf[3] = (id >> 32) & 0xff;
+            idBuf[4] = (id >> 24) & 0xff;
+            idBuf[5] = (id >> 16) & 0xff;
+            idBuf[6] = (id >> 8) & 0xff;
+            idBuf[7] = (id >> 0) & 0xff;
 
-            device->GetMac()->SetShortAddress(address);
+            address64.CopyFrom(idBuf);
 
-            if (address == coor)
-            {
-                MlmeStartRequestParams params;
-                params.m_panCoor = true;
-                params.m_PanId = panId;
-                params.m_bcnOrd = bcnOrd;
-                params.m_sfrmOrd = sfrmOrd;
+            // TODO: Change this to device->SetAddress() if GetAddress can guarantee
+            //  to set only extended addresses
+            device->GetMac()->SetExtendedAddress(address64);
 
-                Ptr<UniformRandomVariable> uniformRandomVariable =
-                    CreateObject<UniformRandomVariable>();
-                ;
-                Time jitter = Time(MilliSeconds(uniformRandomVariable->GetInteger(0, 10)));
-
-                Simulator::Schedule(jitter, &LrWpanMac::MlmeStartRequest, device->GetMac(), params);
-            }
-            else
-            {
-                device->GetMac()->SetPanId(panId);
-                device->GetMac()->SetAssociatedCoor(coor);
-            }
             id++;
         }
     }
@@ -343,7 +338,7 @@ LrWpanHelper::EnablePcapInternal(std::string prefix,
     // have to switch on each type below and insert into the right
     // NetDevice type
     //
-    Ptr<LrWpanNetDevice> device = nd->GetObject<LrWpanNetDevice>();
+    Ptr<lrwpan::LrWpanNetDevice> device = nd->GetObject<lrwpan::LrWpanNetDevice>();
     if (!device)
     {
         NS_LOG_INFO("LrWpanHelper::EnablePcapInternal(): Device "
@@ -366,7 +361,7 @@ LrWpanHelper::EnablePcapInternal(std::string prefix,
     Ptr<PcapFileWrapper> file =
         pcapHelper.CreateFile(filename, std::ios::out, PcapHelper::DLT_IEEE802_15_4);
 
-    if (promiscuous == true)
+    if (promiscuous)
     {
         device->GetMac()->TraceConnectWithoutContext("PromiscSniffer",
                                                      MakeBoundCallback(&PcapSniffLrWpan, file));
@@ -388,7 +383,7 @@ LrWpanHelper::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream,
     uint32_t deviceid = nd->GetIfIndex();
     std::ostringstream oss;
 
-    Ptr<LrWpanNetDevice> device = nd->GetObject<LrWpanNetDevice>();
+    Ptr<lrwpan::LrWpanNetDevice> device = nd->GetObject<lrwpan::LrWpanNetDevice>();
     if (!device)
     {
         NS_LOG_INFO("LrWpanHelper::EnableAsciiInternal(): Device "
@@ -433,23 +428,23 @@ LrWpanHelper::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream,
         // The Mac and Phy objects have the trace sources for these
         //
 
-        asciiTraceHelper.HookDefaultReceiveSinkWithoutContext<LrWpanMac>(device->GetMac(),
-                                                                         "MacRx",
-                                                                         theStream);
+        asciiTraceHelper.HookDefaultReceiveSinkWithoutContext<lrwpan::LrWpanMac>(device->GetMac(),
+                                                                                 "MacRx",
+                                                                                 theStream);
 
         device->GetMac()->TraceConnectWithoutContext(
             "MacTx",
             MakeBoundCallback(&AsciiLrWpanMacTransmitSinkWithoutContext, theStream));
 
-        asciiTraceHelper.HookDefaultEnqueueSinkWithoutContext<LrWpanMac>(device->GetMac(),
-                                                                         "MacTxEnqueue",
-                                                                         theStream);
-        asciiTraceHelper.HookDefaultDequeueSinkWithoutContext<LrWpanMac>(device->GetMac(),
-                                                                         "MacTxDequeue",
-                                                                         theStream);
-        asciiTraceHelper.HookDefaultDropSinkWithoutContext<LrWpanMac>(device->GetMac(),
-                                                                      "MacTxDrop",
-                                                                      theStream);
+        asciiTraceHelper.HookDefaultEnqueueSinkWithoutContext<lrwpan::LrWpanMac>(device->GetMac(),
+                                                                                 "MacTxEnqueue",
+                                                                                 theStream);
+        asciiTraceHelper.HookDefaultDequeueSinkWithoutContext<lrwpan::LrWpanMac>(device->GetMac(),
+                                                                                 "MacTxDequeue",
+                                                                                 theStream);
+        asciiTraceHelper.HookDefaultDropSinkWithoutContext<lrwpan::LrWpanMac>(device->GetMac(),
+                                                                              "MacTxDrop",
+                                                                              theStream);
 
         return;
     }

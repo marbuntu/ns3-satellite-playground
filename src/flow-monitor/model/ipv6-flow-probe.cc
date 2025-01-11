@@ -18,12 +18,13 @@
 // Modifications: Tommaso Pecorella <tommaso.pecorella@unifi.it>
 //
 
-#include "ns3/ipv6-flow-probe.h"
+#include "ipv6-flow-probe.h"
+
+#include "flow-monitor.h"
+#include "ipv6-flow-classifier.h"
 
 #include "ns3/config.h"
 #include "ns3/flow-id-tag.h"
-#include "ns3/flow-monitor.h"
-#include "ns3/ipv6-flow-classifier.h"
 #include "ns3/log.h"
 #include "ns3/node.h"
 #include "ns3/packet.h"
@@ -62,7 +63,7 @@ class Ipv6FlowProbeTag : public Tag
     void Print(std::ostream& os) const override;
     Ipv6FlowProbeTag();
     /**
-     * \brief Consructor
+     * \brief Constructor
      * \param flowId the flow identifier
      * \param packetId the packet identifier
      * \param packetSize the packet size

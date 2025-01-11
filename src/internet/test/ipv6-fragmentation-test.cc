@@ -67,7 +67,6 @@ class UdpSocketImpl;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Tag used in IPv6 Fragmentation Test
  */
@@ -125,7 +124,7 @@ class IPv6TestTag : public Tag
      * \brief Get the token.
      * \returns The token.
      */
-    uint64_t GetToken()
+    uint64_t GetToken() const
     {
         return token;
     }
@@ -133,7 +132,6 @@ class IPv6TestTag : public Tag
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 Fragmentation Test
  */
@@ -618,7 +616,6 @@ Ipv6FragmentationTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 Fragmentation TestSuite
  */
@@ -626,9 +623,9 @@ class Ipv6FragmentationTestSuite : public TestSuite
 {
   public:
     Ipv6FragmentationTestSuite()
-        : TestSuite("ipv6-fragmentation", UNIT)
+        : TestSuite("ipv6-fragmentation", Type::UNIT)
     {
-        AddTestCase(new Ipv6FragmentationTest, TestCase::QUICK);
+        AddTestCase(new Ipv6FragmentationTest, TestCase::Duration::QUICK);
     }
 };
 

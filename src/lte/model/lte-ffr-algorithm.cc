@@ -29,13 +29,13 @@ namespace ns3
 
 NS_LOG_COMPONENT_DEFINE("LteFfrAlgorithm");
 
-/// Type 0 RGB allocation
+/// Type 0 RBG allocation
 static const int Type0AllocationRbg[4] = {
-    10, // RGB size 1
-    26, // RGB size 2
-    63, // RGB size 3
-    110 // RGB size 4
-};      // see table 7.1.6.1-1 of 3GPP TS 36.213
+    10,  // RBG size 1
+    26,  // RBG size 2
+    63,  // RBG size 3
+    110, // RBG size 4
+};       // see table 7.1.6.1-1 of 3GPP TS 36.213
 
 NS_OBJECT_ENSURE_REGISTERED(LteFfrAlgorithm);
 
@@ -156,11 +156,11 @@ LteFfrAlgorithm::GetRbgSize(int dlbandwidth)
     {
         if (dlbandwidth < Type0AllocationRbg[i])
         {
-            return (i + 1);
+            return i + 1;
         }
     }
 
-    return (-1);
+    return -1;
 }
 
 void

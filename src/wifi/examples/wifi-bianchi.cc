@@ -53,6 +53,7 @@
 #include "ns3/yans-wifi-helper.h"
 
 #include <fstream>
+#include <vector>
 
 /// Avoid std::numbers::pi because it's C++20
 #define PI 3.1415926535
@@ -76,14 +77,14 @@ std::map<Mac48Address, uint64_t>
 std::map<Mac48Address, uint64_t>
     packetsTransmitted; ///< Map that stores the total packets transmitted per STA
 std::map<Mac48Address, uint64_t>
-    psduFailed; ///< Map that stores the total number of unsuccessfully received PSDUS (for which
+    psduFailed; ///< Map that stores the total number of unsuccessfuly received PSDUS (for which
                 ///< the PHY header was successfully received)  per STA (including PSDUs not
                 ///< addressed to that STA)
 std::map<Mac48Address, uint64_t>
     psduSucceeded; ///< Map that stores the total number of successfully received PSDUs per STA
                    ///< (including PSDUs not addressed to that STA)
 std::map<Mac48Address, uint64_t> phyHeaderFailed; ///< Map that stores the total number of
-                                                  ///< unsuccessfully received PHY headers per STA
+                                                  ///< unsuccessfuly received PHY headers per STA
 std::map<Mac48Address, uint64_t>
     rxEventWhileTxing; ///< Map that stores the number of reception events per STA that occurred
                        ///< while PHY was already transmitting a PPDU
@@ -2166,6 +2167,8 @@ PhyRxDropTrace(std::string context, Ptr<const Packet> p, WifiPhyRxfailureReason 
     case OBSS_PD_CCA_RESET:
         NS_FATAL_ERROR("Unexpected CCA reset!");
         break;
+    case SIGNAL_DETECTION_ABORTED_BY_TX:
+        break;
     case UNKNOWN:
     default:
         NS_FATAL_ERROR("Unknown drop reason!");
@@ -2468,7 +2471,7 @@ Experiment::Run(const WifiHelper& helper,
     phy.SetPcapDataLinkType(WifiPhyHelper::DLT_IEEE802_11_RADIO);
 
     WifiMacHelper mac = wifiMac;
-    WifiHelper wifi = helper;
+    const auto& wifi = helper;
     NetDeviceContainer devices;
     uint32_t nNodes = wifiNodes.GetN();
     if (infra)
@@ -2506,7 +2509,7 @@ Experiment::Run(const WifiHelper& helper,
         devices = wifi.Install(phy, mac, wifiNodes);
     }
 
-    wifi.AssignStreams(devices, trialNumber);
+    WifiHelper::AssignStreams(devices, trialNumber);
 
     Config::Set(
         "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/HtConfiguration/ShortGuardIntervalSupported",
@@ -2532,10 +2535,10 @@ Experiment::Run(const WifiHelper& helper,
     MobilityHelper mobility;
     Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator>();
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    // Set postion for AP
+    // Set position for AP
     positionAlloc->Add(Vector(1.0, 1.0, 0.0));
 
-    // Set postion for STAs
+    // Set position for STAs
     double angle = (static_cast<double>(360) / (nNodes - 1));
     for (uint32_t i = 0; i < (nNodes - 1); ++i)
     {
@@ -2593,13 +2596,18 @@ Experiment::Run(const WifiHelper& helper,
                         MakeCallback(&DisassociationLog));
     }
 
+    std::string txop =
+        StaticCast<WifiNetDevice>(wifiNodes.Get(0)->GetDevice(0))->GetMac()->GetQosSupported()
+            ? "BE_Txop"
+            : "Txop";
     // Trace CW evolution
-    Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::WifiMac/Txop/CwTrace",
+    Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::WifiMac/" + txop +
+                        "/CwTrace",
                     MakeCallback(&CwTrace));
     // Trace backoff evolution
-    Config::Connect(
-        "/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::WifiMac/Txop/BackoffTrace",
-        MakeCallback(&BackoffTrace));
+    Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/$ns3::WifiMac/" + txop +
+                        "/BackoffTrace",
+                    MakeCallback(&BackoffTrace));
     // Trace PHY Tx start events
     Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::WifiPhy/PhyTxBegin",
                     MakeCallback(&PhyTxTrace));
@@ -2701,8 +2709,8 @@ main(int argc, char* argv[])
     double maxRelativeError =
         0.015; ///< Maximum relative error tolerated between ns-3 results and the Bianchi model
                ///< (used for regression, i.e. when the validate flag is set)
-    double frequency = 5;           ///< The operating frequency band in GHz: 2.4, 5 or 6
-    uint16_t channelWidth = 20;     ///< The constant channel width in MHz (only for 11n/ac/ax)
+    double frequency = 5;              ///< The operating frequency band in GHz: 2.4, 5 or 6
+    ChannelWidthMhz channelWidth = 20; ///< The constant channel width in MHz (only for 11n/ac/ax)
     uint16_t guardIntervalNs = 800; ///< The guard interval in nanoseconds (800 or 400 for 11n/ac,
                                     ///< 800 or 1600 or 3200 for 11 ax)
     uint16_t pktInterval =
@@ -2861,11 +2869,7 @@ main(int argc, char* argv[])
     }
     else if (standard == "11n")
     {
-        if (frequency == 2.4)
-        {
-            wifiStandard = WIFI_STANDARD_80211n;
-        }
-        else if (frequency == 5)
+        if (frequency == 2.4 || frequency == 5)
         {
             wifiStandard = WIFI_STANDARD_80211n;
         }
@@ -2882,15 +2886,7 @@ main(int argc, char* argv[])
     }
     else if (standard == "11ax")
     {
-        if (frequency == 2.4)
-        {
-            wifiStandard = WIFI_STANDARD_80211ax;
-        }
-        else if (frequency == 5)
-        {
-            wifiStandard = WIFI_STANDARD_80211ax;
-        }
-        else if (frequency == 6)
+        if (frequency == 2.4 || frequency == 5 || frequency == 6)
         {
             wifiStandard = WIFI_STANDARD_80211ax;
         }
@@ -2967,7 +2963,7 @@ main(int argc, char* argv[])
     Experiment experiment;
     WifiMacHelper wifiMac;
     double averageThroughput;
-    double throughputArray[trials];
+    std::vector<double> throughputArray(trials);
     for (uint32_t n = nMinStas; n <= nMaxStas; n += nStepSize)
     {
         averageThroughput = 0;

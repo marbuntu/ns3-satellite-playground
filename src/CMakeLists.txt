@@ -15,10 +15,41 @@ foreach(libname ${libs})
     message(STATUS "Processing src/${libname}")
     add_subdirectory(${libname})
   else()
-    message(
-      ${HIGHLIGHTED_STATUS}
-      "Skipping src/${libname} : it does not contain a CMakeLists.txt file"
+    message(${HIGHLIGHTED_STATUS}
+            "Skipping src/${libname}: it does not contain a CMakeLists.txt file"
     )
+  endif()
+endforeach()
+
+# Scan for disabled modules that define settings prefixed with NS3_ or ENABLE_
+# so that we can initialize them as turned off (setting as temporary variables
+# not to affect the cached variables that are set when normally processed)
+subdirlist(modules ${CMAKE_CURRENT_SOURCE_DIR})
+foreach(libname ${modules})
+  if(NOT (${libname} IN_LIST libs))
+    # Skip module directories without CMakeLists.txt files
+    if(NOT (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${libname}/CMakeLists.txt))
+      continue()
+    endif()
+
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/${libname}/CMakeLists.txt
+         lib_cmakelists_contents
+    )
+    string(REGEX MATCHALL "(NS3_[a-zA-Z0-9_]*)|(ENABLE_[a-zA-Z0-9_]*)" flags
+                 "${lib_cmakelists_contents}"
+    )
+    foreach(flag ${flags})
+      # Skip reason flags
+      if(${flag} MATCHES "REASON")
+        continue()
+      endif()
+      # Skip flags already defined
+      if(DEFINED ${flag})
+        continue()
+      endif()
+      # Set flag to off
+      set(${flag} OFF PARENT_SCOPE)
+    endforeach()
   endif()
 endforeach()
 
@@ -86,4 +117,8 @@ if(${NS3_MONOLIB})
   if(${NS3_CLANG_TIMETRACE})
     add_dependencies(timeTraceReport ${lib-ns3-monolib})
   endif()
+endif()
+
+if(${NS3_FETCH_OPTIONAL_COMPONENTS})
+  add_dependency_to_optional_modules_dependencies()
 endif()

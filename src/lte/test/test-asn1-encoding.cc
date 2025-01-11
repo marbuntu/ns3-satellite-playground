@@ -28,13 +28,15 @@
 #include "ns3/string.h"
 #include "ns3/test.h"
 
+#include <iomanip>
+#include <vector>
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("Asn1EncodingTest");
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Contains ASN encoding test utility functions.
  */
@@ -48,15 +50,14 @@ class TestUtils
      */
     static std::string sprintPacketContentsHex(Ptr<Packet> pkt)
     {
-        uint32_t psize = pkt->GetSize();
-        uint8_t buffer[psize];
-        char sbuffer[psize * 3];
-        pkt->CopyData(buffer, psize);
-        for (uint32_t i = 0; i < psize; i++)
+        std::vector<uint8_t> buffer(pkt->GetSize());
+        std::ostringstream oss(std::ostringstream::out);
+        pkt->CopyData(buffer.data(), buffer.size());
+        for (auto b : buffer)
         {
-            sprintf(&sbuffer[i * 3], "%02x ", buffer[i]);
+            oss << std::setfill('0') << std::setw(2) << std::hex << +b << " ";
         }
-        return std::string(sbuffer);
+        return std::string(oss.str() + "\n");
     }
 
     /**
@@ -66,13 +67,12 @@ class TestUtils
      */
     static std::string sprintPacketContentsBin(Ptr<Packet> pkt)
     {
-        uint32_t psize = pkt->GetSize();
-        uint8_t buffer[psize];
+        std::vector<uint8_t> buffer(pkt->GetSize());
         std::ostringstream oss(std::ostringstream::out);
-        pkt->CopyData(buffer, psize);
-        for (uint32_t i = 0; i < psize; i++)
+        pkt->CopyData(buffer.data(), buffer.size());
+        for (auto b : buffer)
         {
-            oss << (std::bitset<8>(buffer[i]));
+            oss << (std::bitset<8>(b));
         }
         return std::string(oss.str() + "\n");
     }
@@ -106,7 +106,6 @@ class TestUtils
 // --------------------------- CLASS RrcHeaderTestCase -----------------------------
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief This class provides common functions to be inherited
  * by the children TestCases
@@ -207,9 +206,9 @@ RrcHeaderTestCase::AssertEqualRadioResourceConfigDedicated(
                           "SrbToAddModList different sizes");
 
     std::list<LteRrcSap::SrbToAddMod> srcSrbToAddModList = rrcd1.srbToAddModList;
-    std::list<LteRrcSap::SrbToAddMod>::iterator it1 = srcSrbToAddModList.begin();
+    auto it1 = srcSrbToAddModList.begin();
     std::list<LteRrcSap::SrbToAddMod> dstSrbToAddModList = rrcd2.srbToAddModList;
-    std::list<LteRrcSap::SrbToAddMod>::iterator it2 = dstSrbToAddModList.begin();
+    auto it2 = dstSrbToAddModList.begin();
 
     for (; it1 != srcSrbToAddModList.end(); it1++, it2++)
     {
@@ -233,9 +232,9 @@ RrcHeaderTestCase::AssertEqualRadioResourceConfigDedicated(
                           "DrbToAddModList different sizes");
 
     std::list<LteRrcSap::DrbToAddMod> srcDrbToAddModList = rrcd1.drbToAddModList;
-    std::list<LteRrcSap::DrbToAddMod>::iterator it3 = srcDrbToAddModList.begin();
+    auto it3 = srcDrbToAddModList.begin();
     std::list<LteRrcSap::DrbToAddMod> dstDrbToAddModList = rrcd2.drbToAddModList;
-    std::list<LteRrcSap::DrbToAddMod>::iterator it4 = dstDrbToAddModList.begin();
+    auto it4 = dstDrbToAddModList.begin();
 
     for (; it3 != srcDrbToAddModList.end(); it3++, it4++)
     {
@@ -267,8 +266,8 @@ RrcHeaderTestCase::AssertEqualRadioResourceConfigDedicated(
 
     std::list<uint8_t> srcDrbToReleaseList = rrcd1.drbToReleaseList;
     std::list<uint8_t> dstDrbToReleaseList = rrcd2.drbToReleaseList;
-    std::list<uint8_t>::iterator it5 = srcDrbToReleaseList.begin();
-    std::list<uint8_t>::iterator it6 = dstDrbToReleaseList.begin();
+    auto it5 = srcDrbToReleaseList.begin();
+    auto it6 = dstDrbToReleaseList.begin();
 
     for (; it5 != srcDrbToReleaseList.end(); it5++, it6++)
     {
@@ -324,7 +323,6 @@ RrcHeaderTestCase::AssertEqualRadioResourceConfigDedicated(
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Request Test Case
  */
@@ -377,7 +375,6 @@ RrcConnectionRequestTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Setup Test Case
  */
@@ -435,7 +432,6 @@ RrcConnectionSetupTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Setup Complete Test Case
  */
@@ -489,7 +485,6 @@ RrcConnectionSetupCompleteTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Reconfiguration Complete Test Case
  */
@@ -544,7 +539,6 @@ RrcConnectionReconfigurationCompleteTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Reconfiguration Test Case
  */
@@ -566,7 +560,7 @@ RrcConnectionReconfigurationTestCase::DoRun()
     packet = Create<Packet>();
     NS_LOG_DEBUG("============= RrcConnectionReconfigurationTestCase ===========");
 
-    LteRrcSap::RrcConnectionReconfiguration msg;
+    LteRrcSap::RrcConnectionReconfiguration msg{};
     msg.rrcTransactionIdentifier = 2;
 
     msg.haveMeasConfig = true;
@@ -783,7 +777,6 @@ RrcConnectionReconfigurationTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Handover Preparation Info Test Case
  */
@@ -893,7 +886,6 @@ HandoverPreparationInfoTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Reestablishment Request Test Case
  */
@@ -953,7 +945,6 @@ RrcConnectionReestablishmentRequestTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Reestablishment Test Case
  */
@@ -1010,7 +1001,6 @@ RrcConnectionReestablishmentTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Reestablishment Complete Test Case
  */
@@ -1065,7 +1055,6 @@ RrcConnectionReestablishmentCompleteTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Rrc Connection Reject Test Case
  */
@@ -1119,7 +1108,6 @@ RrcConnectionRejectTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Measurement Report Test Case
  */
@@ -1197,8 +1185,8 @@ MeasurementReportTestCase::DoRun()
 
     if (srcMeas.haveMeasResultNeighCells)
     {
-        std::list<LteRrcSap::MeasResultEutra>::iterator itsrc = srcMeas.measResultListEutra.begin();
-        std::list<LteRrcSap::MeasResultEutra>::iterator itdst = dstMeas.measResultListEutra.begin();
+        auto itsrc = srcMeas.measResultListEutra.begin();
+        auto itdst = dstMeas.measResultListEutra.begin();
         for (; itsrc != srcMeas.measResultListEutra.end(); itsrc++, itdst++)
         {
             NS_TEST_ASSERT_MSG_EQ(itsrc->physCellId, itdst->physCellId, "Different physCellId!");
@@ -1221,8 +1209,8 @@ MeasurementReportTestCase::DoRun()
 
                 if (!itsrc->cgiInfo.plmnIdentityList.empty())
                 {
-                    std::list<uint32_t>::iterator itsrc2 = itsrc->cgiInfo.plmnIdentityList.begin();
-                    std::list<uint32_t>::iterator itdst2 = itdst->cgiInfo.plmnIdentityList.begin();
+                    auto itsrc2 = itsrc->cgiInfo.plmnIdentityList.begin();
+                    auto itdst2 = itdst->cgiInfo.plmnIdentityList.begin();
                     for (; itsrc2 != itsrc->cgiInfo.plmnIdentityList.begin(); itsrc2++, itdst2++)
                     {
                         NS_TEST_ASSERT_MSG_EQ(*itsrc2, *itdst2, "Different plmnId elements!");
@@ -1257,7 +1245,6 @@ MeasurementReportTestCase::DoRun()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Asn1Encoding Test Suite
  */
@@ -1268,20 +1255,24 @@ class Asn1EncodingSuite : public TestSuite
 };
 
 Asn1EncodingSuite::Asn1EncodingSuite()
-    : TestSuite("test-asn1-encoding", UNIT)
+    : TestSuite("test-asn1-encoding", Type::UNIT)
 {
     NS_LOG_FUNCTION(this);
-    AddTestCase(new RrcConnectionRequestTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionSetupTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionSetupCompleteTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionReconfigurationCompleteTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionReconfigurationTestCase(), TestCase::QUICK);
-    AddTestCase(new HandoverPreparationInfoTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionReestablishmentRequestTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionReestablishmentTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionReestablishmentCompleteTestCase(), TestCase::QUICK);
-    AddTestCase(new RrcConnectionRejectTestCase(), TestCase::QUICK);
-    AddTestCase(new MeasurementReportTestCase(), TestCase::QUICK);
+    AddTestCase(new RrcConnectionRequestTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionSetupTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionSetupCompleteTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionReconfigurationCompleteTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionReconfigurationTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new HandoverPreparationInfoTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionReestablishmentRequestTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionReestablishmentTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionReestablishmentCompleteTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new RrcConnectionRejectTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new MeasurementReportTestCase(), TestCase::Duration::QUICK);
 }
 
-Asn1EncodingSuite asn1EncodingSuite;
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
+Asn1EncodingSuite g_asn1EncodingSuite;

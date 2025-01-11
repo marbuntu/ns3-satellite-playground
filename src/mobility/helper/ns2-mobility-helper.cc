@@ -178,7 +178,7 @@ static bool IsSetInitialPos(ParseResult pr);
 /**
  * Check if this corresponds to a line like this: $ns_ at 1 "$node_(0) setdest 2 3 4"
  * \param pr the ParseResult to analyze
- * \returns true if the ParseResult looks like a coordinate with a scheduled time and destionation
+ * \returns true if the ParseResult looks like a coordinate with a scheduled time and destination
  */
 static bool IsSchedSetPos(ParseResult pr);
 
@@ -523,7 +523,7 @@ ParseNs2Line(const std::string& str)
     {
         std::string x;
         s >> x;
-        if (x.length() == 0)
+        if (x.empty())
         {
             continue;
         }
@@ -591,12 +591,12 @@ TrimNs2Line(const std::string& s)
 {
     std::string ret = s;
 
-    while (ret.size() > 0 && isblank(ret[0]))
+    while (!ret.empty() && isblank(ret[0]))
     {
         ret.erase(0, 1); // Removes blank spaces at the beginning of the line
     }
 
-    while (ret.size() > 0 && (isblank(ret[ret.size() - 1]) || (ret[ret.size() - 1] == ';')))
+    while (!ret.empty() && (isblank(ret[ret.size() - 1]) || (ret[ret.size() - 1] == ';')))
     {
         ret.erase(ret.size() - 1, 1); // Removes blank spaces from at end of line
     }
@@ -616,14 +616,14 @@ template <class T>
 bool
 IsVal(const std::string& str, T& ret)
 {
-    if (str.size() == 0)
+    if (str.empty())
     {
         return false;
     }
-    else if (IsNumber(str))
+
+    if (IsNumber(str))
     {
-        std::string s2 = str;
-        std::istringstream s(s2);
+        std::istringstream s(str);
         s >> ret;
         return true;
     }
@@ -651,15 +651,8 @@ HasNodeIdNumber(std::string str)
 
     nodeId = str.substr(startNodeId + 1, endNodeId - (startNodeId + 1)); // set node id
 
-    //   is number              is integer                                       is not negative
-    if (IsNumber(nodeId) && (nodeId.find_first_of('.') == std::string::npos) && (nodeId[0] != '-'))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    //     is number           is integer                                        is not negative
+    return IsNumber(nodeId) && nodeId.find_first_of('.') == std::string::npos && nodeId[0] != '-';
 }
 
 std::string
@@ -689,8 +682,6 @@ GetNodeIdInt(ParseResult pr)
         result = pr.ivals[0];
         break;
     case 7: // line like $ns_ at 4 "$node_(0) set X_ 28"
-        result = pr.ivals[3];
-        break;
     case 8: // line like $ns_ at 1 "$node_(0) setdest 2 3 4"
         result = pr.ivals[3];
         break;
@@ -708,13 +699,9 @@ GetNodeIdString(ParseResult pr)
     {
     case 4: // line like $node_(0) set X_ 11
         return pr.svals[0];
-        break;
     case 7: // line like $ns_ at 4 "$node_(0) set X_ 28"
-        return pr.svals[3];
-        break;
     case 8: // line like $ns_ at 1 "$node_(0) setdest 2 3 4"
         return pr.svals[3];
-        break;
     default:
         return "";
     }
@@ -746,7 +733,7 @@ bool
 IsSetInitialPos(ParseResult pr)
 {
     //        number of tokens         has $node_( ?                        has "set"           has
-    //        doble for position?
+    //        double for position?
     return pr.tokens.size() == 4 && HasNodeIdNumber(pr.tokens[0]) && pr.tokens[1] == NS2_SET &&
            pr.has_dval[3]
            // coord name is X_, Y_ or Z_ ?
@@ -865,7 +852,7 @@ SetSchedPosition(Ptr<ConstantVelocityMobilityModel> model,
     position.y = model->GetPosition().y;
     position.z = model->GetPosition().z;
 
-    // Chedule next positions
+    // Schedule next positions
     Simulator::Schedule(Seconds(at), &ConstantVelocityMobilityModel::SetPosition, model, position);
 
     return position;

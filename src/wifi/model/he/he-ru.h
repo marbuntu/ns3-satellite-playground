@@ -20,6 +20,8 @@
 #ifndef HE_RU_H
 #define HE_RU_H
 
+#include "ns3/wifi-phy-common.h"
+
 #include <cstdint>
 #include <map>
 #include <ostream>
@@ -97,24 +99,13 @@ class HeRu
          */
         bool GetPrimary80MHz() const;
         /**
-         * Set the RU PHY index
+         * Get the RU PHY index
          *
          * \param bw the width of the channel of which the RU is part (in MHz)
          * \param p20Index the index of the primary20 channel
-         */
-        void SetPhyIndex(uint16_t bw, uint8_t p20Index);
-        /**
-         * Return true if the RU PHY index has been set, false otherwise
-         *
-         * \return true if the RU PHY index has been set, false otherwise
-         */
-        bool IsPhyIndexSet() const;
-        /**
-         * Get the RU PHY index
-         *
          * \return the RU PHY index
          */
-        std::size_t GetPhyIndex() const;
+        std::size_t GetPhyIndex(ChannelWidthMhz bw, uint8_t p20Index) const;
 
         /**
          * Compare this RU to the given RU.
@@ -130,16 +121,47 @@ class HeRu
          * \return true if this RU differs from the given RU, false otherwise
          */
         bool operator!=(const RuSpec& other) const;
+        /**
+         * Compare this RU to the given RU.
+         *
+         * \param other the given RU
+         * \return true if this RU is smaller than the given RU, false otherwise
+         */
+        bool operator<(const RuSpec& other) const;
 
       private:
-        RuType m_ruType;        //!< RU type
-        std::size_t m_index;    /**< RU index (starting at 1) as defined by Tables 27-7
-                                     to 27-9 of 802.11ax D8.0 */
-        bool m_primary80MHz;    //!< true if the RU is allocated in the primary 80MHz channel
-        std::size_t m_phyIndex; /**< the RU PHY index, which is used to indicate whether an
-                                     RU is located in the lower half or the higher half of
-                                     a 160MHz channel. For channel widths less than 160MHz,
-                                     the RU PHY index equals the RU index */
+        RuType m_ruType;     //!< RU type
+        std::size_t m_index; /**< RU index (starting at 1) as defined by Tables 27-7
+                                  to 27-9 of 802.11ax D8.0 */
+        bool m_primary80MHz; //!< true if the RU is allocated in the primary 80MHz channel
+    };
+
+    /**
+     * Struct providing a function call operator to compare two RUs.
+     */
+    struct RuSpecCompare
+    {
+        /**
+         * Constructor.
+         *
+         * \param channelWidth the channel width in MHz
+         * \param p20Index the index of the primary20 channel
+         */
+        RuSpecCompare(ChannelWidthMhz channelWidth, uint8_t p20Index);
+        /**
+         * Function call operator.
+         *
+         * \param lhs left hand side RU
+         * \param rhs right hand side RU
+         * \return true if the left hand side RU has its leftmost tone at a lower
+         *         frequency than the leftmost tone of the right hand side RU,
+         *         false otherwise
+         */
+        bool operator()(const RuSpec& lhs, const RuSpec& rhs) const;
+
+      private:
+        ChannelWidthMhz m_channelWidth; ///< The channel width in MHz
+        uint8_t m_p20Index;             ///< Primary20 channel index
     };
 
     /**
@@ -150,7 +172,7 @@ class HeRu
      * \param ruType the RU type (number of tones)
      * \return the number of distinct RUs available
      */
-    static std::size_t GetNRus(uint16_t bw, RuType ruType);
+    static std::size_t GetNRus(ChannelWidthMhz bw, RuType ruType);
 
     /**
      * Get the set of distinct RUs of the given type (number of tones)
@@ -160,7 +182,7 @@ class HeRu
      * \param ruType the RU type (number of tones)
      * \return the set of distinct RUs available
      */
-    static std::vector<HeRu::RuSpec> GetRusOfType(uint16_t bw, HeRu::RuType ruType);
+    static std::vector<HeRu::RuSpec> GetRusOfType(ChannelWidthMhz bw, HeRu::RuType ruType);
 
     /**
      * Get the set of 26-tone RUs that can be additionally allocated if the given
@@ -170,7 +192,7 @@ class HeRu
      * \param ruType the RU type (number of tones)
      * \return the set of 26-tone RUs that can be additionally allocated
      */
-    static std::vector<HeRu::RuSpec> GetCentral26TonesRus(uint16_t bw, HeRu::RuType ruType);
+    static std::vector<HeRu::RuSpec> GetCentral26TonesRus(ChannelWidthMhz bw, HeRu::RuType ruType);
 
     /**
      * Get the subcarrier group of the RU having the given PHY index among all the
@@ -186,7 +208,9 @@ class HeRu
      * \param phyIndex the PHY index (starting at 1) of the RU
      * \return the subcarrier range of the specified RU
      */
-    static SubcarrierGroup GetSubcarrierGroup(uint16_t bw, RuType ruType, std::size_t phyIndex);
+    static SubcarrierGroup GetSubcarrierGroup(ChannelWidthMhz bw,
+                                              RuType ruType,
+                                              std::size_t phyIndex);
 
     /**
      * Check whether the given RU overlaps with the given set of RUs.
@@ -198,7 +222,7 @@ class HeRu
      * \param v the given set of RUs
      * \return true if the given RU overlaps with the given set of RUs.
      */
-    static bool DoesOverlap(uint16_t bw, RuSpec ru, const std::vector<RuSpec>& v);
+    static bool DoesOverlap(ChannelWidthMhz bw, RuSpec ru, const std::vector<RuSpec>& v);
 
     /**
      * Check whether the given RU overlaps with the given tone ranges.
@@ -208,9 +232,13 @@ class HeRu
      * \param bw the bandwidth (MHz) of the HE PPDU (20, 40, 80, 160)
      * \param ru the given RU allocation
      * \param toneRanges the given set of tone ranges
+     * \param p20Index the index of the primary20 channel
      * \return true if the given RU overlaps with the given set of tone ranges.
      */
-    static bool DoesOverlap(uint16_t bw, RuSpec ru, const SubcarrierGroup& toneRanges);
+    static bool DoesOverlap(ChannelWidthMhz bw,
+                            RuSpec ru,
+                            const SubcarrierGroup& toneRanges,
+                            uint8_t p20Index);
 
     /**
      * Find the RU allocation of the given RU type overlapping the given
@@ -222,7 +250,7 @@ class HeRu
      * \param searchedRuType the searched RU type
      * \return the searched RU allocation.
      */
-    static RuSpec FindOverlappingRu(uint16_t bw, RuSpec referenceRu, RuType searchedRuType);
+    static RuSpec FindOverlappingRu(ChannelWidthMhz bw, RuSpec referenceRu, RuType searchedRuType);
 
     /**
      * Get the approximate bandwidth occupied by a RU.
@@ -230,7 +258,7 @@ class HeRu
      * \param ruType the RU type
      * \return the approximate bandwidth (in MHz) occupied by the RU
      */
-    static uint16_t GetBandwidth(RuType ruType);
+    static ChannelWidthMhz GetBandwidth(RuType ruType);
 
     /**
      * Get the RU corresponding to the approximate bandwidth.
@@ -238,7 +266,7 @@ class HeRu
      * \param bandwidth the approximate bandwidth (in MHz) occupied by the RU
      * \return the RU type
      */
-    static RuType GetRuType(uint16_t bandwidth);
+    static RuType GetRuType(ChannelWidthMhz bandwidth);
 
     /**
      * Given the channel bandwidth and the number of stations candidate for being
@@ -253,12 +281,12 @@ class HeRu
      *                                allocated if the returned RU size is greater than 26 tones
      * \return the RU type
      */
-    static RuType GetEqualSizedRusForStations(uint16_t bandwidth,
+    static RuType GetEqualSizedRusForStations(ChannelWidthMhz bandwidth,
                                               std::size_t& nStations,
                                               std::size_t& nCentral26TonesRus);
 
     /// (bandwidth, number of tones) pair
-    typedef std::pair<uint8_t, RuType> BwTonesPair;
+    typedef std::pair<ChannelWidthMhz, RuType> BwTonesPair;
 
     /// map (bandwidth, number of tones) pairs to the group of subcarrier ranges
     typedef std::map<BwTonesPair, std::vector<SubcarrierGroup>> SubcarrierGroups;

@@ -20,9 +20,10 @@
 #ifndef LTE_RLC_AM_H
 #define LTE_RLC_AM_H
 
+#include "lte-rlc-sequence-number.h"
+#include "lte-rlc.h"
+
 #include <ns3/event-id.h>
-#include <ns3/lte-rlc-sequence-number.h>
-#include <ns3/lte-rlc.h>
 
 #include <map>
 #include <vector>
@@ -222,12 +223,12 @@ class LteRlcAm : public LteRlc
     /**
      * SDU Reassembling state
      */
-    typedef enum
+    enum ReassemblingState_t
     {
         NONE = 0,
         WAITING_S0_FULL = 1,
         WAITING_SI_SF = 2
-    } ReassemblingState_t;
+    };
 
     ReassemblingState_t m_reassemblingState; ///< reassembling state
     Ptr<Packet> m_keepS0;                    ///< keep S0

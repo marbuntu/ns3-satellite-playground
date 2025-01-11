@@ -26,7 +26,7 @@ SOURCES = \
 	source/hash-functions.rst \
 	source/helpers.rst \
 	source/how-to-write-tests.rst \
-	source/logging.rst \
+	source/logging-asserts.rst \
 	source/new-models.rst \
 	source/new-modules.rst \
 	source/object-model.rst \
@@ -45,8 +45,8 @@ SOURCES = \
 	source/tracing.rst \
 	source/troubleshoot.rst \
 	source/utilities.rst \
-	source/windows.rst \
 	source/working-with-cmake.rst \
+	source/working-with-docker.rst \
 	source/working-with-git.rst \
 	source/working-with-gitlab-ci-local.rst \
 	${SRC}/stats/doc/data-collection.rst \
@@ -78,7 +78,7 @@ SOURCEFIGS = \
 	figures/hotspot-setup.png \
 	figures/hotspot-top-down.png \
 	figures/perfetto-trace-cmake.png \
-	figures/uprof-collect-callstack.png \
+	figures/time-consuming-event-handling.png \
 	figures/uprof-collect-callstack.png \
 	figures/uprof-profile-application.png \
 	figures/uprof-select-events.png \
@@ -136,7 +136,7 @@ RESCALE = ../../utils/rescale-pdf.sh
 	@if test x$($@_width) != x; then $(RESCALE) $($@_width) $@ ; fi
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
+SPHINXOPTS    = -W --keep-going
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = build

@@ -239,8 +239,7 @@ VectorTlvValue::VectorTlvValue()
 
 VectorTlvValue::~VectorTlvValue()
 {
-    for (std::vector<Tlv*>::const_iterator iter = m_tlvList->begin(); iter != m_tlvList->end();
-         ++iter)
+    for (auto iter = m_tlvList->begin(); iter != m_tlvList->end(); ++iter)
     {
         delete (*iter);
     }
@@ -252,8 +251,7 @@ uint32_t
 VectorTlvValue::GetSerializedSize() const
 {
     uint32_t size = 0;
-    for (std::vector<Tlv*>::const_iterator iter = m_tlvList->begin(); iter != m_tlvList->end();
-         ++iter)
+    for (auto iter = m_tlvList->begin(); iter != m_tlvList->end(); ++iter)
     {
         size += (*iter)->GetSerializedSize();
     }
@@ -263,8 +261,7 @@ VectorTlvValue::GetSerializedSize() const
 void
 VectorTlvValue::Serialize(Buffer::Iterator i) const
 {
-    for (std::vector<Tlv*>::const_iterator iter = m_tlvList->begin(); iter != m_tlvList->end();
-         ++iter)
+    for (auto iter = m_tlvList->begin(); iter != m_tlvList->end(); ++iter)
     {
         (*iter)->Serialize(i);
         i.Next((*iter)->GetSerializedSize());
@@ -297,8 +294,8 @@ SfVectorTlvValue::SfVectorTlvValue()
 SfVectorTlvValue*
 SfVectorTlvValue::Copy() const
 {
-    SfVectorTlvValue* tmp = new SfVectorTlvValue();
-    for (std::vector<Tlv*>::const_iterator iter = Begin(); iter != End(); ++iter)
+    auto tmp = new SfVectorTlvValue();
+    for (auto iter = Begin(); iter != End(); ++iter)
     {
         tmp->Add(Tlv((*iter)->GetType(), (*iter)->GetLength(), *(*iter)->PeekValue()));
     }
@@ -441,19 +438,12 @@ SfVectorTlvValue::Deserialize(Buffer::Iterator i, uint64_t valueLen)
             break;
         }
         case ARQ_RETRY_TIMEOUT_Transmitter_Delay:
-            break;
         case ARQ_RETRY_TIMEOUT_Receiver_Delay:
-            break;
         case ARQ_BLOCK_LIFETIME:
-            break;
         case ARQ_SYNC_LOSS:
-            break;
         case ARQ_DELIVER_IN_ORDER:
-            break;
         case ARQ_PURGE_TIMEOUT:
-            break;
         case ARQ_BLOCK_SIZE:
-            break;
         case reserved2:
             break;
         case CS_Specification: {
@@ -528,7 +518,7 @@ U8TlvValue::GetValue() const
 U8TlvValue*
 U8TlvValue::Copy() const
 {
-    U8TlvValue* tmp = new U8TlvValue(m_value);
+    auto tmp = new U8TlvValue(m_value);
     return tmp;
 }
 
@@ -581,7 +571,7 @@ U16TlvValue::GetValue() const
 U16TlvValue*
 U16TlvValue::Copy() const
 {
-    U16TlvValue* tmp = new U16TlvValue(m_value);
+    auto tmp = new U16TlvValue(m_value);
     return tmp;
 }
 
@@ -634,7 +624,7 @@ U32TlvValue::GetValue() const
 U32TlvValue*
 U32TlvValue::Copy() const
 {
-    U32TlvValue* tmp = new U32TlvValue(m_value);
+    auto tmp = new U32TlvValue(m_value);
     return tmp;
 }
 
@@ -693,8 +683,8 @@ CsParamVectorTlvValue::CsParamVectorTlvValue()
 CsParamVectorTlvValue*
 CsParamVectorTlvValue::Copy() const
 {
-    CsParamVectorTlvValue* tmp = new CsParamVectorTlvValue();
-    for (std::vector<Tlv*>::const_iterator iter = Begin(); iter != End(); ++iter)
+    auto tmp = new CsParamVectorTlvValue();
+    for (auto iter = Begin(); iter != End(); ++iter)
     {
         tmp->Add(Tlv((*iter)->GetType(), (*iter)->GetLength(), *(*iter)->PeekValue()));
     }
@@ -710,8 +700,8 @@ ClassificationRuleVectorTlvValue::ClassificationRuleVectorTlvValue()
 ClassificationRuleVectorTlvValue*
 ClassificationRuleVectorTlvValue::Copy() const
 {
-    ClassificationRuleVectorTlvValue* tmp = new ClassificationRuleVectorTlvValue();
-    for (std::vector<Tlv*>::const_iterator iter = Begin(); iter != End(); ++iter)
+    auto tmp = new ClassificationRuleVectorTlvValue();
+    for (auto iter = Begin(); iter != End(); ++iter)
     {
         tmp->Add(Tlv((*iter)->GetType(), (*iter)->GetLength(), *(*iter)->PeekValue()));
     }
@@ -870,7 +860,7 @@ TosTlvValue::Copy() const
 // ==============================================================================
 PortRangeTlvValue::PortRangeTlvValue()
 {
-    m_portRange = new std::vector<struct PortRange>;
+    m_portRange = new std::vector<PortRange>;
 }
 
 PortRangeTlvValue::~PortRangeTlvValue()
@@ -888,9 +878,7 @@ PortRangeTlvValue::GetSerializedSize() const
 void
 PortRangeTlvValue::Serialize(Buffer::Iterator i) const
 {
-    for (std::vector<struct PortRange>::const_iterator iter = m_portRange->begin();
-         iter != m_portRange->end();
-         ++iter)
+    for (auto iter = m_portRange->begin(); iter != m_portRange->end(); ++iter)
     {
         i.WriteHtonU16((*iter).PortLow);
         i.WriteHtonU16((*iter).PortHigh);
@@ -914,7 +902,7 @@ PortRangeTlvValue::Deserialize(Buffer::Iterator i, uint64_t valueLength)
 void
 PortRangeTlvValue::Add(uint16_t portLow, uint16_t portHigh)
 {
-    struct PortRange tmp;
+    PortRange tmp;
     tmp.PortLow = portLow;
     tmp.PortHigh = portHigh;
     m_portRange->push_back(tmp);
@@ -935,10 +923,8 @@ PortRangeTlvValue::End() const
 PortRangeTlvValue*
 PortRangeTlvValue::Copy() const
 {
-    PortRangeTlvValue* tmp = new PortRangeTlvValue();
-    for (std::vector<struct PortRange>::const_iterator iter = m_portRange->begin();
-         iter != m_portRange->end();
-         ++iter)
+    auto tmp = new PortRangeTlvValue();
+    for (auto iter = m_portRange->begin(); iter != m_portRange->end(); ++iter)
     {
         tmp->Add((*iter).PortLow, (*iter).PortHigh);
     }
@@ -971,10 +957,9 @@ ProtocolTlvValue::GetSerializedSize() const
 void
 ProtocolTlvValue::Serialize(Buffer::Iterator i) const
 {
-    for (std::vector<uint8_t>::const_iterator iter = m_protocol->begin(); iter != m_protocol->end();
-         ++iter)
+    for (auto iter = m_protocol->begin(); iter != m_protocol->end(); ++iter)
     {
-        i.WriteU8((*iter));
+        i.WriteU8(*iter);
     }
 }
 
@@ -1011,11 +996,10 @@ ProtocolTlvValue::End() const
 ProtocolTlvValue*
 ProtocolTlvValue::Copy() const
 {
-    ProtocolTlvValue* tmp = new ProtocolTlvValue();
-    for (std::vector<uint8_t>::const_iterator iter = m_protocol->begin(); iter != m_protocol->end();
-         ++iter)
+    auto tmp = new ProtocolTlvValue();
+    for (auto iter = m_protocol->begin(); iter != m_protocol->end(); ++iter)
     {
-        tmp->Add((*iter));
+        tmp->Add(*iter);
     }
     return tmp;
 }
@@ -1024,7 +1008,7 @@ ProtocolTlvValue::Copy() const
 
 Ipv4AddressTlvValue::Ipv4AddressTlvValue()
 {
-    m_ipv4Addr = new std::vector<struct ipv4Addr>;
+    m_ipv4Addr = new std::vector<Ipv4Addr>;
 }
 
 Ipv4AddressTlvValue::~Ipv4AddressTlvValue()
@@ -1046,9 +1030,7 @@ Ipv4AddressTlvValue::GetSerializedSize() const
 void
 Ipv4AddressTlvValue::Serialize(Buffer::Iterator i) const
 {
-    for (std::vector<struct ipv4Addr>::const_iterator iter = m_ipv4Addr->begin();
-         iter != m_ipv4Addr->end();
-         ++iter)
+    for (auto iter = m_ipv4Addr->begin(); iter != m_ipv4Addr->end(); ++iter)
     {
         i.WriteHtonU32((*iter).Address.Get());
         i.WriteHtonU32((*iter).Mask.Get());
@@ -1070,12 +1052,9 @@ Ipv4AddressTlvValue::Deserialize(Buffer::Iterator i, uint64_t valueLength)
 }
 
 void
-Ipv4AddressTlvValue::Add(Ipv4Address address, Ipv4Mask Mask)
+Ipv4AddressTlvValue::Add(Ipv4Address address, Ipv4Mask mask)
 {
-    struct ipv4Addr tmp;
-    tmp.Address = address;
-    tmp.Mask = Mask;
-    m_ipv4Addr->push_back(tmp);
+    m_ipv4Addr->push_back({address, mask});
 }
 
 Ipv4AddressTlvValue::Iterator
@@ -1093,10 +1072,8 @@ Ipv4AddressTlvValue::End() const
 Ipv4AddressTlvValue*
 Ipv4AddressTlvValue::Copy() const
 {
-    Ipv4AddressTlvValue* tmp = new Ipv4AddressTlvValue();
-    for (std::vector<struct ipv4Addr>::const_iterator iter = m_ipv4Addr->begin();
-         iter != m_ipv4Addr->end();
-         ++iter)
+    auto tmp = new Ipv4AddressTlvValue();
+    for (auto iter = m_ipv4Addr->begin(); iter != m_ipv4Addr->end(); ++iter)
     {
         tmp->Add((*iter).Address, (*iter).Mask);
     }

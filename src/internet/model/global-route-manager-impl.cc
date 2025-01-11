@@ -26,14 +26,13 @@
 #include "candidate-queue.h"
 #include "global-router-interface.h"
 #include "ipv4-global-routing.h"
+#include "ipv4.h"
 
 #include "ns3/assert.h"
 #include "ns3/fatal-error.h"
-#include "ns3/ipv4-list-routing.h"
-#include "ns3/ipv4-routing-protocol.h"
-#include "ns3/ipv4.h"
 #include "ns3/log.h"
 #include "ns3/node-list.h"
+#include "ns3/simulator.h"
 
 #include <algorithm>
 #include <iostream>
@@ -63,9 +62,8 @@ operator<<(std::ostream& os, const SPFVertex::NodeExit_t& exit)
 std::ostream&
 operator<<(std::ostream& os, const SPFVertex::ListOfSPFVertex_t& vs)
 {
-    typedef SPFVertex::ListOfSPFVertex_t::const_iterator CIter_t;
     os << "{";
-    for (CIter_t iter = vs.begin(); iter != vs.end();)
+    for (auto iter = vs.begin(); iter != vs.end();)
     {
         os << (*iter)->m_vertexId;
         if (++iter != vs.end())
@@ -130,11 +128,11 @@ SPFVertex::~SPFVertex()
     NS_LOG_FUNCTION(this);
 
     NS_LOG_LOGIC("Children vertices - " << m_children);
-    NS_LOG_LOGIC("Parent verteices - " << m_parents);
+    NS_LOG_LOGIC("Parent vertices - " << m_parents);
 
     // find this node from all its parents and remove the entry of this node
     // from all its parents
-    for (ListOfSPFVertex_t::iterator piter = m_parents.begin(); piter != m_parents.end(); piter++)
+    for (auto piter = m_parents.begin(); piter != m_parents.end(); piter++)
     {
         // remove the current vertex from its parent's children list. Check
         // if the size of the list is reduced, or the child<->parent relation
@@ -150,7 +148,7 @@ SPFVertex::~SPFVertex()
     }
 
     // delete children
-    while (m_children.size() > 0)
+    while (!m_children.empty())
     {
         // pop out children one by one. Some children may disappear
         // when deleting some other children in the list. As a result,
@@ -256,7 +254,7 @@ SPFVertex::GetParent(uint32_t i) const
         NS_LOG_LOGIC("Index to SPFVertex's parent is out-of-range.");
         return nullptr;
     }
-    ListOfSPFVertex_t::const_iterator iter = m_parents.begin();
+    auto iter = m_parents.begin();
     while (i-- > 0)
     {
         iter++;
@@ -286,7 +284,7 @@ SPFVertex::SetRootExitDirection(Ipv4Address nextHop, int32_t id)
     // always maintain only one root's exit
     m_ecmpRootExits.clear();
     m_ecmpRootExits.emplace_back(nextHop, id);
-    // update the following in order to be backward compatitable with
+    // update the following in order to be backward compatible with
     // GetNextHop and GetOutgoingInterface methods
     m_nextHop = nextHop;
     m_rootOif = id;
@@ -303,11 +301,10 @@ SPFVertex::NodeExit_t
 SPFVertex::GetRootExitDirection(uint32_t i) const
 {
     NS_LOG_FUNCTION(this << i);
-    typedef ListOfNodeExit_t::const_iterator CIter_t;
 
     NS_ASSERT_MSG(i < m_ecmpRootExits.size(),
                   "Index out-of-range when accessing SPFVertex::m_ecmpRootExits!");
-    CIter_t iter = m_ecmpRootExits.begin();
+    auto iter = m_ecmpRootExits.begin();
     while (i-- > 0)
     {
         iter++;
@@ -347,7 +344,7 @@ SPFVertex::InheritAllRootExitDirections(const SPFVertex* vertex)
 
     // discard all exit direction currently associated with this vertex,
     // and copy all the exit directions from the given vertex
-    if (m_ecmpRootExits.size() > 0)
+    if (!m_ecmpRootExits.empty())
     {
         NS_LOG_WARN("x root exit directions in this vertex are going to be discarded");
     }
@@ -377,7 +374,7 @@ SPFVertex::GetChild(uint32_t n) const
     NS_LOG_FUNCTION(this << n);
     uint32_t j = 0;
 
-    for (ListOfSPFVertex_t::const_iterator i = m_children.begin(); i != m_children.end(); i++, j++)
+    for (auto i = m_children.begin(); i != m_children.end(); i++, j++)
     {
         if (j == n)
         {
@@ -437,8 +434,7 @@ GlobalRouteManagerLSDB::GlobalRouteManagerLSDB()
 GlobalRouteManagerLSDB::~GlobalRouteManagerLSDB()
 {
     NS_LOG_FUNCTION(this);
-    LSDBMap_t::iterator i;
-    for (i = m_database.begin(); i != m_database.end(); i++)
+    for (auto i = m_database.begin(); i != m_database.end(); i++)
     {
         NS_LOG_LOGIC("free LSA");
         GlobalRoutingLSA* temp = i->second;
@@ -458,8 +454,7 @@ void
 GlobalRouteManagerLSDB::Initialize()
 {
     NS_LOG_FUNCTION(this);
-    LSDBMap_t::iterator i;
-    for (i = m_database.begin(); i != m_database.end(); i++)
+    for (auto i = m_database.begin(); i != m_database.end(); i++)
     {
         GlobalRoutingLSA* temp = i->second;
         temp->SetStatus(GlobalRoutingLSA::LSA_SPF_NOT_EXPLORED);
@@ -501,8 +496,7 @@ GlobalRouteManagerLSDB::GetLSA(Ipv4Address addr) const
     //
     // Look up an LSA by its address.
     //
-    LSDBMap_t::const_iterator i;
-    for (i = m_database.begin(); i != m_database.end(); i++)
+    for (auto i = m_database.begin(); i != m_database.end(); i++)
     {
         if (i->first == addr)
         {
@@ -519,8 +513,7 @@ GlobalRouteManagerLSDB::GetLSAByLinkData(Ipv4Address addr) const
     //
     // Look up an LSA by its address.
     //
-    LSDBMap_t::const_iterator i;
-    for (i = m_database.begin(); i != m_database.end(); i++)
+    for (auto i = m_database.begin(); i != m_database.end(); i++)
     {
         GlobalRoutingLSA* temp = i->second;
         // Iterate among temp's Link Records
@@ -574,8 +567,7 @@ void
 GlobalRouteManagerImpl::DeleteGlobalRoutes()
 {
     NS_LOG_FUNCTION(this);
-    NodeList::Iterator listEnd = NodeList::End();
-    for (NodeList::Iterator i = NodeList::Begin(); i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
         Ptr<GlobalRouter> router = node->GetObject<GlobalRouter>();
@@ -622,8 +614,7 @@ GlobalRouteManagerImpl::BuildGlobalRoutingDatabase()
     // Walk the list of nodes looking for the GlobalRouter Interface.  Nodes with
     // global router interfaces are, not too surprisingly, our routers.
     //
-    NodeList::Iterator listEnd = NodeList::End();
-    for (NodeList::Iterator i = NodeList::Begin(); i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
 
@@ -649,7 +640,7 @@ GlobalRouteManagerImpl::BuildGlobalRoutingDatabase()
 
         for (uint32_t j = 0; j < numLSAs; ++j)
         {
-            GlobalRoutingLSA* lsa = new GlobalRoutingLSA();
+            auto lsa = new GlobalRoutingLSA();
             //
             // This is the call to actually fetch a Link State Advertisement from the
             // router.
@@ -705,8 +696,7 @@ GlobalRouteManagerImpl::InitializeRoutes()
     // Walk the list of nodes in the system.
     //
     NS_LOG_INFO("About to start SPF calculation");
-    NodeList::Iterator listEnd = NodeList::End();
-    for (NodeList::Iterator i = NodeList::Begin(); i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
         //
@@ -1033,7 +1023,7 @@ GlobalRouteManagerImpl::SPFNexthopCalculation(SPFVertex* v,
             //
             // In the case of point-to-point links, the link data field (m_linkData) of a
             // Global Router Link Record contains the local IP address.  If we look at the
-            // link record describing the link from the perspecive of <w> (the remote
+            // link record describing the link from the perspective of <w> (the remote
             // node from the viewpoint of <v>) back to the root node, we can discover the
             // IP address of the router to which <v> is adjacent.  This is a distinguished
             // address -- the next hop address to get from <v> to <w> and all networks
@@ -1137,7 +1127,7 @@ GlobalRouteManagerImpl::SPFNexthopCalculation(SPFVertex* v,
         // Above, when we were considering the root node, we calculated the next hop
         // address and outgoing interface required to get off of the root network.
         // At this point, we are further away from the root network along one of the
-        // (shortest) paths.  So the next hop and outoing interface remain the same
+        // (shortest) paths.  So the next hop and outgoing interface remain the same
         // (are inherited).
         //
         w->InheritAllRootExitDirections(v);
@@ -1216,7 +1206,7 @@ GlobalRouteManagerImpl::SPFGetNextLink(SPFVertex* v,
             // skipped a previous link and moved forward to the next (which is then the
             // one we want).
             //
-            if (skip == false)
+            if (!skip)
             {
                 NS_LOG_LOGIC("Returning the found link");
                 return l;
@@ -1264,12 +1254,8 @@ GlobalRouteManagerImpl::CheckForStubNode(Ipv4Address root)
     for (uint32_t i = 0; i < rlsa->GetNLinkRecords(); i++)
     {
         GlobalRoutingLinkRecord* l = rlsa->GetLinkRecord(i);
-        if (l->GetLinkType() == GlobalRoutingLinkRecord::TransitNetwork)
-        {
-            transits++;
-            transitLink = l;
-        }
-        else if (l->GetLinkType() == GlobalRoutingLinkRecord::PointToPoint)
+        if (l->GetLinkType() == GlobalRoutingLinkRecord::TransitNetwork ||
+            l->GetLinkType() == GlobalRoutingLinkRecord::PointToPoint)
         {
             transits++;
             transitLink = l;
@@ -1562,9 +1548,7 @@ GlobalRouteManagerImpl::SPFAddASExternal(GlobalRoutingLSA* extlsa, SPFVertex* v)
     // ID corresponding to the root vertex.  This is the one we're going to write
     // the routing information to.
     //
-    NodeList::Iterator i = NodeList::Begin();
-    NodeList::Iterator listEnd = NodeList::End();
-    for (; i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
         //
@@ -1702,7 +1686,7 @@ GlobalRouteManagerImpl::SPFIntraAddStub(GlobalRoutingLinkRecord* l, SPFVertex* v
 
     NS_ASSERT_MSG(m_spfroot, "GlobalRouteManagerImpl::SPFIntraAddStub (): Root pointer not set");
 
-    // XXX simplifed logic for the moment.  There are two cases to consider:
+    // XXX simplified logic for the moment.  There are two cases to consider:
     // 1) the stub network is on this router; do nothing for now
     //    (already handled above)
     // 2) the stub network is on a remote router, so I should use the
@@ -1728,9 +1712,7 @@ GlobalRouteManagerImpl::SPFIntraAddStub(GlobalRoutingLinkRecord* l, SPFVertex* v
     // ID corresponding to the root vertex.  This is the one we're going to write
     // the routing information to.
     //
-    NodeList::Iterator i = NodeList::Begin();
-    NodeList::Iterator listEnd = NodeList::End();
-    for (; i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
         //
@@ -1850,9 +1832,7 @@ GlobalRouteManagerImpl::FindOutgoingInterfaceId(Ipv4Address a, Ipv4Mask amask)
     // the node at the root of the SPF tree.  This is the node for which we are
     // building the routing table.
     //
-    NodeList::Iterator i = NodeList::Begin();
-    NodeList::Iterator listEnd = NodeList::End();
-    for (; i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
 
@@ -1939,9 +1919,7 @@ GlobalRouteManagerImpl::SPFIntraAddRouter(SPFVertex* v)
     // ID corresponding to the root vertex.  This is the one we're going to write
     // the routing information to.
     //
-    NodeList::Iterator i = NodeList::Begin();
-    NodeList::Iterator listEnd = NodeList::End();
-    for (; i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
         //
@@ -1990,7 +1968,7 @@ GlobalRouteManagerImpl::SPFIntraAddRouter(SPFVertex* v)
             //
             // Iterate through the link records on the vertex to which we're going to add
             // routes.  To make sure we're being clear, we're going to add routing table
-            // entries to the tables on the node corresping to the root of the SPF tree.
+            // entries to the tables on the node corresponding to the root of the SPF tree.
             // These entries will have routes to the IP addresses we find from looking at
             // the local side of the point-to-point links found on the node described by
             // the vertex <v>.
@@ -2083,9 +2061,7 @@ GlobalRouteManagerImpl::SPFIntraAddTransit(SPFVertex* v)
     // ID corresponding to the root vertex.  This is the one we're going to write
     // the routing information to.
     //
-    NodeList::Iterator i = NodeList::Begin();
-    NodeList::Iterator listEnd = NodeList::End();
-    for (; i != listEnd; i++)
+    for (auto i = NodeList::Begin(); i != NodeList::End(); i++)
     {
         Ptr<Node> node = *i;
         //

@@ -19,7 +19,8 @@
 
 /**
  * \file uan-rc-example.cc
- * \ingroup UAN
+ * \ingroup uan
+ *
  * This example uses UanMacRc and UanMacRcGw which combined form a system
  * using what is referred to as RC-MAC.  Details of RC-MAC will be published
  * soon.  In brief terms, RC-MAC is a dual channel protocol wherein the
@@ -95,7 +96,7 @@ Experiment::ReceivePacket(Ptr<Socket> socket)
 }
 
 UanTxMode
-Experiment::CreateMode(uint32_t kass, uint32_t fc, bool upperblock, std::string name)
+Experiment::CreateMode(uint32_t kass, uint32_t fc, bool upperblock, std::string name) const
 {
     std::ostringstream buf;
     buf << name << " " << kass;
@@ -307,4 +308,6 @@ main(int argc, char* argv[])
         NS_FATAL_ERROR("Can not open GNU Plot outfile: " << exp.m_gnuplotfile);
     }
     gp.GenerateOutput(of);
+
+    return 0;
 }

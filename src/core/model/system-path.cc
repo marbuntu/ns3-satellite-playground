@@ -19,37 +19,17 @@
 #include "system-path.h"
 
 #include "assert.h"
+#include "environment-variable.h"
 #include "fatal-error.h"
 #include "log.h"
+#include "string.h"
 
 #include <algorithm>
-#include <cstdlib> // getenv
-#include <cstring> // strlen
 #include <ctime>
+#include <filesystem>
 #include <regex>
 #include <sstream>
 #include <tuple>
-
-// Some compilers such as GCC < 8 (Ubuntu 18.04
-// ships with GCC 7) do not ship with the
-// std::filesystem header,  but with the
-// std::experimental::filesystem header.
-// Since Clang reuses these headers and the libstdc++
-// from GCC, we need to either use the experimental
-// version or require a more up-to-date GCC.
-// we use the "fs" namespace to prevent collisions
-// with musl libc.
-#ifdef __has_include
-#if __has_include(<filesystem>)
-#include <filesystem>
-namespace fs = std::filesystem;
-#elif __has_include(<experimental/filesystem>)
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#else
-#error "No support for filesystem library"
-#endif
-#endif
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -61,6 +41,7 @@ namespace fs = std::experimental::filesystem;
 #endif
 
 #ifdef __linux__
+#include <cstring>
 #include <unistd.h>
 #endif
 
@@ -106,13 +87,13 @@ ReadFilesNoThrow(std::string path)
 {
     NS_LOG_FUNCTION(path);
     std::list<std::string> files;
-    if (!fs::exists(path))
+    if (!std::filesystem::exists(path))
     {
         return std::make_tuple(files, true);
     }
-    for (auto& it : fs::directory_iterator(path))
+    for (auto& it : std::filesystem::directory_iterator(path))
     {
-        if (!fs::is_directory(it.path()))
+        if (!std::filesystem::is_directory(it.path()))
         {
             files.push_back(it.path().filename().string());
         }
@@ -140,7 +121,7 @@ Dirname(std::string path)
 {
     NS_LOG_FUNCTION(path);
     std::list<std::string> elements = Split(path);
-    std::list<std::string>::const_iterator last = elements.end();
+    auto last = elements.end();
     last--;
     return Join(elements.begin(), last);
 }
@@ -188,7 +169,7 @@ FindSelfDirectory()
     {
         //  LPTSTR = char *
         DWORD size = 1024;
-        LPTSTR lpFilename = (LPTSTR)malloc(sizeof(TCHAR) * size);
+        auto lpFilename = (LPTSTR)malloc(sizeof(TCHAR) * size);
         DWORD status = GetModuleFileName(nullptr, lpFilename, size);
         while (status == size)
         {
@@ -257,19 +238,8 @@ std::list<std::string>
 Split(std::string path)
 {
     NS_LOG_FUNCTION(path);
-    std::list<std::string> retval;
-    std::string::size_type current = 0;
-    std::string::size_type next = 0;
-    next = path.find(SYSTEM_PATH_SEP, current);
-    while (next != std::string::npos)
-    {
-        std::string item = path.substr(current, next - current);
-        retval.push_back(item);
-        current = next + 1;
-        next = path.find(SYSTEM_PATH_SEP, current);
-    }
-    std::string item = path.substr(current, next - current);
-    retval.push_back(item);
+    std::vector<std::string> items = SplitString(path, SYSTEM_PATH_SEP);
+    std::list<std::string> retval(items.begin(), items.end());
     return retval;
 }
 
@@ -278,9 +248,9 @@ Join(std::list<std::string>::const_iterator begin, std::list<std::string>::const
 {
     NS_LOG_FUNCTION(*begin << *end);
     std::string retval = "";
-    for (std::list<std::string>::const_iterator i = begin; i != end; i++)
+    for (auto i = begin; i != end; i++)
     {
-        if (*i == "")
+        if ((*i).empty())
         {
             // skip empty strings in the path list
             continue;
@@ -315,15 +285,13 @@ std::string
 MakeTemporaryDirectoryName()
 {
     NS_LOG_FUNCTION_NOARGS();
-    char* path = nullptr;
-
-    path = std::getenv("TMP");
-    if (!path || std::strlen(path) == 0)
+    auto [found, path] = EnvironmentVariable::Get("TMP");
+    if (!found)
     {
-        path = std::getenv("TEMP");
-        if (!path || std::strlen(path) == 0)
+        std::tie(found, path) = EnvironmentVariable::Get("TEMP");
+        if (!found)
         {
-            path = const_cast<char*>("/tmp");
+            path = "/tmp";
         }
     }
 
@@ -364,9 +332,9 @@ MakeDirectories(std::string path)
     NS_LOG_FUNCTION(path);
 
     std::error_code ec;
-    if (!fs::exists(path))
+    if (!std::filesystem::exists(path))
     {
-        fs::create_directories(path, ec);
+        std::filesystem::create_directories(path, ec);
     }
 
     if (ec.value())
@@ -396,7 +364,7 @@ Exists(const std::string path)
     auto tokens = Split(path);
     std::string file = tokens.back();
 
-    if (file == "")
+    if (file.empty())
     {
         // Last component was a directory, not a file name
         // We already checked that the directory exists,

@@ -41,18 +41,17 @@
 #include "ns3/string.h"
 #include "ns3/test.h"
 #include "ns3/uinteger.h"
-#include "ns3/v4ping-helper.h"
 
 using namespace ns3;
 
 /**
- * \ingroup dsdv-test
+ * \ingroup dsdv
+ * \ingroup tests
  * \defgroup dsdv-test DSDV module tests
  */
 
 /**
  * \ingroup dsdv-test
- * \ingroup tests
  *
  * \brief DSDV test case to verify the DSDV header
  *
@@ -111,7 +110,6 @@ DsdvHeaderTestCase::DoRun()
 
 /**
  * \ingroup dsdv-test
- * \ingroup tests
  *
  * \brief DSDV routing table tests (adding and looking up routes)
  */
@@ -213,7 +211,6 @@ DsdvTableTestCase::DoRun()
 
 /**
  * \ingroup dsdv-test
- * \ingroup tests
  *
  * \brief DSDV test suite
  */
@@ -221,9 +218,9 @@ class DsdvTestSuite : public TestSuite
 {
   public:
     DsdvTestSuite()
-        : TestSuite("routing-dsdv", UNIT)
+        : TestSuite("routing-dsdv", Type::UNIT)
     {
-        AddTestCase(new DsdvHeaderTestCase(), TestCase::QUICK);
-        AddTestCase(new DsdvTableTestCase(), TestCase::QUICK);
+        AddTestCase(new DsdvHeaderTestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new DsdvTableTestCase(), TestCase::Duration::QUICK);
     }
 } g_dsdvTestSuite; ///< the test suite

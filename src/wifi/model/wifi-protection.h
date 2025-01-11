@@ -26,6 +26,7 @@
 #include "ns3/nstime.h"
 
 #include <memory>
+#include <optional>
 
 namespace ns3
 {
@@ -47,7 +48,8 @@ struct WifiProtection
     {
         NONE = 0,
         RTS_CTS,
-        CTS_TO_SELF
+        CTS_TO_SELF,
+        MU_RTS_CTS
     };
 
     /**
@@ -69,8 +71,8 @@ struct WifiProtection
      */
     virtual void Print(std::ostream& os) const = 0;
 
-    const Method method; //!< protection method
-    Time protectionTime; //!< time required by the protection method
+    const Method method;                //!< protection method
+    std::optional<Time> protectionTime; //!< time required by the protection method
 };
 
 /**
@@ -115,6 +117,23 @@ struct WifiCtsToSelfProtection : public WifiProtection
     void Print(std::ostream& os) const override;
 
     WifiTxVector ctsTxVector; //!< CTS TXVECTOR
+};
+
+/**
+ * \ingroup wifi
+ *
+ * WifiMuRtsCtsProtection specifies that MU-RTS/CTS protection method is used.
+ */
+struct WifiMuRtsCtsProtection : public WifiProtection
+{
+    WifiMuRtsCtsProtection();
+
+    // Overridden from WifiProtection
+    std::unique_ptr<WifiProtection> Copy() const override;
+    void Print(std::ostream& os) const override;
+
+    CtrlTriggerHeader muRts;    //!< MU-RTS
+    WifiTxVector muRtsTxVector; //!< MU-RTS TXVECTOR
 };
 
 /**

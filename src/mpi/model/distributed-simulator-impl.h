@@ -76,19 +76,19 @@ class LbtsMessage
     /**
      * \return transmitted count
      */
-    uint32_t GetTxCount();
+    uint32_t GetTxCount() const;
     /**
      * \return received count
      */
-    uint32_t GetRxCount();
+    uint32_t GetRxCount() const;
     /**
      * \return id which corresponds to mpi rank
      */
-    uint32_t GetMyId();
+    uint32_t GetMyId() const;
     /**
      * \return true if system is finished
      */
-    bool IsFinished();
+    bool IsFinished() const;
 
   private:
     uint32_t m_txCount;  /**< Count of transmitted messages. */
@@ -122,7 +122,7 @@ class DistributedSimulatorImpl : public SimulatorImpl
     void Destroy() override;
     bool IsFinished() const override;
     void Stop() override;
-    void Stop(const Time& delay) override;
+    EventId Stop(const Time& delay) override;
     EventId Schedule(const Time& delay, EventImpl* event) override;
     void ScheduleWithContext(uint32_t context, const Time& delay, EventImpl* event) override;
     EventId ScheduleNow(EventImpl* event) override;

@@ -24,7 +24,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 network number allocator Test
  */
@@ -83,7 +82,6 @@ NetworkNumber6AllocatorTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 address allocator Test
  */
@@ -148,7 +146,6 @@ AddressAllocator6TestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 network number and address allocator Test
  */
@@ -200,7 +197,6 @@ NetworkAndAddress6TestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 example of an address generator Test
  */
@@ -265,7 +261,6 @@ ExampleAddress6GeneratorTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 address collision Test
  */
@@ -320,25 +315,34 @@ AddressCollision6TestCase::DoRun()
     Ipv6AddressGenerator::AddAllocated("0::0:16");
 
     Ipv6AddressGenerator::TestMode();
+    bool allocated = Ipv6AddressGenerator::IsAddressAllocated("0::0:21");
+    NS_TEST_EXPECT_MSG_EQ(allocated, false, "0::0:21 should not be already allocated");
     bool added = Ipv6AddressGenerator::AddAllocated("0::0:21");
     NS_TEST_EXPECT_MSG_EQ(added, true, "address should get allocated");
 
+    allocated = Ipv6AddressGenerator::IsAddressAllocated("0::0:4");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0::0:4 should be already allocated");
     added = Ipv6AddressGenerator::AddAllocated("0::0:4");
     NS_TEST_EXPECT_MSG_EQ(added, false, "address should not get allocated");
 
+    allocated = Ipv6AddressGenerator::IsAddressAllocated("0::0:9");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0::0:9 should be already allocated");
     added = Ipv6AddressGenerator::AddAllocated("0::0:9");
     NS_TEST_EXPECT_MSG_EQ(added, false, "address should not get allocated");
 
+    allocated = Ipv6AddressGenerator::IsAddressAllocated("0::0:16");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0::0:16 should be already allocated");
     added = Ipv6AddressGenerator::AddAllocated("0::0:16");
     NS_TEST_EXPECT_MSG_EQ(added, false, "address should not get allocated");
 
+    allocated = Ipv6AddressGenerator::IsAddressAllocated("0::0:21");
+    NS_TEST_EXPECT_MSG_EQ(allocated, true, "0::0:21 should be already allocated");
     added = Ipv6AddressGenerator::AddAllocated("0::0:21");
     NS_TEST_EXPECT_MSG_EQ(added, false, "address should not get allocated");
 }
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 address generator TestSuite
  */
@@ -348,11 +352,11 @@ class Ipv6AddressGeneratorTestSuite : public TestSuite
     Ipv6AddressGeneratorTestSuite()
         : TestSuite("ipv6-address-generator")
     {
-        AddTestCase(new NetworkNumber6AllocatorTestCase(), TestCase::QUICK);
-        AddTestCase(new AddressAllocator6TestCase(), TestCase::QUICK);
-        AddTestCase(new NetworkAndAddress6TestCase(), TestCase::QUICK);
-        AddTestCase(new ExampleAddress6GeneratorTestCase(), TestCase::QUICK);
-        AddTestCase(new AddressCollision6TestCase(), TestCase::QUICK);
+        AddTestCase(new NetworkNumber6AllocatorTestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new AddressAllocator6TestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new NetworkAndAddress6TestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new ExampleAddress6GeneratorTestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new AddressCollision6TestCase(), TestCase::Duration::QUICK);
     }
 };
 

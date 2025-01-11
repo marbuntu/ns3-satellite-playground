@@ -28,7 +28,6 @@ NS_LOG_COMPONENT_DEFINE("TcpNewRenoCongAvoidTest");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Test the behavior of RFC congestion avoidance
  *
@@ -133,7 +132,7 @@ TcpNewRenoCongAvoidNormalTest::CWndTrace(uint32_t oldValue, uint32_t newValue)
         return;
     }
 
-    if (!m_event.IsRunning())
+    if (!m_event.IsPending())
     {
         m_event = Simulator::Schedule(Seconds(1.0), &TcpNewRenoCongAvoidNormalTest::Check, this);
     }
@@ -181,7 +180,6 @@ TcpNewRenoCongAvoidNormalTest::NormalClose(SocketWho who)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TestSuite for the behavior of RFC congestion avoidance
  */
@@ -189,7 +187,7 @@ class TcpRenoCongAvoidTestSuite : public TestSuite
 {
   public:
     TcpRenoCongAvoidTestSuite()
-        : TestSuite("tcp-cong-avoid-test", UNIT)
+        : TestSuite("tcp-cong-avoid-test", Type::UNIT)
     {
         std::list<TypeId> types = {
             TcpNewReno::GetTypeId(),
@@ -207,14 +205,14 @@ class TcpRenoCongAvoidTestSuite : public TestSuite
                                                               t,
                                                               "cong avoid MSS=500, pkt_size=500," +
                                                                   typeName),
-                            TestCase::QUICK);
+                            TestCase::Duration::QUICK);
                 AddTestCase(new TcpNewRenoCongAvoidNormalTest(500,
                                                               1000,
                                                               i,
                                                               t,
                                                               "cong avoid MSS=500, pkt_size=1000," +
                                                                   typeName),
-                            TestCase::QUICK);
+                            TestCase::Duration::QUICK);
             }
         }
     }

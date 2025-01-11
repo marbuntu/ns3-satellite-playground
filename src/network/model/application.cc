@@ -22,8 +22,9 @@
 
 #include "application.h"
 
+#include "node.h"
+
 #include "ns3/log.h"
-#include "ns3/node.h"
 #include "ns3/nstime.h"
 #include "ns3/simulator.h"
 
@@ -129,6 +130,13 @@ void
 Application::StopApplication()
 { // Provide null functionality in case subclass is not interested
     NS_LOG_FUNCTION(this);
+}
+
+int64_t
+Application::AssignStreams(int64_t stream)
+{
+    NS_LOG_FUNCTION(this << stream);
+    return 0;
 }
 
 } // namespace ns3

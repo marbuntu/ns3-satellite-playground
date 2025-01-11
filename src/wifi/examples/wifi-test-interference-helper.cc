@@ -44,7 +44,7 @@
 // Note that the program checks the consistency between the selected standard
 // the selected preamble type.
 //
-// The output of the program displays InterfenceHelper and SpectrumWifiPhy trace
+// The output of the program displays InterferenceHelper and SpectrumWifiPhy trace
 // logs associated to the chosen scenario.
 //
 
@@ -71,9 +71,9 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("test-interference-helper");
 
-bool checkResults = false;         //!< True if results have to be checked.
-bool expectRxASuccessfull = false; //!< True if Rx from A is expected to be successful.
-bool expectRxBSuccessfull = false; //!< True if Rx from B is expected to be successful.
+bool checkResults = false;        //!< True if results have to be checked.
+bool expectRxASuccessful = false; //!< True if Rx from A is expected to be successful.
+bool expectRxBSuccessful = false; //!< True if Rx from B is expected to be successful.
 
 /// InterferenceExperiment
 class InterferenceExperiment
@@ -83,24 +83,24 @@ class InterferenceExperiment
     struct Input
     {
         Input();
-        Time interval;         ///< interval
-        double xA;             ///< x A
-        double xB;             ///< x B
-        std::string txModeA;   ///< transmit mode A
-        std::string txModeB;   ///< transmit mode B
-        double txPowerLevelA;  ///< transmit power level A
-        double txPowerLevelB;  ///< transmit power level B
-        uint32_t packetSizeA;  ///< packet size A
-        uint32_t packetSizeB;  ///< packet size B
-        uint16_t channelA;     ///< channel number A
-        uint16_t channelB;     ///< channel number B
-        uint16_t widthA;       ///< channel width A
-        uint16_t widthB;       ///< channel width B
-        WifiStandard standard; ///< standard
-        WifiPhyBand band;      ///< band
-        WifiPreamble preamble; ///< preamble
-        bool captureEnabled;   ///< whether physical layer capture is enabled
-        double captureMargin;  ///< margin used for physical layer capture
+        Time interval;          ///< interval
+        double xA;              ///< x A
+        double xB;              ///< x B
+        std::string txModeA;    ///< transmit mode A
+        std::string txModeB;    ///< transmit mode B
+        double txPowerLevelA;   ///< transmit power level A
+        double txPowerLevelB;   ///< transmit power level B
+        uint32_t packetSizeA;   ///< packet size A
+        uint32_t packetSizeB;   ///< packet size B
+        uint16_t channelA;      ///< channel number A
+        uint16_t channelB;      ///< channel number B
+        ChannelWidthMhz widthA; ///< channel width A
+        ChannelWidthMhz widthB; ///< channel width B
+        WifiStandard standard;  ///< standard
+        WifiPhyBand band;       ///< band
+        WifiPreamble preamble;  ///< preamble
+        bool captureEnabled;    ///< whether physical layer capture is enabled
+        double captureMargin;   ///< margin used for physical layer capture
     };
 
     InterferenceExperiment();
@@ -108,7 +108,7 @@ class InterferenceExperiment
      * Run function
      * \param input the interference experiment data
      */
-    void Run(struct InterferenceExperiment::Input input);
+    void Run(InterferenceExperiment::Input input);
 
   private:
     /**
@@ -123,7 +123,7 @@ class InterferenceExperiment
     void SendB() const;
     Ptr<SpectrumWifiPhy> m_txA; ///< transmit A function
     Ptr<SpectrumWifiPhy> m_txB; ///< transmit B function
-    struct Input m_input;       ///< input
+    Input m_input;              ///< input
     bool m_droppedA;            ///< flag to indicate whether packet A has been dropped
     bool m_droppedB;            ///< flag to indicate whether packet B has been dropped
     mutable uint64_t m_uidA;    ///< UID to use for packet A
@@ -213,12 +213,12 @@ InterferenceExperiment::Input::Input()
 }
 
 void
-InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
+InterferenceExperiment::Run(InterferenceExperiment::Input input)
 {
     m_input = input;
 
-    double range = std::max(std::abs(input.xA), input.xB);
-    Config::SetDefault("ns3::RangePropagationLossModel::MaxRange", DoubleValue(range));
+    double maxRange = std::max(std::abs(input.xA), input.xB);
+    Config::SetDefault("ns3::RangePropagationLossModel::MaxRange", DoubleValue(maxRange));
 
     Ptr<SingleModelSpectrumChannel> channel = CreateObject<SingleModelSpectrumChannel>();
     channel->SetPropagationDelayModel(CreateObject<ConstantSpeedPropagationDelayModel>());
@@ -235,7 +235,6 @@ InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
     Ptr<Node> nodeA = CreateObject<Node>();
     Ptr<WifiNetDevice> devA = CreateObject<WifiNetDevice>();
     m_txA = CreateObject<SpectrumWifiPhy>();
-    m_txA->CreateWifiSpectrumPhyInterface(devA);
     m_txA->SetDevice(devA);
     m_txA->SetTxPowerStart(input.txPowerLevelA);
     m_txA->SetTxPowerEnd(input.txPowerLevelA);
@@ -243,7 +242,6 @@ InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
     Ptr<Node> nodeB = CreateObject<Node>();
     Ptr<WifiNetDevice> devB = CreateObject<WifiNetDevice>();
     m_txB = CreateObject<SpectrumWifiPhy>();
-    m_txB->CreateWifiSpectrumPhyInterface(devB);
     m_txB->SetDevice(devB);
     m_txB->SetTxPowerStart(input.txPowerLevelB);
     m_txB->SetTxPowerEnd(input.txPowerLevelB);
@@ -251,7 +249,6 @@ InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
     Ptr<Node> nodeRx = CreateObject<Node>();
     Ptr<WifiNetDevice> devRx = CreateObject<WifiNetDevice>();
     Ptr<SpectrumWifiPhy> rx = CreateObject<SpectrumWifiPhy>();
-    rx->CreateWifiSpectrumPhyInterface(devRx);
     rx->SetDevice(devRx);
 
     Ptr<InterferenceHelper> interferenceTxA = CreateObject<InterferenceHelper>();
@@ -266,9 +263,9 @@ InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
     rx->SetInterferenceHelper(interferenceRx);
     Ptr<ErrorRateModel> errorRx = CreateObject<NistErrorRateModel>();
     rx->SetErrorRateModel(errorRx);
-    m_txA->SetChannel(channel);
-    m_txB->SetChannel(channel);
-    rx->SetChannel(channel);
+    m_txA->AddChannel(channel);
+    m_txB->AddChannel(channel);
+    rx->AddChannel(channel);
     m_txA->SetMobility(posTxA);
     m_txB->SetMobility(posTxB);
     rx->SetMobility(posRx);
@@ -290,10 +287,10 @@ InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
     devRx->SetPhy(rx);
     nodeRx->AddDevice(devRx);
 
-    m_txA->SetOperatingChannel(WifiPhy::ChannelTuple{input.channelA, 0, (int)(input.band), 0});
-    m_txB->SetOperatingChannel(WifiPhy::ChannelTuple{input.channelB, 0, (int)(input.band), 0});
+    m_txA->SetOperatingChannel(WifiPhy::ChannelTuple{input.channelA, 0, input.band, 0});
+    m_txB->SetOperatingChannel(WifiPhy::ChannelTuple{input.channelB, 0, input.band, 0});
     rx->SetOperatingChannel(
-        WifiPhy::ChannelTuple{std::max(input.channelA, input.channelB), 0, (int)(input.band), 0});
+        WifiPhy::ChannelTuple{std::max(input.channelA, input.channelB), 0, input.band, 0});
 
     rx->TraceConnectWithoutContext("PhyRxDrop",
                                    MakeCallback(&InterferenceExperiment::PacketDropped, this));
@@ -307,7 +304,7 @@ InterferenceExperiment::Run(struct InterferenceExperiment::Input input)
     m_txA->Dispose();
     rx->Dispose();
 
-    if (checkResults && (m_droppedA == expectRxASuccessfull || m_droppedB == expectRxBSuccessfull))
+    if (checkResults && (m_droppedA == expectRxASuccessful || m_droppedB == expectRxBSuccessful))
     {
         NS_LOG_ERROR("Results are not expected!");
         exit(1);
@@ -344,12 +341,12 @@ main(int argc, char* argv[])
     cmd.AddValue("enableCapture", "Enable/disable physical layer capture", input.captureEnabled);
     cmd.AddValue("captureMargin", "Margin used for physical layer capture", input.captureMargin);
     cmd.AddValue("checkResults", "Used to check results at the end of the test", checkResults);
-    cmd.AddValue("expectRxASuccessfull",
+    cmd.AddValue("expectRxASuccessful",
                  "Indicate whether packet A is expected to be successfully received",
-                 expectRxASuccessfull);
-    cmd.AddValue("expectRxBSuccessfull",
+                 expectRxASuccessful);
+    cmd.AddValue("expectRxBSuccessful",
                  "Indicate whether packet B is expected to be successfully received",
-                 expectRxBSuccessfull);
+                 expectRxBSuccessful);
     cmd.Parse(argc, argv);
 
     input.interval = MicroSeconds(delay);

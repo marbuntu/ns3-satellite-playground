@@ -1372,7 +1372,7 @@ FqCoDelQueueDiscECNMarking::DoRun()
  *
  * The variable outerHash stores the nearest multiple of 8 that is lesser than
  * the hash. When a flow hash of 20 arrives, the value of outerHash
- * is 16. Since m_flowIndices[16] wasn’t previously allotted, a new flow
+ * is 16. Since m_flowIndices[16] wasn't previously allotted, a new flow
  * is created, and the tag corresponding to this queue is set to 20.
  */
 class FqCoDelQueueDiscSetLinearProbing : public TestCase
@@ -1768,16 +1768,16 @@ class FqCoDelQueueDiscTestSuite : public TestSuite
 };
 
 FqCoDelQueueDiscTestSuite::FqCoDelQueueDiscTestSuite()
-    : TestSuite("fq-codel-queue-disc", UNIT)
+    : TestSuite("fq-codel-queue-disc", Type::UNIT)
 {
-    AddTestCase(new FqCoDelQueueDiscNoSuitableFilter, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscIPFlowsSeparationAndPacketLimit, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscDeficit, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscTCPFlowsSeparation, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscUDPFlowsSeparation, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscECNMarking, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscSetLinearProbing, TestCase::QUICK);
-    AddTestCase(new FqCoDelQueueDiscL4sMode, TestCase::QUICK);
+    AddTestCase(new FqCoDelQueueDiscNoSuitableFilter, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscIPFlowsSeparationAndPacketLimit, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscDeficit, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscTCPFlowsSeparation, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscUDPFlowsSeparation, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscECNMarking, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscSetLinearProbing, TestCase::Duration::QUICK);
+    AddTestCase(new FqCoDelQueueDiscL4sMode, TestCase::Duration::QUICK);
 }
 
 /// Do not forget to allocate an instance of this TestSuite.

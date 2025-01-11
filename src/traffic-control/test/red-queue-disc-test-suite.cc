@@ -32,7 +32,6 @@ using namespace ns3;
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Red Queue Disc Test Item
  */
@@ -74,16 +73,11 @@ RedQueueDiscTestItem::AddHeader()
 bool
 RedQueueDiscTestItem::Mark()
 {
-    if (m_ecnCapablePacket)
-    {
-        return true;
-    }
-    return false;
+    return m_ecnCapablePacket;
 }
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Red Queue Disc Test Case
  */
@@ -621,7 +615,6 @@ RedQueueDiscTestCase::DoRun()
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Red Queue Disc Test Suite
  */
@@ -629,8 +622,8 @@ static class RedQueueDiscTestSuite : public TestSuite
 {
   public:
     RedQueueDiscTestSuite()
-        : TestSuite("red-queue-disc", UNIT)
+        : TestSuite("red-queue-disc", Type::UNIT)
     {
-        AddTestCase(new RedQueueDiscTestCase(), TestCase::QUICK);
+        AddTestCase(new RedQueueDiscTestCase(), TestCase::Duration::QUICK);
     }
 } g_redQueueTestSuite; ///< the test suite

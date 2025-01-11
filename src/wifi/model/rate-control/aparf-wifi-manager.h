@@ -79,11 +79,12 @@ class AparfWifiManager : public WifiRemoteStationManager
                         double ackSnr,
                         WifiMode ackMode,
                         double dataSnr,
-                        uint16_t dataChannelWidth,
+                        ChannelWidthMhz dataChannelWidth,
                         uint8_t dataNss) override;
     void DoReportFinalRtsFailed(WifiRemoteStation* station) override;
     void DoReportFinalDataFailed(WifiRemoteStation* station) override;
-    WifiTxVector DoGetDataTxVector(WifiRemoteStation* station, uint16_t allowedWidth) override;
+    WifiTxVector DoGetDataTxVector(WifiRemoteStation* station,
+                                   ChannelWidthMhz allowedWidth) override;
     WifiTxVector DoGetRtsTxVector(WifiRemoteStation* station) override;
 
     /** Check for initializations.
@@ -92,10 +93,10 @@ class AparfWifiManager : public WifiRemoteStationManager
      */
     void CheckInit(AparfWifiRemoteStation* station);
 
-    uint32_t m_succesMax1; //!< The minimum number of successful transmissions in \"High\" state to
-                           //!< try a new power or rate.
-    uint32_t m_succesMax2; //!< The minimum number of successful transmissions in \"Low\" state to
-                           //!< try a new power or rate.
+    uint32_t m_successMax1; //!< The minimum number of successful transmissions in \"High\" state to
+                            //!< try a new power or rate.
+    uint32_t m_successMax2; //!< The minimum number of successful transmissions in \"Low\" state to
+                            //!< try a new power or rate.
     uint32_t m_failMax;  //!< The minimum number of failed transmissions to try a new power or rate.
     uint32_t m_powerMax; //!< The maximum number of power changes.
     uint8_t m_powerInc;  //!< Step size for increment the power.

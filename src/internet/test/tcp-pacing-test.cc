@@ -30,7 +30,6 @@ NS_LOG_COMPONENT_DEFINE("TcpPacingTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Test the behavior of TCP pacing
  *
@@ -337,14 +336,7 @@ TcpPacingTest::Tx(const Ptr<const Packet> p, const TcpHeader& h, SocketWho who)
         // so add an additional m_segmentSize to bytesInFlight
         uint32_t soonBytesInFlight = m_bytesInFlight + m_segmentSize;
         bool canPacketBeSent = ((m_curCwnd - soonBytesInFlight) >= m_segmentSize);
-        if (!canPacketBeSent || (m_curCwnd == 0))
-        {
-            m_isFullCwndSent = true;
-        }
-        else
-        {
-            m_isFullCwndSent = false;
-        }
+        m_isFullCwndSent = (!canPacketBeSent || m_curCwnd == 0);
         m_nextPacketInterval = m_expectedInterval;
         NS_LOG_DEBUG("Next expected interval (s): " << m_nextPacketInterval.GetSeconds());
     }
@@ -373,7 +365,6 @@ TcpPacingTest::NormalClose(SocketWho who)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TestSuite for the behavior of TCP pacing
  */
@@ -381,7 +372,7 @@ class TcpPacingTestSuite : public TestSuite
 {
   public:
     TcpPacingTestSuite()
-        : TestSuite("tcp-pacing-test", UNIT)
+        : TestSuite("tcp-pacing-test", Type::UNIT)
     {
         uint16_t pacingSsRatio = 200;
         uint16_t pacingCaRatio = 120;
@@ -405,7 +396,7 @@ class TcpPacingTestSuite : public TestSuite
                                       delAckMaxCount,
                                       tid,
                                       description),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         paceInitialWindow = true;
         description = std::string("Pacing case 2: Slow start only, initial pacing");
@@ -419,7 +410,7 @@ class TcpPacingTestSuite : public TestSuite
                                       delAckMaxCount,
                                       tid,
                                       description),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         // set ssThresh to some smaller value to check that pacing
         // slows down in second half of slow start, then transitions to CA
@@ -438,7 +429,7 @@ class TcpPacingTestSuite : public TestSuite
                                       delAckMaxCount,
                                       tid,
                                       description),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         // Repeat tests, but with more typical delAckMaxCount == 2
         delAckMaxCount = 2;
@@ -457,7 +448,7 @@ class TcpPacingTestSuite : public TestSuite
                                       delAckMaxCount,
                                       tid,
                                       description),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         paceInitialWindow = true;
         description = std::string("Pacing case 5: Slow start only, initial pacing, delayed ACKs");
@@ -471,7 +462,7 @@ class TcpPacingTestSuite : public TestSuite
                                       delAckMaxCount,
                                       tid,
                                       description),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         description = std::string("Pacing case 6: Slow start, followed by transition to Congestion "
                                   "avoidance, no initial pacing, delayed ACKs");
@@ -488,7 +479,7 @@ class TcpPacingTestSuite : public TestSuite
                                       delAckMaxCount,
                                       tid,
                                       description),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 };
 

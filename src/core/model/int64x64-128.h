@@ -58,24 +58,11 @@ class int64x64_t
     static const uint128_t HP128_MASK_HI_BIT = (((int128_t)1) << 127);
     /// Mask for fraction part.
     static const uint64_t HP_MASK_LO = 0xffffffffffffffffULL;
-    /// Mask for sign + integer part.
-    static const uint64_t HP_MASK_HI = ~HP_MASK_LO;
-    /**
-     * Floating point value of HP_MASK_LO + 1.
-     * We really want:
-     * \code
-     *   static const long double HP_MAX_64 = std:pow (2.0L, 64);
-     * \endcode
-     * but we can't call functions in const definitions.
-     *
-     * We could make this a static and initialize in int64x64-128.cc or
-     * int64x64.cc, but this requires handling static initialization order
-     * when most of the implementation is inline.  Instead, we resort to
-     * this define.
-     */
-#define HP_MAX_64 (std::pow(2.0L, 64))
 
   public:
+    /// Floating point value of HP_MASK_LO + 1.
+    static constexpr long double HP_MAX_64 = (static_cast<uint64_t>(1) << 63) * 2.0L;
+
     /**
      * Type tag for the underlying implementation.
      *
@@ -188,11 +175,6 @@ class int64x64_t
         : _v(v)
     {
         _v <<= 64;
-    }
-
-    inline int64x64_t(const int128_t v)
-        : _v(v)
-    {
     }
 
     /**@}*/
@@ -403,7 +385,9 @@ class int64x64_t
 
     friend inline int64x64_t operator-(const int64x64_t& lhs)
     {
-        return int64x64_t(-lhs._v);
+        int64x64_t res;
+        res._v = -lhs._v;
+        return res;
     }
 
     friend inline int64x64_t operator!(const int64x64_t& lhs)
@@ -415,6 +399,7 @@ class int64x64_t
 
     /**
      * Implement `*=`.
+     * We assert if the product cannot be encoded in int64x64_t.
      *
      * \param [in] o The other factor.
      */
@@ -430,7 +415,7 @@ class int64x64_t
      *
      * Mathematically this should produce a Q128.128 value;
      * we keep the central 128 bits, representing the Q64.64 result.
-     * We assert on integer overflow beyond the 64-bit integer portion.
+     * We might assert if the result, in uint128_t format, exceeds 2^127.
      *
      * \param [in] a First factor.
      * \param [in] b Second factor.

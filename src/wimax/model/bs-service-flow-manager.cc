@@ -169,7 +169,7 @@ BsServiceFlowManager::ScheduleDsaRsp(ServiceFlow* serviceFlow, Cid cid)
     ssRecord->IncrementDsaRspRetries();
     p->AddHeader(ManagementMessageType(ManagementMessageType::MESSAGE_TYPE_DSA_RSP));
 
-    if (m_dsaAckTimeoutEvent.IsRunning())
+    if (m_dsaAckTimeoutEvent.IsPending())
     {
         Simulator::Cancel(m_dsaAckTimeoutEvent);
     }
@@ -221,10 +221,9 @@ BsServiceFlowManager::ProcessDsaReq(const DsaReq& dsaReq, Cid cid)
 }
 
 void
-BsServiceFlowManager::AddMulticastServiceFlow(ServiceFlow sf,
-                                              enum WimaxPhy::ModulationType modulation)
+BsServiceFlowManager::AddMulticastServiceFlow(ServiceFlow sf, WimaxPhy::ModulationType modulation)
 {
-    ServiceFlow* serviceFlow = new ServiceFlow();
+    auto serviceFlow = new ServiceFlow();
     serviceFlow->CopyParametersFrom(sf);
     Ptr<BaseStationNetDevice> bs = m_device->GetObject<BaseStationNetDevice>();
     Ptr<WimaxConnection> multicastConnection =

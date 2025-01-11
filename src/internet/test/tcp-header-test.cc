@@ -41,7 +41,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP header Get/Set test.
  */
@@ -159,7 +158,6 @@ TcpHeaderGetSetTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP header with RFC793 Options test.
  */
@@ -208,12 +206,12 @@ TcpHeaderWithRFC793OptionTestCase::CheckCorrectDeserialize()
 {
     TcpHeader source;
     TcpHeader destination;
-    TcpOptionNOP temp;
+    auto temp = CreateObject<TcpOptionNOP>();
     Buffer buffer;
     buffer.AddAtStart(40);
 
     Buffer::Iterator i = buffer.Begin();
-    source.AppendOption(&temp);
+    source.AppendOption(temp);
 
     source.Serialize(i);
 
@@ -386,9 +384,8 @@ TcpHeaderWithRFC793OptionTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
- * \brief TCP header Flags to Striing test.
+ * \brief TCP header Flags to String test.
  */
 class TcpHeaderFlagsToString : public TestCase
 {
@@ -456,7 +453,6 @@ TcpHeaderFlagsToString::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP header TestSuite
  */
@@ -464,12 +460,13 @@ class TcpHeaderTestSuite : public TestSuite
 {
   public:
     TcpHeaderTestSuite()
-        : TestSuite("tcp-header", UNIT)
+        : TestSuite("tcp-header", Type::UNIT)
     {
-        AddTestCase(new TcpHeaderGetSetTestCase("GetSet test cases"), TestCase::QUICK);
+        AddTestCase(new TcpHeaderGetSetTestCase("GetSet test cases"), TestCase::Duration::QUICK);
         AddTestCase(new TcpHeaderWithRFC793OptionTestCase("Test for options in RFC 793"),
-                    TestCase::QUICK);
-        AddTestCase(new TcpHeaderFlagsToString("Test flags to string function"), TestCase::QUICK);
+                    TestCase::Duration::QUICK);
+        AddTestCase(new TcpHeaderFlagsToString("Test flags to string function"),
+                    TestCase::Duration::QUICK);
     }
 };
 

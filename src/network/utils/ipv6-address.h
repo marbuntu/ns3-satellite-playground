@@ -20,12 +20,11 @@
 #ifndef IPV6_ADDRESS_H
 #define IPV6_ADDRESS_H
 
+#include "ipv4-address.h"
 #include "mac8-address.h"
 
 #include "ns3/address.h"
 #include "ns3/attribute-helper.h"
-#include "ns3/deprecated.h"
-#include "ns3/ipv4-address.h"
 
 #include <cstring>
 #include <ostream>
@@ -346,6 +345,12 @@ class Ipv6Address
     static Ipv6Address ConvertFrom(const Address& address);
 
     /**
+     * \brief convert the IPv6Address object to an Address object.
+     * \return the Address object corresponding to this object.
+     */
+    Address ConvertTo() const;
+
+    /**
      * \return true if address is initialized (i.e., set to something), false otherwise
      */
     bool IsInitialized() const;
@@ -399,12 +404,6 @@ class Ipv6Address
     void GetBytes(uint8_t buf[16]) const;
 
   private:
-    /**
-     * \brief convert the IPv6Address object to an Address object.
-     * \return the Address object corresponding to this object.
-     */
-    Address ConvertTo() const;
-
     /**
      * \brief Return the Type of address.
      * \return type of address
@@ -647,7 +646,7 @@ std::istream& operator>>(std::istream& is, Ipv6Address& address);
  * \brief Stream extraction operator.
  *
  * \param is the reference to the input stream
- * \param prefix the Ipv6Preofix
+ * \param prefix the Ipv6Prefix
  * \returns the reference to the input stream
  */
 std::istream& operator>>(std::istream& is, Ipv6Prefix& prefix);
@@ -655,7 +654,7 @@ std::istream& operator>>(std::istream& is, Ipv6Prefix& prefix);
 inline bool
 operator==(const Ipv6Address& a, const Ipv6Address& b)
 {
-    return (!std::memcmp(a.m_address, b.m_address, 16));
+    return !std::memcmp(a.m_address, b.m_address, 16);
 }
 
 inline bool
@@ -667,13 +666,13 @@ operator!=(const Ipv6Address& a, const Ipv6Address& b)
 inline bool
 operator<(const Ipv6Address& a, const Ipv6Address& b)
 {
-    return (std::memcmp(a.m_address, b.m_address, 16) < 0);
+    return std::memcmp(a.m_address, b.m_address, 16) < 0;
 }
 
 inline bool
 operator==(const Ipv6Prefix& a, const Ipv6Prefix& b)
 {
-    return (!std::memcmp(a.m_prefix, b.m_prefix, 16));
+    return !std::memcmp(a.m_prefix, b.m_prefix, 16);
 }
 
 inline bool

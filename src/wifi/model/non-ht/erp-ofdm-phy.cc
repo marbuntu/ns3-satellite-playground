@@ -30,6 +30,9 @@
 
 #include <array>
 
+#undef NS_LOG_APPEND_CONTEXT
+#define NS_LOG_APPEND_CONTEXT WIFI_PHY_NS_LOG_APPEND_CONTEXT(m_wifiPhy)
+
 namespace ns3
 {
 
@@ -69,7 +72,7 @@ const std::array<uint64_t, 8>&
 GetErpOfdmRatesBpsList()
 {
     return s_erpOfdmRatesBpsList;
-};
+}
 
 ErpOfdmPhy::ErpOfdmPhy()
     : OfdmPhy(OFDM_PHY_DEFAULT, false) // don't add OFDM modes to list
@@ -113,12 +116,12 @@ ErpOfdmPhy::BuildPpdu(const WifiConstPsduMap& psdus,
                       Time /* ppduDuration */)
 {
     NS_LOG_FUNCTION(this << psdus << txVector);
-    return Create<ErpOfdmPpdu>(psdus.begin()->second,
-                               txVector,
-                               m_wifiPhy->GetOperatingChannel().GetPrimaryChannelCenterFrequency(
-                                   txVector.GetChannelWidth()),
-                               m_wifiPhy->GetPhyBand(),
-                               ObtainNextUid(txVector));
+    return Create<ErpOfdmPpdu>(
+        psdus.begin()->second,
+        txVector,
+        m_wifiPhy->GetOperatingChannel(),
+        m_wifiPhy->GetLatestPhyEntity()->ObtainNextUid(
+            txVector)); // use latest PHY entity to handle MU-RTS sent with non-HT rate
 }
 
 void
@@ -162,7 +165,7 @@ ErpOfdmPhy::GetErpOfdmRate(uint64_t rate)
     {                                                                                              \
         static WifiMode mode = CreateErpOfdmMode(#x, f);                                           \
         return mode;                                                                               \
-    };
+    }
 
 GET_ERP_OFDM_MODE(ErpOfdmRate6Mbps, true)
 GET_ERP_OFDM_MODE(ErpOfdmRate9Mbps, false)
@@ -205,7 +208,7 @@ ErpOfdmPhy::GetConstellationSize(const std::string& name)
 }
 
 uint64_t
-ErpOfdmPhy::GetPhyRate(const std::string& name, uint16_t channelWidth)
+ErpOfdmPhy::GetPhyRate(const std::string& name, ChannelWidthMhz channelWidth)
 {
     WifiCodeRate codeRate = GetCodeRate(name);
     uint16_t constellationSize = GetConstellationSize(name);
@@ -226,7 +229,7 @@ ErpOfdmPhy::GetDataRateFromTxVector(const WifiTxVector& txVector, uint16_t /* st
 }
 
 uint64_t
-ErpOfdmPhy::GetDataRate(const std::string& name, uint16_t channelWidth)
+ErpOfdmPhy::GetDataRate(const std::string& name, ChannelWidthMhz channelWidth)
 {
     WifiCodeRate codeRate = GetCodeRate(name);
     uint16_t constellationSize = GetConstellationSize(name);

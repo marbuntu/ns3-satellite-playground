@@ -21,7 +21,8 @@
 #ifndef LTE_UE_CPHY_SAP_H
 #define LTE_UE_CPHY_SAP_H
 
-#include <ns3/lte-rrc-sap.h>
+#include "lte-rrc-sap.h"
+
 #include <ns3/ptr.h>
 
 #include <stdint.h>
@@ -194,7 +195,7 @@ class LteUeCphySapProvider
      * started by checking if the radio frames are in-sync for N311
      * consecutive times.
      */
-    virtual void StartInSnycDetection() = 0;
+    virtual void StartInSyncDetection() = 0;
 
     /**
      * \brief A method call by UE RRC to communicate the IMSI to the UE PHY
@@ -231,8 +232,8 @@ class LteUeCphySapUser
     /// UeMeasurementsParameters structure
     struct UeMeasurementsParameters
     {
-        std::vector<struct UeMeasurementsElement> m_ueMeasurementsList; ///< UE measurement list
-        uint8_t m_componentCarrierId;                                   ///< component carrier ID
+        std::vector<UeMeasurementsElement> m_ueMeasurementsList; ///< UE measurement list
+        uint8_t m_componentCarrierId;                            ///< component carrier ID
     };
 
     /**
@@ -307,6 +308,9 @@ class MemberLteUeCphySapProvider : public LteUeCphySapProvider
      */
     MemberLteUeCphySapProvider(C* owner);
 
+    // Delete default constructor to avoid misuse
+    MemberLteUeCphySapProvider() = delete;
+
     // inherited from LteUeCphySapProvider
     void Reset() override;
     void StartCellSearch(uint32_t dlEarfcn) override;
@@ -324,22 +328,16 @@ class MemberLteUeCphySapProvider : public LteUeCphySapProvider
     void SetRsrpFilterCoefficient(uint8_t rsrpFilterCoefficient) override;
     void ResetPhyAfterRlf() override;
     void ResetRlfParams() override;
-    void StartInSnycDetection() override;
+    void StartInSyncDetection() override;
     void SetImsi(uint64_t imsi) override;
 
   private:
-    MemberLteUeCphySapProvider();
     C* m_owner; ///< the owner class
 };
 
 template <class C>
 MemberLteUeCphySapProvider<C>::MemberLteUeCphySapProvider(C* owner)
     : m_owner(owner)
-{
-}
-
-template <class C>
-MemberLteUeCphySapProvider<C>::MemberLteUeCphySapProvider()
 {
 }
 
@@ -457,9 +455,9 @@ MemberLteUeCphySapProvider<C>::ResetRlfParams()
 
 template <class C>
 void
-MemberLteUeCphySapProvider<C>::StartInSnycDetection()
+MemberLteUeCphySapProvider<C>::StartInSyncDetection()
 {
-    m_owner->DoStartInSnycDetection();
+    m_owner->DoStartInSyncDetection();
 }
 
 template <class C>
@@ -484,6 +482,9 @@ class MemberLteUeCphySapUser : public LteUeCphySapUser
      */
     MemberLteUeCphySapUser(C* owner);
 
+    // Delete default constructor to avoid misuse
+    MemberLteUeCphySapUser() = delete;
+
     // methods inherited from LteUeCphySapUser go here
     void RecvMasterInformationBlock(uint16_t cellId,
                                     LteRrcSap::MasterInformationBlock mib) override;
@@ -495,18 +496,12 @@ class MemberLteUeCphySapUser : public LteUeCphySapUser
     void ResetSyncIndicationCounter() override;
 
   private:
-    MemberLteUeCphySapUser();
     C* m_owner; ///< the owner class
 };
 
 template <class C>
 MemberLteUeCphySapUser<C>::MemberLteUeCphySapUser(C* owner)
     : m_owner(owner)
-{
-}
-
-template <class C>
-MemberLteUeCphySapUser<C>::MemberLteUeCphySapUser()
 {
 }
 

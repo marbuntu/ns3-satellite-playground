@@ -44,11 +44,12 @@ UdpEchoClient::GetTypeId()
             .SetParent<Application>()
             .SetGroupName("Applications")
             .AddConstructor<UdpEchoClient>()
-            .AddAttribute("MaxPackets",
-                          "The maximum number of packets the application will send",
-                          UintegerValue(100),
-                          MakeUintegerAccessor(&UdpEchoClient::m_count),
-                          MakeUintegerChecker<uint32_t>())
+            .AddAttribute(
+                "MaxPackets",
+                "The maximum number of packets the application will send (zero means infinite)",
+                UintegerValue(100),
+                MakeUintegerAccessor(&UdpEchoClient::m_count),
+                MakeUintegerChecker<uint32_t>())
             .AddAttribute("Interval",
                           "The time to wait between packets",
                           TimeValue(Seconds(1.0)),
@@ -64,6 +65,12 @@ UdpEchoClient::GetTypeId()
                           UintegerValue(0),
                           MakeUintegerAccessor(&UdpEchoClient::m_peerPort),
                           MakeUintegerChecker<uint16_t>())
+            .AddAttribute("Tos",
+                          "The Type of Service used to send IPv4 packets. "
+                          "All 8 bits of the TOS byte are set (including ECN bits).",
+                          UintegerValue(0),
+                          MakeUintegerAccessor(&UdpEchoClient::m_tos),
+                          MakeUintegerChecker<uint8_t>())
             .AddAttribute(
                 "PacketSize",
                 "Size of echo data in outbound packets",
@@ -125,13 +132,6 @@ UdpEchoClient::SetRemote(Address addr)
 }
 
 void
-UdpEchoClient::DoDispose()
-{
-    NS_LOG_FUNCTION(this);
-    Application::DoDispose();
-}
-
-void
 UdpEchoClient::StartApplication()
 {
     NS_LOG_FUNCTION(this);
@@ -140,16 +140,18 @@ UdpEchoClient::StartApplication()
     {
         TypeId tid = TypeId::LookupByName("ns3::UdpSocketFactory");
         m_socket = Socket::CreateSocket(GetNode(), tid);
-        if (Ipv4Address::IsMatchingType(m_peerAddress) == true)
+        NS_ABORT_MSG_IF(m_peerAddress.IsInvalid(), "'RemoteAddress' attribute not properly set");
+        if (Ipv4Address::IsMatchingType(m_peerAddress))
         {
             if (m_socket->Bind() == -1)
             {
                 NS_FATAL_ERROR("Failed to bind socket");
             }
+            m_socket->SetIpTos(m_tos); // Affects only IPv4 sockets.
             m_socket->Connect(
                 InetSocketAddress(Ipv4Address::ConvertFrom(m_peerAddress), m_peerPort));
         }
-        else if (Ipv6Address::IsMatchingType(m_peerAddress) == true)
+        else if (Ipv6Address::IsMatchingType(m_peerAddress))
         {
             if (m_socket->Bind6() == -1)
             {
@@ -158,15 +160,16 @@ UdpEchoClient::StartApplication()
             m_socket->Connect(
                 Inet6SocketAddress(Ipv6Address::ConvertFrom(m_peerAddress), m_peerPort));
         }
-        else if (InetSocketAddress::IsMatchingType(m_peerAddress) == true)
+        else if (InetSocketAddress::IsMatchingType(m_peerAddress))
         {
             if (m_socket->Bind() == -1)
             {
                 NS_FATAL_ERROR("Failed to bind socket");
             }
+            m_socket->SetIpTos(m_tos); // Affects only IPv4 sockets.
             m_socket->Connect(m_peerAddress);
         }
-        else if (Inet6SocketAddress::IsMatchingType(m_peerAddress) == true)
+        else if (Inet6SocketAddress::IsMatchingType(m_peerAddress))
         {
             if (m_socket->Bind6() == -1)
             {
@@ -391,7 +394,7 @@ UdpEchoClient::Send()
                        << Inet6SocketAddress::ConvertFrom(m_peerAddress).GetPort());
     }
 
-    if (m_sent < m_count)
+    if (m_sent < m_count || m_count == 0)
     {
         ScheduleTransmit(m_interval);
     }

@@ -25,6 +25,8 @@
 
 namespace ns3
 {
+namespace lrwpan
+{
 
 NS_LOG_COMPONENT_DEFINE("LrWpanSpectrumValueHelper");
 
@@ -126,6 +128,12 @@ LrWpanSpectrumValueHelper::CreateNoisePowerSpectralDensity(uint32_t channel)
     return noisePsd;
 }
 
+void
+LrWpanSpectrumValueHelper::SetNoiseFactor(double f)
+{
+    m_noiseFactor = f;
+}
+
 double
 LrWpanSpectrumValueHelper::TotalAvgPower(Ptr<const SpectrumValue> psd, uint32_t channel)
 {
@@ -146,4 +154,5 @@ LrWpanSpectrumValueHelper::TotalAvgPower(Ptr<const SpectrumValue> psd, uint32_t 
     return totalAvgPower;
 }
 
+} // namespace lrwpan
 } // namespace ns3

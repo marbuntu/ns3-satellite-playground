@@ -33,6 +33,7 @@
 #include "ns3/string.h"
 #include "ns3/test.h"
 #include "ns3/udp-client-server-helper.h"
+#include "ns3/udp-server.h"
 #include "ns3/wifi-net-device.h"
 
 using namespace ns3;
@@ -152,7 +153,7 @@ Issue211Test::DoRun()
     NetDeviceContainer apDevices = wifi.Install(phy, mac, wifiApNode);
 
     // Assign fixed streams to random variables in use
-    wifi.AssignStreams(apDevices, streamNumber);
+    WifiHelper::AssignStreams(apDevices, streamNumber);
 
     MobilityHelper mobility;
     Ptr<ListPositionAllocator> positionAlloc = CreateObject<ListPositionAllocator>();
@@ -257,9 +258,9 @@ class Issue211TestSuite : public TestSuite
 };
 
 Issue211TestSuite::Issue211TestSuite()
-    : TestSuite("wifi-issue-211", UNIT)
+    : TestSuite("wifi-issue-211", Type::UNIT)
 {
-    AddTestCase(new Issue211Test, TestCase::QUICK);
+    AddTestCase(new Issue211Test, TestCase::Duration::QUICK);
 }
 
 static Issue211TestSuite g_issue211TestSuite; ///< the test suite

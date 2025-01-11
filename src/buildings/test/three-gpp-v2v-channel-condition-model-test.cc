@@ -38,7 +38,6 @@ NS_LOG_COMPONENT_DEFINE("ThreeGppV2vChannelConditionModelsTest");
 
 /**
  * \ingroup building-test
- * \ingroup tests
  *
  * Test case for the classes ThreeGppV2vUrbanChannelConditionModel,
  * and ThreeGppV2vHighwayChannelConditionModel to test their code to
@@ -68,15 +67,15 @@ class ThreeGppV2vBuildingsChCondModelTestCase : public TestCase
     /**
      * Struct containing the parameters for each test
      */
-    typedef struct
+    struct TestVector
     {
         Vector m_positionA;                            //!< the position of the first node
         Vector m_positionB;                            //!< the position of the second node
         ChannelCondition::LosConditionValue m_losCond; //!< the correct channel condition
         TypeId m_typeId; //!< the type ID of the channel condition model to be used
-    } TestVector;
+    };
 
-    TestVectors<TestVector> m_testVectors; //!< array containg all the test vectors
+    TestVectors<TestVector> m_testVectors; //!< array containing all the test vectors
 };
 
 ThreeGppV2vBuildingsChCondModelTestCase::ThreeGppV2vBuildingsChCondModelTestCase()
@@ -221,13 +220,13 @@ class ThreeGppV2vUrbanLosNlosvChCondModelTestCase : public TestCase
     /**
      * Struct containing the parameters for each test
      */
-    typedef struct
+    struct TestVector
     {
         Vector m_positionA; //!< the position of the first node
         Vector m_positionB; //!< the position of the second node
         double m_pLos;      //!< LOS probability
         TypeId m_typeId;    //!< the type ID of the channel condition model to be used
-    } TestVector;
+    };
 
     TestVectors<TestVector> m_testVectors; //!< array containing all the test vectors
     Ptr<ThreeGppV2vUrbanChannelConditionModel> m_condModel; //!< the channel condition model
@@ -386,13 +385,13 @@ class ThreeGppV2vHighwayLosNlosvChCondModelTestCase : public TestCase
     /**
      * Struct containing the parameters for each test
      */
-    typedef struct
+    struct TestVector
     {
         Vector m_positionA; //!< the position of the first node
         Vector m_positionB; //!< the position of the second node
         double m_pLos;      //!< LOS probability
         TypeId m_typeId;    //!< the type ID of the channel condition model to be used
-    } TestVector;
+    };
 
     TestVectors<TestVector> m_testVectors; //!< array containing all the test vectors
     Ptr<ThreeGppV2vHighwayChannelConditionModel> m_condModel; //!< the channel condition model
@@ -511,7 +510,6 @@ ThreeGppV2vHighwayLosNlosvChCondModelTestCase::DoRun()
 
 /**
  * \ingroup building-test
- * \ingroup tests
  *
  * Test suite for the 3GPP V2V channel condition model
  *
@@ -539,17 +537,17 @@ class ThreeGppV2vChCondModelsTestSuite : public TestSuite
 };
 
 ThreeGppV2vChCondModelsTestSuite::ThreeGppV2vChCondModelsTestSuite()
-    : TestSuite("three-gpp-v2v-channel-condition-model", SYSTEM)
+    : TestSuite("three-gpp-v2v-channel-condition-model", Type::SYSTEM)
 {
     AddTestCase(new ThreeGppV2vBuildingsChCondModelTestCase,
-                TestCase::QUICK); // test for the deterministic procedure (NLOS vs LOS/NLOSv), based
-                                  // on buildings
+                TestCase::Duration::QUICK); // test for the deterministic procedure (NLOS vs
+                                            // LOS/NLOSv), based on buildings
     AddTestCase(new ThreeGppV2vUrbanLosNlosvChCondModelTestCase,
-                TestCase::QUICK); // test for the probabilistic procedure (LOS vs NLOSv), in V2V
-                                  // urban scenario
+                TestCase::Duration::QUICK); // test for the probabilistic procedure (LOS vs
+                                            // NLOSv), in V2V urban scenario
     AddTestCase(new ThreeGppV2vHighwayLosNlosvChCondModelTestCase,
-                TestCase::QUICK); // test for the probabilistic procedure (LOS vs NLOSv), in V2V
-                                  // highway scenario
+                TestCase::Duration::QUICK); // test for the probabilistic procedure (LOS vs
+                                            // NLOSv), in V2V highway scenario
 }
 
 /// Static variable for test initialization

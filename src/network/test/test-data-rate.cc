@@ -198,7 +198,7 @@ class DataRateTestCase2 : public DataRateTestCase
 };
 
 DataRateTestCase2::DataRateTestCase2()
-    : DataRateTestCase("Test arithmatic on DateRate")
+    : DataRateTestCase("Test arithmetic on DateRate")
 {
 }
 
@@ -282,10 +282,10 @@ class DataRateTestSuite : public TestSuite
 };
 
 DataRateTestSuite::DataRateTestSuite()
-    : TestSuite("data-rate", UNIT)
+    : TestSuite("data-rate", Type::UNIT)
 {
-    AddTestCase(new DataRateTestCase1(), TestCase::QUICK);
-    AddTestCase(new DataRateTestCase2(), TestCase::QUICK);
+    AddTestCase(new DataRateTestCase1(), TestCase::Duration::QUICK);
+    AddTestCase(new DataRateTestCase2(), TestCase::Duration::QUICK);
 }
 
 static DataRateTestSuite sDataRateTestSuite; //!< Static variable for test initialization

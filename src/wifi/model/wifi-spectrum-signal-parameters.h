@@ -21,6 +21,8 @@
 #ifndef WIFI_SPECTRUM_SIGNAL_PARAMETERS_H
 #define WIFI_SPECTRUM_SIGNAL_PARAMETERS_H
 
+#include "wifi-phy-common.h"
+
 #include "ns3/spectrum-signal-parameters.h"
 
 namespace ns3
@@ -50,7 +52,6 @@ struct WifiSpectrumSignalParameters : public SpectrumSignalParameters
     WifiSpectrumSignalParameters(const WifiSpectrumSignalParameters& p);
 
     Ptr<const WifiPpdu> ppdu; ///< The PPDU being transmitted
-    uint16_t txCenterFreq;    ///< the center frequency of the transmitted signal in MHz
 };
 
 } // namespace ns3

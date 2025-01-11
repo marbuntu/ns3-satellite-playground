@@ -31,7 +31,6 @@ NS_LOG_COMPONENT_DEFINE("BuildingsChannelConditionModelsTest");
 
 /**
  * \ingroup building-test
- * \ingroup tests
  *
  * Test case for the class BuildingsChannelConditionModel. It checks if the
  * channel condition is correctly determined when a building is deployed in the
@@ -59,14 +58,14 @@ class BuildingsChannelConditionModelTestCase : public TestCase
     /**
      * Struct containing the parameters for each test
      */
-    typedef struct
+    struct TestVector
     {
         Vector m_positionA;                            //!< the position of the first node
         Vector m_positionB;                            //!< the position of the second node
         ChannelCondition::LosConditionValue m_losCond; //!< the correct channel condition
-    } TestVector;
+    };
 
-    TestVectors<TestVector> m_testVectors; //!< array containg all the test vectors
+    TestVectors<TestVector> m_testVectors; //!< array containing all the test vectors
 };
 
 BuildingsChannelConditionModelTestCase::BuildingsChannelConditionModelTestCase()
@@ -121,6 +120,7 @@ BuildingsChannelConditionModelTestCase::DoRun()
     building->SetNRoomsY(1);
     building->SetNFloors(1);
     building->SetBoundaries(Box(0.0, 10.0, 0.0, 10.0, 0.0, 5.0));
+    building->SetExtWallsType(Building::ExtWallsType_t::Wood);
 
     BuildingsHelper::Install(nodes);
 
@@ -147,7 +147,6 @@ BuildingsChannelConditionModelTestCase::DoRun()
 
 /**
  * \ingroup building-test
- * \ingroup tests
  * Test suite for the buildings channel condition model
  */
 class BuildingsChannelConditionModelsTestSuite : public TestSuite
@@ -157,9 +156,9 @@ class BuildingsChannelConditionModelsTestSuite : public TestSuite
 };
 
 BuildingsChannelConditionModelsTestSuite::BuildingsChannelConditionModelsTestSuite()
-    : TestSuite("buildings-channel-condition-model", UNIT)
+    : TestSuite("buildings-channel-condition-model", Type::UNIT)
 {
-    AddTestCase(new BuildingsChannelConditionModelTestCase, TestCase::QUICK);
+    AddTestCase(new BuildingsChannelConditionModelTestCase, TestCase::Duration::QUICK);
 }
 
 /// Static variable for test initialization

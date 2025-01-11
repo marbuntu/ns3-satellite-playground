@@ -70,18 +70,19 @@ class IdealWifiManager : public WifiRemoteStationManager
                         double ackSnr,
                         WifiMode ackMode,
                         double dataSnr,
-                        uint16_t dataChannelWidth,
+                        ChannelWidthMhz dataChannelWidth,
                         uint8_t dataNss) override;
     void DoReportAmpduTxStatus(WifiRemoteStation* station,
                                uint16_t nSuccessfulMpdus,
                                uint16_t nFailedMpdus,
                                double rxSnr,
                                double dataSnr,
-                               uint16_t dataChannelWidth,
+                               ChannelWidthMhz dataChannelWidth,
                                uint8_t dataNss) override;
     void DoReportFinalRtsFailed(WifiRemoteStation* station) override;
     void DoReportFinalDataFailed(WifiRemoteStation* station) override;
-    WifiTxVector DoGetDataTxVector(WifiRemoteStation* station, uint16_t allowedWidth) override;
+    WifiTxVector DoGetDataTxVector(WifiRemoteStation* station,
+                                   ChannelWidthMhz allowedWidth) override;
     WifiTxVector DoGetRtsTxVector(WifiRemoteStation* station) override;
 
     /**
@@ -121,7 +122,7 @@ class IdealWifiManager : public WifiRemoteStationManager
      * \param mode non-HT WifiMode
      * \return the channel width (MHz) for the selected mode
      */
-    uint16_t GetChannelWidthForNonHtMode(WifiMode mode) const;
+    ChannelWidthMhz GetChannelWidthForNonHtMode(WifiMode mode) const;
 
     /**
      * Convenience function to get the last observed SNR from a given station for a given channel
@@ -135,8 +136,25 @@ class IdealWifiManager : public WifiRemoteStationManager
      * \return the SNR in linear scale
      */
     double GetLastObservedSnr(IdealWifiRemoteStation* station,
-                              uint16_t channelWidth,
+                              ChannelWidthMhz channelWidth,
                               uint8_t nss) const;
+
+    /**
+     * Check whether a given modulation class is supported by both the node and the peer
+     * \param mc the modulation class
+     * \param station the peer station
+     * \return true if the modulation class can be used, false otherwise
+     */
+    bool IsModulationClassSupported(WifiModulationClass mc, IdealWifiRemoteStation* station);
+
+    /**
+     * Check whether a given modulation class is supported and that there are no higher modulation
+     * classes that should instead be candidates
+     * \param mc the modulation class
+     * \param station the peer station
+     * \return true if the modulation class is a candidate, false otherwise
+     */
+    bool IsCandidateModulationClass(WifiModulationClass mc, IdealWifiRemoteStation* station);
 
     /**
      * A vector of <snr, WifiTxVector> pair holding the minimum SNR for the

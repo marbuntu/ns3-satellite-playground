@@ -20,9 +20,10 @@
 #ifndef ADDRESS_H
 #define ADDRESS_H
 
+#include "tag-buffer.h"
+
 #include "ns3/attribute-helper.h"
 #include "ns3/attribute.h"
-#include "ns3/tag-buffer.h"
 
 #include <ostream>
 #include <stdint.h>
@@ -86,6 +87,14 @@ namespace ns3
  * }
  * \endcode
  *
+ * To convert a specific Address T (e.g., Ipv6Address) to and from an Address type,
+ * a class must implement three public functions:
+ * \code
+ * static T ConvertFrom(const Address& address);
+ * Address ConvertTo() const;
+ * operator Address() const;
+ * \endcode
+ *
  * \see attribute_Address
  */
 class Address
@@ -95,10 +104,7 @@ class Address
      * The maximum size of a byte buffer which
      * can be stored in an Address instance.
      */
-    enum MaxSize_e
-    {
-        MAX_SIZE = 20
-    };
+    static constexpr uint32_t MAX_SIZE{20};
 
     /**
      * Create an invalid address

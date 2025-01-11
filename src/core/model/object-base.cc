@@ -18,16 +18,14 @@
  */
 #include "object-base.h"
 
+#include "assert.h"
 #include "attribute-construction-list.h"
+#include "environment-variable.h"
 #include "log.h"
 #include "string.h"
 #include "trace-source-accessor.h"
 
 #include "ns3/core-config.h"
-
-#include <cstdlib> // getenv
-#include <cstring> // strlen
-#include <unordered_map>
 
 /**
  * \file
@@ -37,68 +35,21 @@
 
 namespace ns3
 {
+// Explicit instantiation declaration
+
+/**
+ * \ingroup callback
+ * Explicit instantiation for ObjectBase
+ * \return A wrapper Callback
+ * \sa ns3::MakeCallback
+ */
+template Callback<ObjectBase*> MakeCallback<ObjectBase*>(ObjectBase* (*)());
+template Callback<ObjectBase*>::Callback();
+template class CallbackImpl<ObjectBase*>;
 
 NS_LOG_COMPONENT_DEFINE("ObjectBase");
 
 NS_OBJECT_ENSURE_REGISTERED(ObjectBase);
-
-/** Unnamed namespace */
-namespace
-{
-
-/**
- * Get key, value pairs from the "NS_ATTRIBUTE_DEFAULT" environment variable.
- *
- * \param [in] key The key to search for.
- * \return \c true if the key was found, and the associated value.
- */
-std::pair<bool, std::string>
-EnvDictionary(std::string key)
-{
-    static std::unordered_map<std::string, std::string> dict;
-
-    if (dict.size() == 0)
-    {
-        const char* envVar = getenv("NS_ATTRIBUTE_DEFAULT");
-        if (envVar != nullptr && std::strlen(envVar) > 0)
-        {
-            std::string env = envVar;
-            std::string::size_type cur = 0;
-            std::string::size_type next = 0;
-            while (next != std::string::npos)
-            {
-                next = env.find(';', cur);
-                std::string tmp = std::string(env, cur, next - cur);
-                std::string::size_type equal = tmp.find('=');
-                if (equal != std::string::npos)
-                {
-                    std::string name = tmp.substr(0, equal);
-                    std::string envval = tmp.substr(equal + 1, tmp.size() - equal - 1);
-                    dict.insert({name, envval});
-                }
-                cur = next + 1;
-            }
-        }
-        else
-        {
-            // insert an empty key, so we don't do this again
-            dict.insert({"", ""});
-        }
-    }
-
-    std::string value;
-    bool found{false};
-
-    auto loc = dict.find(key);
-    if (loc != dict.end())
-    {
-        value = loc->second;
-        found = true;
-    }
-    return {found, value};
-}
-
-} // unnamed namespace
 
 /**
  * Ensure the TypeId for ObjectBase gets fully configured
@@ -137,27 +88,6 @@ ObjectBase::NotifyConstructionCompleted()
     NS_LOG_FUNCTION(this);
 }
 
-/**
- * \def LOG_WHERE_VALUE(where, value)
- * Log where and what value we find for the attribute
- * \param where The source of the value
- * \param value The value found, or "nothing"
- */
-#ifdef NS3_LOG_ENABLE
-#define LOG_WHERE_VALUE(where, value)                                                              \
-    do                                                                                             \
-    {                                                                                              \
-        std::string valStr{"nothing"};                                                             \
-        if (value)                                                                                 \
-        {                                                                                          \
-            valStr = "\"" + value->SerializeToString(info.checker) + "\"";                         \
-        }                                                                                          \
-        NS_LOG_DEBUG(where << " gave " << valStr);                                                 \
-    } while (false)
-#else
-#define LOG_WHERE_VALUE(where, value)
-#endif
-
 void
 ObjectBase::ConstructSelf(const AttributeConstructionList& attributes)
 {
@@ -170,13 +100,12 @@ ObjectBase::ConstructSelf(const AttributeConstructionList& attributes)
         NS_LOG_DEBUG("construct tid=" << tid.GetName() << ", params=" << tid.GetAttributeN());
         for (uint32_t i = 0; i < tid.GetAttributeN(); i++)
         {
-            struct TypeId::AttributeInformation info = tid.GetAttribute(i);
+            TypeId::AttributeInformation info = tid.GetAttribute(i);
             NS_LOG_DEBUG("try to construct \"" << tid.GetName() << "::" << info.name << "\"");
-
+            // is this attribute stored in this AttributeConstructionList instance ?
             Ptr<const AttributeValue> value = attributes.Find(info.checker);
             std::string where = "argument";
 
-            LOG_WHERE_VALUE(where, value);
             // See if this attribute should not be set here in the
             // constructor.
             if (!(info.flags & TypeId::ATTR_CONSTRUCT))
@@ -203,25 +132,28 @@ ObjectBase::ConstructSelf(const AttributeConstructionList& attributes)
 
             if (!value)
             {
-                auto [found, val] = EnvDictionary(tid.GetAttributeFullName(i));
+                NS_LOG_DEBUG("trying to set from environment variable NS_ATTRIBUTE_DEFAULT");
+                auto [found, val] =
+                    EnvironmentVariable::Get("NS_ATTRIBUTE_DEFAULT", tid.GetAttributeFullName(i));
                 if (found)
                 {
+                    NS_LOG_DEBUG("found in environment: " << val);
                     value = Create<StringValue>(val);
                     where = "env var";
-                    LOG_WHERE_VALUE(where, value);
                 }
             }
 
-            bool initial = false;
+            bool initial{false};
             if (!value)
             {
-                // Set from Tid initialValue, which is guaranteed to exist
+                // This is guaranteed to exist
+                NS_LOG_DEBUG("falling back to initial value from tid");
                 value = info.initialValue;
                 where = "initial value";
                 initial = true;
-                LOG_WHERE_VALUE(where, value);
             }
 
+            // We have a matching attribute value, if only from the initialValue
             if (DoSet(info.accessor, info.checker, *value) || initial)
             {
                 // Setting from initial value may fail, e.g. setting
@@ -230,14 +162,35 @@ ObjectBase::ConstructSelf(const AttributeConstructionList& attributes)
                 NS_LOG_DEBUG("construct \"" << tid.GetName() << "::" << info.name << "\" from "
                                             << where);
             }
+            else
+            {
+                /*
+                  One would think this is an error...
+
+                  but there are cases where `attributes.Find(info.checker)`
+                  returns a non-null value which still fails the `DoSet()` call.
+                  For example, `value` is sometimes a real `PointerValue`
+                  containing 0 as the pointed-to address.  Since value
+                  is not null (it just contains null) the initial
+                  value is not used, the DoSet fails, and we end up
+                  here.
+
+                  If we were adventurous we might try to fix this deep
+                  below DoSet, but there be dragons.
+                */
+                /*
+                NS_ASSERT_MSG(false,
+                              "Failed to set attribute '" << info.name << "' from '"
+                                                          << value->SerializeToString(info.checker)
+                                                          << "'");
+                */
+            }
 
         } // for i attributes
         tid = tid.GetParent();
     } while (tid != ObjectBase::GetTypeId());
     NotifyConstructionCompleted();
 }
-
-#undef LOG_WHERE_VALUE
 
 bool
 ObjectBase::DoSet(Ptr<const AttributeAccessor> accessor,
@@ -258,7 +211,7 @@ void
 ObjectBase::SetAttribute(std::string name, const AttributeValue& value)
 {
     NS_LOG_FUNCTION(this << name << &value);
-    struct TypeId::AttributeInformation info;
+    TypeId::AttributeInformation info;
     TypeId tid = GetInstanceTypeId();
     if (!tid.LookupAttributeByName(name, &info))
     {
@@ -281,7 +234,7 @@ bool
 ObjectBase::SetAttributeFailSafe(std::string name, const AttributeValue& value)
 {
     NS_LOG_FUNCTION(this << name << &value);
-    struct TypeId::AttributeInformation info;
+    TypeId::AttributeInformation info;
     TypeId tid = GetInstanceTypeId();
     if (!tid.LookupAttributeByName(name, &info))
     {
@@ -298,7 +251,7 @@ void
 ObjectBase::GetAttribute(std::string name, AttributeValue& value) const
 {
     NS_LOG_FUNCTION(this << name << &value);
-    struct TypeId::AttributeInformation info;
+    TypeId::AttributeInformation info;
     TypeId tid = GetInstanceTypeId();
     if (!tid.LookupAttributeByName(name, &info))
     {
@@ -315,7 +268,7 @@ ObjectBase::GetAttribute(std::string name, AttributeValue& value) const
     {
         return;
     }
-    StringValue* str = dynamic_cast<StringValue*>(&value);
+    auto str = dynamic_cast<StringValue*>(&value);
     if (str == nullptr)
     {
         NS_FATAL_ERROR("Attribute name=" << name << " tid=" << tid.GetName()
@@ -335,7 +288,7 @@ bool
 ObjectBase::GetAttributeFailSafe(std::string name, AttributeValue& value) const
 {
     NS_LOG_FUNCTION(this << name << &value);
-    struct TypeId::AttributeInformation info;
+    TypeId::AttributeInformation info;
     TypeId tid = GetInstanceTypeId();
     if (!tid.LookupAttributeByName(name, &info))
     {
@@ -350,7 +303,7 @@ ObjectBase::GetAttributeFailSafe(std::string name, AttributeValue& value) const
     {
         return true;
     }
-    StringValue* str = dynamic_cast<StringValue*>(&value);
+    auto str = dynamic_cast<StringValue*>(&value);
     if (str == nullptr)
     {
         return false;
@@ -373,6 +326,7 @@ ObjectBase::TraceConnectWithoutContext(std::string name, const CallbackBase& cb)
     Ptr<const TraceSourceAccessor> accessor = tid.LookupTraceSourceByName(name);
     if (!accessor)
     {
+        NS_LOG_DEBUG("Cannot connect trace " << name << " on object of type " << tid.GetName());
         return false;
     }
     bool ok = accessor->ConnectWithoutContext(this, cb);
@@ -387,6 +341,7 @@ ObjectBase::TraceConnect(std::string name, std::string context, const CallbackBa
     Ptr<const TraceSourceAccessor> accessor = tid.LookupTraceSourceByName(name);
     if (!accessor)
     {
+        NS_LOG_DEBUG("Cannot connect trace " << name << " on object of type " << tid.GetName());
         return false;
     }
     bool ok = accessor->Connect(this, context, cb);

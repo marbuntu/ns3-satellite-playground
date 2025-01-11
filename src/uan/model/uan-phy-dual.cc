@@ -79,7 +79,7 @@ UanPhyCalcSinrDual::CalcSinrDb(Ptr<Packet> pkt,
     }
 
     double intKp = -DbToKp(rxPowerDb); // This packet is in the arrivalList
-    UanTransducer::ArrivalList::const_iterator it = arrivalList.begin();
+    auto it = arrivalList.begin();
     for (; it != arrivalList.end(); it++)
     {
         // Only count interference if there is overlap in incoming frequency
@@ -237,7 +237,7 @@ UanPhyDual::GetTypeId()
                             MakeTraceSourceAccessor(&UanPhyDual::m_rxOkLogger),
                             "ns3::UanPhy::TracedCallback")
             .AddTraceSource("RxError",
-                            "A packet was received unsuccessfully.",
+                            "A packet was received unsuccessfuly.",
                             MakeTraceSourceAccessor(&UanPhyDual::m_rxErrLogger),
                             "ns3::UanPhy::TracedCallback")
             .AddTraceSource("Tx",
@@ -251,7 +251,7 @@ UanPhyDual::GetTypeId()
 }
 
 void
-UanPhyDual::SetEnergyModelCallback(DeviceEnergyModel::ChangeStateCallback callback)
+UanPhyDual::SetEnergyModelCallback(energy::DeviceEnergyModel::ChangeStateCallback callback)
 {
     NS_LOG_DEBUG("Not Implemented");
 }

@@ -20,6 +20,7 @@
 #ifndef QOS_UTILS_H
 #define QOS_UTILS_H
 
+#include "ns3/fatal-error.h"
 #include "ns3/ptr.h"
 
 #include <map>
@@ -33,8 +34,6 @@ class QueueItem;
 class Mac48Address;
 
 typedef std::pair<Mac48Address, uint8_t> WifiAddressTidPair; //!< (MAC address, TID) pair
-
-#define WIFI_TID_UNDEFINED 0xff
 
 /**
  * Function object to compute the hash of a (MAC address, TID) pair
@@ -89,6 +88,38 @@ enum AcIndex : uint8_t
 };
 
 /**
+ * \brief Stream insertion operator.
+ *
+ * \param os the stream
+ * \param acIndex the AC index
+ * \returns a reference to the stream
+ */
+inline std::ostream&
+operator<<(std::ostream& os, const AcIndex& acIndex)
+{
+    switch (acIndex)
+    {
+    case AC_BE:
+        return (os << "AC BE");
+    case AC_BK:
+        return (os << "AC BK");
+    case AC_VI:
+        return (os << "AC VI");
+    case AC_VO:
+        return (os << "AC VO");
+    case AC_BE_NQOS:
+        return (os << "AC BE NQOS");
+    case AC_BEACON:
+        return (os << "AC BEACON");
+    case AC_UNDEF:
+        return (os << "AC Undefined");
+    default:
+        NS_FATAL_ERROR("Unknown AC index");
+        return (os << "Unknown");
+    }
+}
+
+/**
  * \ingroup wifi
  * This class stores the pair of TIDs of an Access Category.
  */
@@ -136,7 +167,7 @@ class WifiAc
  * \param right the AC on the right of operator>
  * \return true if the AC on the left has higher priority than the AC on the right
  */
-bool operator>(enum AcIndex left, enum AcIndex right);
+bool operator>(AcIndex left, AcIndex right);
 
 /**
  * \ingroup wifi
@@ -147,7 +178,7 @@ bool operator>(enum AcIndex left, enum AcIndex right);
  * \param right the AC on the right of operator>=
  * \return true if the AC on the left has higher or the same priority than the AC on the right
  */
-bool operator>=(enum AcIndex left, enum AcIndex right);
+bool operator>=(AcIndex left, AcIndex right);
 
 /**
  * \ingroup wifi
@@ -158,7 +189,7 @@ bool operator>=(enum AcIndex left, enum AcIndex right);
  * \param right the AC on the right of operator<
  * \return true if the AC on the left has lower priority than the AC on the right
  */
-bool operator<(enum AcIndex left, enum AcIndex right);
+bool operator<(AcIndex left, AcIndex right);
 
 /**
  * \ingroup wifi
@@ -169,7 +200,7 @@ bool operator<(enum AcIndex left, enum AcIndex right);
  * \param right the AC on the right of operator<=
  * \return true if the AC on the left has lower or the same priority than the AC on the right
  */
-bool operator<=(enum AcIndex left, enum AcIndex right);
+bool operator<=(AcIndex left, AcIndex right);
 
 /**
  * Map containing the four ACs in increasing order of priority (according to
@@ -186,18 +217,6 @@ extern const std::map<AcIndex, WifiAc> wifiAcList;
  * \return the access class for the given TID
  */
 AcIndex QosUtilsMapTidToAc(uint8_t tid);
-
-/**
- * \ingroup wifi
- * If a QoS tag is attached to the packet, returns a value < 8.
- * A value >= 8 is returned otherwise.
- *
- * \param packet the packet to checked for a QoS tag
- *
- * \return a value less than 8 if QoS tag was present, a value >= 8
- *         is returned if no QoS tag was present
- */
-uint8_t QosUtilsGetTidForPacket(Ptr<const Packet> packet);
 
 /**
  * \ingroup wifi

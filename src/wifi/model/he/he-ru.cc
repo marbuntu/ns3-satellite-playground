@@ -23,6 +23,7 @@
 #include "ns3/assert.h"
 
 #include <optional>
+#include <tuple>
 
 namespace ns3
 {
@@ -159,7 +160,8 @@ const HeRu::SubcarrierGroups HeRu::m_heRuSubcarrierGroups = {
     {{80, HeRu::RU_484_TONE},
      {/* 1 */ {{-500, -17}},
       /* 2 */ {{17, 500}}}},
-    {{80, HeRu::RU_996_TONE}, {/* 1 */ {{-500, -3}, {3, 500}}}}};
+    {{80, HeRu::RU_996_TONE}, {/* 1 */ {{-500, -3}, {3, 500}}}},
+};
 
 // Table 27-26 IEEE802.11ax-2021
 const HeRu::RuAllocationMap HeRu::m_heRuAllocations = {
@@ -369,29 +371,51 @@ const HeRu::RuAllocationMap HeRu::m_heRuAllocations = {
     // clang-format on
 };
 
+HeRu::RuSpecCompare::RuSpecCompare(ChannelWidthMhz channelWidth, uint8_t p20Index)
+    : m_channelWidth(channelWidth),
+      m_p20Index(p20Index)
+{
+}
+
+bool
+HeRu::RuSpecCompare::operator()(const HeRu::RuSpec& lhs, const HeRu::RuSpec& rhs) const
+{
+    const auto lhsIndex = lhs.GetPhyIndex(m_channelWidth, m_p20Index);
+    const auto rhsIndex = rhs.GetPhyIndex(m_channelWidth, m_p20Index);
+    const auto lhsStartTone =
+        HeRu::GetSubcarrierGroup(m_channelWidth, lhs.GetRuType(), lhsIndex).front().first;
+    const auto rhsStartTone =
+        HeRu::GetSubcarrierGroup(m_channelWidth, rhs.GetRuType(), rhsIndex).front().first;
+    return lhsStartTone < rhsStartTone;
+}
+
 std::vector<HeRu::RuSpec>
 HeRu::GetRuSpecs(uint8_t ruAllocation)
 {
     std::optional<std::size_t> idx;
-    switch (ruAllocation)
+    if (((ruAllocation >= 0) && (ruAllocation <= 15)) || (ruAllocation == 112))
     {
-    case 0 ... 15:
-    case 112:
         idx = ruAllocation;
-        break;
-    case 16 ... 95:
-    case 192 ... 215:
+    }
+    else if (((ruAllocation >= 16) && (ruAllocation <= 95)) ||
+             ((ruAllocation >= 192) && (ruAllocation <= 215)))
+    {
         idx = ruAllocation & 0xF8;
-        break;
-    case 96 ... 111:
+    }
+    else if ((ruAllocation >= 96) && (ruAllocation <= 111))
+    {
         idx = ruAllocation & 0xF0;
-        break;
-    case 113 ... 115:
-        break;
-    case 128 ... 191:
+    }
+    else if ((ruAllocation >= 113) && (ruAllocation <= 115))
+    {
+        // Do not set idx to return an undefined RU allocation
+    }
+    else if ((ruAllocation >= 128) && (ruAllocation <= 191))
+    {
         idx = ruAllocation & 0xC0;
-        break;
-    default:
+    }
+    else
+    {
         NS_FATAL_ERROR("Reserved RU allocation " << +ruAllocation);
     }
     return idx.has_value() ? m_heRuAllocations.at(idx.value()) : std::vector<HeRu::RuSpec>{};
@@ -425,8 +449,7 @@ HeRu::RuSpec::RuSpec()
 HeRu::RuSpec::RuSpec(RuType ruType, std::size_t index, bool primary80MHz)
     : m_ruType(ruType),
       m_index(index),
-      m_primary80MHz(primary80MHz),
-      m_phyIndex(0)
+      m_primary80MHz(primary80MHz)
 {
     NS_ABORT_MSG_IF(index == 0, "Index cannot be zero");
 }
@@ -452,37 +475,24 @@ HeRu::RuSpec::GetPrimary80MHz() const
     return m_primary80MHz;
 }
 
-void
-HeRu::RuSpec::SetPhyIndex(uint16_t bw, uint8_t p20Index)
+std::size_t
+HeRu::RuSpec::GetPhyIndex(ChannelWidthMhz bw, uint8_t p20Index) const
 {
     bool primary80IsLower80 = (p20Index < bw / 40);
 
     if (bw < 160 || m_ruType == HeRu::RU_2x996_TONE || (primary80IsLower80 && m_primary80MHz) ||
         (!primary80IsLower80 && !m_primary80MHz))
     {
-        m_phyIndex = m_index;
+        return m_index;
     }
     else
     {
-        m_phyIndex = m_index + GetNRus(bw, m_ruType) / 2;
+        return m_index + GetNRus(bw, m_ruType) / 2;
     }
 }
 
-bool
-HeRu::RuSpec::IsPhyIndexSet() const
-{
-    return (m_phyIndex != 0);
-}
-
 std::size_t
-HeRu::RuSpec::GetPhyIndex() const
-{
-    NS_ABORT_MSG_IF(m_phyIndex == 0, "RU PHY index not set");
-    return m_phyIndex;
-}
-
-std::size_t
-HeRu::GetNRus(uint16_t bw, RuType ruType)
+HeRu::GetNRus(ChannelWidthMhz bw, RuType ruType)
 {
     if (bw == 160 && ruType == RU_2x996_TONE)
     {
@@ -502,7 +512,7 @@ HeRu::GetNRus(uint16_t bw, RuType ruType)
 }
 
 std::vector<HeRu::RuSpec>
-HeRu::GetRusOfType(uint16_t bw, HeRu::RuType ruType)
+HeRu::GetRusOfType(ChannelWidthMhz bw, HeRu::RuType ruType)
 {
     if (ruType == HeRu::RU_2x996_TONE)
     {
@@ -532,7 +542,7 @@ HeRu::GetRusOfType(uint16_t bw, HeRu::RuType ruType)
 }
 
 std::vector<HeRu::RuSpec>
-HeRu::GetCentral26TonesRus(uint16_t bw, HeRu::RuType ruType)
+HeRu::GetCentral26TonesRus(ChannelWidthMhz bw, HeRu::RuType ruType)
 {
     std::vector<std::size_t> indices;
 
@@ -578,7 +588,7 @@ HeRu::GetCentral26TonesRus(uint16_t bw, HeRu::RuType ruType)
 }
 
 HeRu::SubcarrierGroup
-HeRu::GetSubcarrierGroup(uint16_t bw, RuType ruType, std::size_t phyIndex)
+HeRu::GetSubcarrierGroup(ChannelWidthMhz bw, RuType ruType, std::size_t phyIndex)
 {
     if (ruType == HeRu::RU_2x996_TONE) // handle special case of RU covering 160 MHz channel
     {
@@ -617,7 +627,7 @@ HeRu::GetSubcarrierGroup(uint16_t bw, RuType ruType, std::size_t phyIndex)
 }
 
 bool
-HeRu::DoesOverlap(uint16_t bw, RuSpec ru, const std::vector<RuSpec>& v)
+HeRu::DoesOverlap(ChannelWidthMhz bw, RuSpec ru, const std::vector<RuSpec>& v)
 {
     // A 2x996-tone RU spans 160 MHz, hence it overlaps with any other RU
     if (bw == 160 && ru.GetRuType() == RU_2x996_TONE && !v.empty())
@@ -653,7 +663,10 @@ HeRu::DoesOverlap(uint16_t bw, RuSpec ru, const std::vector<RuSpec>& v)
 }
 
 bool
-HeRu::DoesOverlap(uint16_t bw, RuSpec ru, const SubcarrierGroup& toneRanges)
+HeRu::DoesOverlap(ChannelWidthMhz bw,
+                  RuSpec ru,
+                  const SubcarrierGroup& toneRanges,
+                  uint8_t p20Index)
 {
     for (const auto& range : toneRanges)
     {
@@ -662,7 +675,8 @@ HeRu::DoesOverlap(uint16_t bw, RuSpec ru, const SubcarrierGroup& toneRanges)
             return true;
         }
 
-        SubcarrierGroup rangesRu = GetSubcarrierGroup(bw, ru.GetRuType(), ru.GetPhyIndex());
+        SubcarrierGroup rangesRu =
+            GetSubcarrierGroup(bw, ru.GetRuType(), ru.GetPhyIndex(bw, p20Index));
         for (auto& r : rangesRu)
         {
             if (range.second >= r.first && r.second >= range.first)
@@ -675,7 +689,7 @@ HeRu::DoesOverlap(uint16_t bw, RuSpec ru, const SubcarrierGroup& toneRanges)
 }
 
 HeRu::RuSpec
-HeRu::FindOverlappingRu(uint16_t bw, RuSpec referenceRu, RuType searchedRuType)
+HeRu::FindOverlappingRu(ChannelWidthMhz bw, RuSpec referenceRu, RuType searchedRuType)
 {
     std::size_t numRus = HeRu::GetNRus(bw, searchedRuType);
 
@@ -748,15 +762,11 @@ operator<<(std::ostream& os, const HeRu::RuSpec& ru)
 {
     os << "RU{" << ru.GetRuType() << "/" << ru.GetIndex() << "/"
        << (ru.GetPrimary80MHz() ? "primary80MHz" : "secondary80MHz");
-    if (ru.IsPhyIndexSet())
-    {
-        os << "[" << ru.GetPhyIndex() << "]";
-    }
     os << "}";
     return os;
 }
 
-uint16_t
+ChannelWidthMhz
 HeRu::GetBandwidth(RuType ruType)
 {
     switch (ruType)
@@ -782,7 +792,7 @@ HeRu::GetBandwidth(RuType ruType)
 }
 
 HeRu::RuType
-HeRu::GetRuType(uint16_t bandwidth)
+HeRu::GetRuType(ChannelWidthMhz bandwidth)
 {
     switch (bandwidth)
     {
@@ -807,7 +817,7 @@ HeRu::GetRuType(uint16_t bandwidth)
 }
 
 HeRu::RuType
-HeRu::GetEqualSizedRusForStations(uint16_t bandwidth,
+HeRu::GetEqualSizedRusForStations(ChannelWidthMhz bandwidth,
                                   std::size_t& nStations,
                                   std::size_t& nCentral26TonesRus)
 {
@@ -886,6 +896,16 @@ bool
 HeRu::RuSpec::operator!=(const RuSpec& other) const
 {
     return !(*this == other);
+}
+
+bool
+HeRu::RuSpec::operator<(const RuSpec& other) const
+{
+    // we do not compare the RU PHY indices because they may be uninitialized for
+    // one of the compared RUs. This event should not cause the comparison to evaluate
+    // to false
+    return std::tie(m_ruType, m_index, m_primary80MHz) <
+           std::tie(other.m_ruType, other.m_index, other.m_primary80MHz);
 }
 
 } // namespace ns3

@@ -21,7 +21,6 @@
 
 #include "event-id.h"
 #include "fatal-error.h"
-#include "int-to-type.h"
 #include "nstime.h"
 
 /**
@@ -50,7 +49,12 @@ namespace ns3
  * Timer is destroyed.
  */
 
+namespace internal
+{
+
 class TimerImpl;
+
+} // namespace internal
 
 /**
  * \ingroup timer
@@ -121,7 +125,7 @@ class Timer
      * \param [in] destroyPolicy the event lifetime management policies
      * to use for destroy events
      */
-    Timer(enum DestroyPolicy destroyPolicy);
+    Timer(DestroyPolicy destroyPolicy);
     ~Timer();
 
     /**
@@ -198,7 +202,7 @@ class Timer
     /**
      * \returns The current state of the timer.
      */
-    enum Timer::State GetState() const;
+    Timer::State GetState() const;
     /**
      * Schedule a new event using the currently-configured delay, function,
      * and arguments.
@@ -233,11 +237,8 @@ class Timer
     void Resume();
 
   private:
-    /** Internal bit marking the suspended state. */
-    enum InternalSuspended
-    {
-        TIMER_SUSPENDED = (1 << 7) /** Timer suspended. */
-    };
+    /** Internal bit marking the suspended timer state */
+    static constexpr auto TIMER_SUSPENDED{1 << 7};
 
     /**
      * Bitfield for Timer State, DestroyPolicy and InternalSuspended.
@@ -257,7 +258,7 @@ class Timer
      * The timer implementation, which contains the bound callback
      * function and arguments.
      */
-    TimerImpl* m_impl;
+    internal::TimerImpl* m_impl;
     /** The amount of time left on the Timer while it is suspended. */
     Time m_delayLeft;
 };
@@ -278,7 +279,7 @@ void
 Timer::SetFunction(FN fn)
 {
     delete m_impl;
-    m_impl = MakeTimerImpl(fn);
+    m_impl = internal::MakeTimerImpl(fn);
 }
 
 template <typename MEM_PTR, typename OBJ_PTR>
@@ -286,7 +287,7 @@ void
 Timer::SetFunction(MEM_PTR memPtr, OBJ_PTR objPtr)
 {
     delete m_impl;
-    m_impl = MakeTimerImpl(memPtr, objPtr);
+    m_impl = internal::MakeTimerImpl(memPtr, objPtr);
 }
 
 template <typename... Ts>

@@ -24,7 +24,7 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("TcpRxBufferTestSuite");
 
 /**
- * \ingroup internet-tests
+ * \ingroup internet-test
  * \ingroup tests
  *
  * \brief The TcpRxBuffer Test
@@ -60,7 +60,6 @@ TcpRxBufferTestCase::TestUpdateSACKList()
 {
     TcpRxBuffer rxBuf;
     TcpOptionSack::SackList sackList;
-    TcpOptionSack::SackList::iterator it;
     Ptr<Packet> p = Create<Packet>(100);
     TcpHeader h;
 
@@ -83,7 +82,7 @@ TcpRxBufferTestCase::TestUpdateSACKList()
                           "Sequence number differs from expected");
     sackList = rxBuf.GetSackList();
     NS_TEST_ASSERT_MSG_EQ(sackList.size(), 1, "SACK list should contain one element");
-    it = sackList.begin();
+    auto it = sackList.begin();
     NS_TEST_ASSERT_MSG_EQ(it->first, SequenceNumber32(501), "SACK block different than expected");
     NS_TEST_ASSERT_MSG_EQ(it->second, SequenceNumber32(601), "SACK block different than expected");
 
@@ -296,7 +295,6 @@ TcpRxBufferTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief the TestSuite for the TcpRxBuffer test case
  */
@@ -304,9 +302,9 @@ class TcpRxBufferTestSuite : public TestSuite
 {
   public:
     TcpRxBufferTestSuite()
-        : TestSuite("tcp-rx-buffer", UNIT)
+        : TestSuite("tcp-rx-buffer", Type::UNIT)
     {
-        AddTestCase(new TcpRxBufferTestCase, TestCase::QUICK);
+        AddTestCase(new TcpRxBufferTestCase, TestCase::Duration::QUICK);
     }
 };
 

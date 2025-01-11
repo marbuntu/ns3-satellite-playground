@@ -21,7 +21,7 @@
 #ifndef UAN_PHY_DUAL_H
 #define UAN_PHY_DUAL_H
 
-#include "ns3/uan-phy.h"
+#include "uan-phy.h"
 
 namespace ns3
 {
@@ -90,7 +90,7 @@ class UanPhyDual : public UanPhy
     static TypeId GetTypeId();
 
     // Inherited methods:
-    void SetEnergyModelCallback(DeviceEnergyModel::ChangeStateCallback callback) override;
+    void SetEnergyModelCallback(energy::DeviceEnergyModel::ChangeStateCallback callback) override;
     void EnergyDepletionHandler() override;
     void EnergyRechargeHandler() override;
     void SendPacket(Ptr<Packet> pkt, uint32_t modeNum) override;
@@ -240,7 +240,7 @@ class UanPhyDual : public UanPhy
 
     /** A packet was received successfully. */
     ns3::TracedCallback<Ptr<const Packet>, double, UanTxMode> m_rxOkLogger;
-    /** A packet was received unsuccessfully. */
+    /** A packet was received unsuccessfuly. */
     ns3::TracedCallback<Ptr<const Packet>, double, UanTxMode> m_rxErrLogger;
     /** A packet was sent from this Phy. */
     ns3::TracedCallback<Ptr<const Packet>, double, UanTxMode> m_txLogger;

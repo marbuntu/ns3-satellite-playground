@@ -28,7 +28,6 @@ NS_LOG_COMPONENT_DEFINE("TcpDatSentCbTest");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Socket that the 50% of the times saves the entire packet in the buffer,
  * while in the other 50% saves only half the packet.
@@ -90,7 +89,6 @@ TcpSocketHalfAck::ReceivedData(Ptr<Packet> packet, const TcpHeader& tcpHeader)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Data Sent callback test
  *
@@ -164,7 +162,6 @@ TcpDataSentCbTestCase::CreateReceiverSocket(Ptr<Node> node)
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TestSuite: Data Sent callback
  */
@@ -172,18 +169,18 @@ class TcpDataSentCbTestSuite : public TestSuite
 {
   public:
     TcpDataSentCbTestSuite()
-        : TestSuite("tcp-datasentcb", UNIT)
+        : TestSuite("tcp-datasentcb", Type::UNIT)
     {
         AddTestCase(new TcpDataSentCbTestCase("Check the data sent callback", 500, 10),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new TcpDataSentCbTestCase("Check the data sent callback", 100, 100),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new TcpDataSentCbTestCase("Check the data sent callback", 1000, 50),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new TcpDataSentCbTestCase("Check the data sent callback", 855, 18),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new TcpDataSentCbTestCase("Check the data sent callback", 1243, 59),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 };
 

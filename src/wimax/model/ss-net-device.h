@@ -23,12 +23,12 @@
 #define WIMAX_SS_NET_DEVICE_H
 
 #include "ipcs-classifier.h"
+#include "ss-service-flow-manager.h"
 #include "wimax-mac-header.h"
 #include "wimax-net-device.h"
 
 #include "ns3/event-id.h"
 #include "ns3/nstime.h"
-#include "ns3/ss-service-flow-manager.h"
 #include "ns3/uinteger.h"
 
 namespace ns3
@@ -297,12 +297,12 @@ class SubscriberStationNetDevice : public WimaxNetDevice
      * \brief adds a new service flow
      * \param sf pointer to service flow to add
      */
-    void AddServiceFlow(ServiceFlow* sf);
+    void AddServiceFlow(ServiceFlow* sf) const;
     /**
      * \brief adds a new service flow
      * \param sf service flow to add
      */
-    void AddServiceFlow(ServiceFlow sf);
+    void AddServiceFlow(ServiceFlow sf) const;
     /**
      * \brief Set timer.  If in stopped state, the EventId passed in the first
      * argument will be cancelled.  If not, the second parameter will be set

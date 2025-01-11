@@ -50,7 +50,6 @@
 //       +-----+    +-----+    +-----+    +-----+    +-----+
 
 #include "ns3/applications-module.h"
-#include "ns3/config-store-module.h"
 #include "ns3/core-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/global-route-manager.h"
@@ -157,7 +156,7 @@ main(int argc, char* argv[])
     bsDevs.Add(dev);
     if (verbose)
     {
-        wimax.EnableLogComponents(); // Turn on all wimax logging
+        WimaxHelper::EnableLogComponents(); // Turn on all wimax logging
     }
 
     for (int i = 0; i < nbSS; i++)

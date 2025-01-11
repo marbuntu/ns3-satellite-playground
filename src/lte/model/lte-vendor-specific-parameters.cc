@@ -17,8 +17,9 @@
  * Author: Marco Miozzo  <marco.miozzo@cttc.es>
  */
 
+#include "lte-vendor-specific-parameters.h"
+
 #include <ns3/log.h>
-#include <ns3/lte-vendor-specific-parameters.h>
 
 namespace ns3
 {
@@ -35,9 +36,9 @@ SrsCqiRntiVsp::~SrsCqiRntiVsp()
 }
 
 uint16_t
-SrsCqiRntiVsp::GetRnti()
+SrsCqiRntiVsp::GetRnti() const
 {
-    return (m_rnti);
+    return m_rnti;
 }
 
 } // namespace ns3

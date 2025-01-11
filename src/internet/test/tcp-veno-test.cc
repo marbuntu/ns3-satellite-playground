@@ -35,7 +35,6 @@ NS_LOG_COMPONENT_DEFINE("TcpVenoTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Testing the additive increase and multiplicative decrease of TcpVeno
  */
@@ -80,7 +79,7 @@ class TcpVenoTest : public TestCase
      */
     uint32_t MultiplicativeDecrease(uint32_t diff,
                                     const UintegerValue& beta,
-                                    uint32_t bytesInFlight);
+                                    uint32_t bytesInFlight) const;
 
     /**
      * \brief Mimics the NewReno IncreaseWindow algorithm.
@@ -244,7 +243,7 @@ TcpVenoTest::AdditiveIncrease(Ptr<TcpSocketState> state, uint32_t diff, Uinteger
 uint32_t
 TcpVenoTest::MultiplicativeDecrease(uint32_t diff,
                                     const UintegerValue& beta,
-                                    uint32_t bytesInFlight)
+                                    uint32_t bytesInFlight) const
 {
     uint32_t calculatedSsThresh;
     if (diff < beta.Get())
@@ -300,7 +299,6 @@ TcpVenoTest::NewReno_CongestionAvoidance(Ptr<TcpSocketState> state, uint32_t seg
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief TCP Veno TestSuite
  */
@@ -308,7 +306,7 @@ class TcpVenoTestSuite : public TestSuite
 {
   public:
     TcpVenoTestSuite()
-        : TestSuite("tcp-veno-test", UNIT)
+        : TestSuite("tcp-veno-test", Type::UNIT)
     {
         AddTestCase(new TcpVenoTest(38 * 1446,
                                     1446,
@@ -317,7 +315,7 @@ class TcpVenoTestSuite : public TestSuite
                                     1,
                                     1,
                                     "Veno test on cWnd in slow start and non-congestive loss"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new TcpVenoTest(30 * 536,
                                     536,
                                     20 * 536,
@@ -325,7 +323,7 @@ class TcpVenoTestSuite : public TestSuite
                                     1,
                                     1,
                                     "Veno test on cWnd with diff < beta"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new TcpVenoTest(60 * 536,
                                     536,
                                     40 * 536,
@@ -333,7 +331,7 @@ class TcpVenoTestSuite : public TestSuite
                                     1,
                                     3,
                                     "Veno increment test on cWnd with diff > beta"),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 };
 

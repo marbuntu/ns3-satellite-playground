@@ -46,7 +46,6 @@ NS_LOG_COMPONENT_DEFINE("LteHandoverFailureTest");
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Verifying that a handover failure occurs due to various causes
  *
@@ -111,7 +110,7 @@ class LteHandoverFailureTestCase : public TestCase
           m_handoverJoiningTimeout(handoverJoiningTimeout),
           m_handoverLeavingTimeout(handoverLeavingTimeout),
           m_targeteNodeBPosition(targeteNodeBPosition),
-          m_hasHandoverFailureOccured(false)
+          m_hasHandoverFailureOccurred(false)
     {
     }
 
@@ -124,7 +123,7 @@ class LteHandoverFailureTestCase : public TestCase
 
     /**
      * \brief Called at the end of simulation and verifies that a handover
-     *        and a handover failure has occured in the simulation.
+     *        and a handover failure has occurred in the simulation.
      */
     void DoTeardown() override;
 
@@ -199,8 +198,8 @@ class LteHandoverFailureTestCase : public TestCase
     uint8_t m_raResponseWindowSize; ///< window length for reception of RAR
     Time m_handoverJoiningTimeout;  ///< handover joining timeout duration at target eNodeB
     Time m_handoverLeavingTimeout;  ///< handover leaving timeout duration at source eNodeB
-    uint16_t m_targeteNodeBPosition;  ///< position of the target eNodeB
-    bool m_hasHandoverFailureOccured; ///< has handover failure occured in simulation
+    uint16_t m_targeteNodeBPosition;   ///< position of the target eNodeB
+    bool m_hasHandoverFailureOccurred; ///< has handover failure occurred in simulation
 
 }; // end of class LteHandoverFailureTestCase
 
@@ -322,7 +321,7 @@ LteHandoverFailureTestCase::HandoverFailureMaxRach(std::string context,
                                                    uint16_t targetCellId)
 {
     NS_LOG_FUNCTION(this << context << imsi << rnti << targetCellId);
-    m_hasHandoverFailureOccured = true;
+    m_hasHandoverFailureOccurred = true;
 }
 
 void
@@ -332,7 +331,7 @@ LteHandoverFailureTestCase::HandoverFailureNoPreamble(std::string context,
                                                       uint16_t targetCellId)
 {
     NS_LOG_FUNCTION(this << context << imsi << rnti << targetCellId);
-    m_hasHandoverFailureOccured = true;
+    m_hasHandoverFailureOccurred = true;
 }
 
 void
@@ -342,7 +341,7 @@ LteHandoverFailureTestCase::HandoverFailureJoining(std::string context,
                                                    uint16_t targetCellId)
 {
     NS_LOG_FUNCTION(this << context << imsi << rnti << targetCellId);
-    m_hasHandoverFailureOccured = true;
+    m_hasHandoverFailureOccurred = true;
 }
 
 void
@@ -352,19 +351,18 @@ LteHandoverFailureTestCase::HandoverFailureLeaving(std::string context,
                                                    uint16_t targetCellId)
 {
     NS_LOG_FUNCTION(this << context << imsi << rnti << targetCellId);
-    m_hasHandoverFailureOccured = true;
+    m_hasHandoverFailureOccurred = true;
 }
 
 void
 LteHandoverFailureTestCase::DoTeardown()
 {
     NS_LOG_FUNCTION(this);
-    NS_TEST_ASSERT_MSG_EQ(m_hasHandoverFailureOccured, true, "Handover failure did not occur");
+    NS_TEST_ASSERT_MSG_EQ(m_hasHandoverFailureOccurred, true, "Handover failure did not occur");
 }
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * The following log components can be used to debug this test's behavior:
  * LteHandoverFailureTest:LteEnbRrc:LteEnbMac:LteUeRrc:EpcX2
@@ -375,7 +373,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
 {
   public:
     LteHandoverFailureTestSuite()
-        : TestSuite("lte-handover-failure", TestSuite::SYSTEM)
+        : TestSuite("lte-handover-failure", Type::SYSTEM)
     {
         // Argument sequence for all test cases: useIdealRrc, handoverTime, simulationDuration,
         // numberOfRaPreambles, preambleTransMax, raResponseWindowSize,
@@ -393,7 +391,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                                                    MilliSeconds(200),
                                                    MilliSeconds(500),
                                                    2500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to non-allocation of non-contention preamble at "
                         "target eNodeB due to max number reached",
@@ -406,7 +404,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(200),
                         MilliSeconds(500),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to HANDOVER JOINING timeout before reception of "
                         "RRC CONNECTION RECONFIGURATION at source eNodeB",
@@ -419,7 +417,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(0),
                         MilliSeconds(500),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to HANDOVER JOINING timeout before completion "
                         "of non-contention RACH process to target eNodeB",
@@ -432,7 +430,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(15),
                         MilliSeconds(500),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to HANDOVER JOINING timeout before reception of "
                         "RRC CONNECTION RECONFIGURATION COMPLETE at target eNodeB",
@@ -445,7 +443,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(18),
                         MilliSeconds(500),
                         500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to HANDOVER LEAVING timeout before reception of "
                         "RRC CONNECTION RECONFIGURATION at source eNodeB",
@@ -458,7 +456,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(200),
                         MilliSeconds(0),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to HANDOVER LEAVING timeout before completion "
                         "of non-contention RACH process to target eNodeB",
@@ -471,7 +469,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(200),
                         MilliSeconds(15),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "REAL Handover failure due to HANDOVER LEAVING timeout before reception of "
                         "RRC CONNECTION RECONFIGURATION COMPLETE at target eNodeB",
@@ -484,7 +482,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(200),
                         MilliSeconds(18),
                         500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
 
         // Test cases for IDEAL RRC protocol
         AddTestCase(new LteHandoverFailureTestCase("IDEAL Handover failure due to maximum RACH "
@@ -498,7 +496,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                                                    MilliSeconds(200),
                                                    MilliSeconds(500),
                                                    1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to non-allocation of non-contention preamble "
                         "at target eNodeB due to max number reached",
@@ -511,7 +509,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(200),
                         MilliSeconds(500),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to HANDOVER JOINING timeout before reception "
                         "of RRC CONNECTION RECONFIGURATION at source eNodeB",
@@ -524,7 +522,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(0),
                         MilliSeconds(500),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to HANDOVER JOINING timeout before completion "
                         "of non-contention RACH process to target eNodeB",
@@ -537,7 +535,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(10),
                         MilliSeconds(500),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to HANDOVER JOINING timeout before reception "
                         "of RRC CONNECTION RECONFIGURATION COMPLETE at target eNodeB",
@@ -550,7 +548,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(4),
                         MilliSeconds(500),
                         500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to HANDOVER LEAVING timeout before reception "
                         "of RRC CONNECTION RECONFIGURATION at source eNodeB",
@@ -563,7 +561,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(500),
                         MilliSeconds(0),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to HANDOVER LEAVING timeout before completion "
                         "of non-contention RACH process to target eNodeB",
@@ -576,7 +574,7 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(500),
                         MilliSeconds(10),
                         1500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
         AddTestCase(new LteHandoverFailureTestCase(
                         "IDEAL Handover failure due to HANDOVER LEAVING timeout before reception "
                         "of RRC CONNECTION RECONFIGURATION COMPLETE at target eNodeB",
@@ -589,6 +587,6 @@ static class LteHandoverFailureTestSuite : public TestSuite
                         MilliSeconds(500),
                         MilliSeconds(4),
                         500),
-                    TestCase::QUICK);
+                    TestCase::Duration::QUICK);
     }
 } g_lteHandoverFailureTestSuite; ///< end of LteHandoverFailureTestSuite ()

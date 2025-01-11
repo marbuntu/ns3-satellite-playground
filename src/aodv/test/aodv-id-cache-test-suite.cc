@@ -33,13 +33,13 @@ namespace aodv
 {
 
 /**
- * \ingroup aodv
  * \defgroup aodv-test AODV module tests
+ * \ingroup aodv
+ * \ingroup tests
  */
 
 /**
  * \ingroup aodv-test
- * \ingroup tests
  *
  * \brief Unit test for id cache
  */
@@ -111,7 +111,6 @@ IdCacheTest::CheckTimeout3()
 
 /**
  * \ingroup aodv-test
- * \ingroup tests
  *
  * \brief Id Cache Test Suite
  */
@@ -119,9 +118,9 @@ class IdCacheTestSuite : public TestSuite
 {
   public:
     IdCacheTestSuite()
-        : TestSuite("aodv-routing-id-cache", UNIT)
+        : TestSuite("aodv-routing-id-cache", Type::UNIT)
     {
-        AddTestCase(new IdCacheTest, TestCase::QUICK);
+        AddTestCase(new IdCacheTest, TestCase::Duration::QUICK);
     }
 } g_idCacheTestSuite; ///< the test suite
 

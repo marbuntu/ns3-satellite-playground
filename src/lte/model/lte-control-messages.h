@@ -21,8 +21,9 @@
 #ifndef LTE_CONTROL_MESSAGES_H
 #define LTE_CONTROL_MESSAGES_H
 
-#include <ns3/ff-mac-common.h>
-#include <ns3/lte-rrc-sap.h>
+#include "ff-mac-common.h"
+#include "lte-rrc-sap.h"
+
 #include <ns3/ptr.h>
 #include <ns3/simple-ref-count.h>
 
@@ -106,7 +107,7 @@ class DlDciLteControlMessage : public LteControlMessage
      * \brief Get dic information
      * \return dci messages
      */
-    DlDciListElement_s GetDci();
+    const DlDciListElement_s& GetDci();
 
   private:
     DlDciListElement_s m_dci; ///< DCI
@@ -135,7 +136,7 @@ class UlDciLteControlMessage : public LteControlMessage
      * \brief Get dic information
      * \return dci messages
      */
-    UlDciListElement_s GetDci();
+    const UlDciListElement_s& GetDci();
 
   private:
     UlDciListElement_s m_dci; ///< DCI

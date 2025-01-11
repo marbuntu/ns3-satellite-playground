@@ -33,7 +33,6 @@ using namespace ns3;
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Pie Queue Disc Test Item
  */
@@ -94,16 +93,11 @@ PieQueueDiscTestItem::AddHeader()
 bool
 PieQueueDiscTestItem::Mark()
 {
-    if (m_ecnCapablePacket)
-    {
-        return true;
-    }
-    return false;
+    return m_ecnCapablePacket;
 }
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Pie Queue Disc Test Case
  */
@@ -849,7 +843,6 @@ PieQueueDiscTestCase::DoRun()
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Pie Queue Disc Test Suite
  */
@@ -857,8 +850,8 @@ static class PieQueueDiscTestSuite : public TestSuite
 {
   public:
     PieQueueDiscTestSuite()
-        : TestSuite("pie-queue-disc", UNIT)
+        : TestSuite("pie-queue-disc", Type::UNIT)
     {
-        AddTestCase(new PieQueueDiscTestCase(), TestCase::QUICK);
+        AddTestCase(new PieQueueDiscTestCase(), TestCase::Duration::QUICK);
     }
 } g_pieQueueTestSuite; ///< the test suite

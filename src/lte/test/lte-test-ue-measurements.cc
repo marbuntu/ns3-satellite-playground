@@ -84,7 +84,7 @@ RecvMeasurementReportCallback(LteUeMeasurementsTestCase* testcase,
  */
 
 LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
-    : TestSuite("lte-ue-measurements", SYSTEM)
+    : TestSuite("lte-ue-measurements", Type::SYSTEM)
 {
     AddTestCase(new LteUeMeasurementsTestCase("d1=10, d2=10000",
                                               10.000000,
@@ -93,7 +93,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.010305,
                                               -63.010305),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=20, d2=10000",
                                               20.000000,
                                               10000.000000,
@@ -101,7 +101,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.010319,
                                               -56.989719),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=50, d2=10000",
                                               50.000000,
                                               10000.000000,
@@ -109,7 +109,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.010421,
                                               -49.031021),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=100, d2=10000",
                                               100.000000,
                                               10000.000000,
@@ -117,7 +117,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.010783,
                                               -43.010783),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=200, d2=10000",
                                               200.000000,
                                               10000.000000,
@@ -125,7 +125,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.012232,
                                               -36.991632),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=100, d2=10000",
                                               100.000000,
                                               10000.000000,
@@ -133,7 +133,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.010783,
                                               -43.010783),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=200, d2=10000",
                                               200.000000,
                                               10000.000000,
@@ -141,7 +141,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.012232,
                                               -36.991632),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=500, d2=10000",
                                               500.000000,
                                               10000.000000,
@@ -149,7 +149,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.022359,
                                               -29.042959),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=1000, d2=10000",
                                               1000.000000,
                                               10000.000000,
@@ -157,7 +157,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.058336,
                                               -23.058336),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=2000, d2=10000",
                                               2000.000000,
                                               10000.000000,
@@ -165,7 +165,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -3.199337,
                                               -17.178738),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=5000, d2=10000",
                                               5000.000000,
                                               10000.000000,
@@ -173,7 +173,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -4.075793,
                                               -10.096393),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteUeMeasurementsTestCase("d1=10000, d2=10000",
                                               10000.000000,
                                               10000.000000,
@@ -181,7 +181,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -6.257687,
                                               -6.257687),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=20000, d2=10000",
                                               20000.000000,
                                               10000.000000,
@@ -189,7 +189,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -10.373365,
                                               -4.352765),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=50000, d2=10000",
                                               50000.000000,
                                               10000.000000,
@@ -197,7 +197,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -17.605046,
                                               -3.625645),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=100000, d2=10000",
                                               100000.000000,
                                               10000.000000,
@@ -205,7 +205,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -23.511071,
                                               -3.511071),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=200000, d2=10000",
                                               200000.000000,
                                               10000.000000,
@@ -213,7 +213,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -29.502549,
                                               -3.481949),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=500000, d2=10000",
                                               500000.000000,
                                               10000.000000,
@@ -221,7 +221,7 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -37.453160,
                                               -3.473760),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
     AddTestCase(new LteUeMeasurementsTestCase("d1=1000000, d2=10000",
                                               1000000.000000,
                                               10000.000000,
@@ -229,9 +229,13 @@ LteUeMeasurementsTestSuite::LteUeMeasurementsTestSuite()
                                               -113.739702,
                                               -43.472589,
                                               -3.472589),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteUeMeasurementsTestSuite lteUeMeasurementsTestSuite;
 
 /*
@@ -320,7 +324,7 @@ LteUeMeasurementsTestCase::DoRun()
     lteHelper->Attach(ueDevs2, enbDevs.Get(1));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs1, bearer);
     lteHelper->ActivateDataRadioBearer(ueDevs2, bearer);
@@ -448,7 +452,7 @@ operator<<(std::vector<uint8_t>& v, const uint8_t& range)
  */
 
 LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
-    : TestSuite("lte-ue-measurements-piecewise-1", SYSTEM)
+    : TestSuite("lte-ue-measurements-piecewise-1", Type::SYSTEM)
 {
     std::vector<Time> expectedTime;
     std::vector<uint8_t> expectedRsrp;
@@ -474,7 +478,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With normal threshold
     config.threshold1.range = 54;
@@ -487,7 +491,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With short time-to-trigger
     config.timeToTrigger = 64;
@@ -500,7 +504,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With long time-to-trigger
     config.timeToTrigger = 128;
@@ -513,7 +517,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With super time-to-trigger
     config.timeToTrigger = 256;
@@ -526,7 +530,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With hysteresis
     config.hysteresis = 8;
@@ -540,7 +544,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // With very high threshold
     config.threshold1.range = 97;
@@ -552,7 +556,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // === Event A2 (serving cell becomes worse than threshold) ===
 
@@ -566,7 +570,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With normal threshold
     config.threshold1.range = 54;
@@ -579,7 +583,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With short time-to-trigger
     config.timeToTrigger = 64;
@@ -592,7 +596,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With long time-to-trigger
     config.timeToTrigger = 128;
@@ -605,7 +609,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With super time-to-trigger
     config.timeToTrigger = 256;
@@ -618,7 +622,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With hysteresis
     config.hysteresis = 8;
@@ -632,7 +636,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // With very high threshold
     config.threshold1.range = 97;
@@ -648,7 +652,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     /*
      * Event A3, A4, and A5 are not tested intensively here because they depend on
@@ -668,7 +672,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                                                         config,
                                                         expectedTime,
                                                         expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // === Event A4 (neighbour becomes better than threshold) ===
 
@@ -678,7 +682,7 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                                                         config,
                                                         expectedTime,
                                                         expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // === Event A5 (PCell becomes worse than absolute threshold1 AND neighbour becomes better than
     // another absolute threshold2) ===
@@ -689,10 +693,14 @@ LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1()
                                                         config,
                                                         expectedTime,
                                                         expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
 } // end of LteUeMeasurementsPiecewiseTestSuite1::LteUeMeasurementsPiecewiseTestSuite1
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteUeMeasurementsPiecewiseTestSuite1 lteUeMeasurementsPiecewiseTestSuite1;
 
 /*
@@ -786,7 +794,7 @@ LteUeMeasurementsPiecewiseTestCase1::DoRun()
     lteHelper->Attach(ueDevs.Get(0), enbDevs.Get(0));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -948,7 +956,7 @@ LteUeMeasurementsPiecewiseTestCase1::TeleportVeryFar()
  */
 
 LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
-    : TestSuite("lte-ue-measurements-piecewise-2", SYSTEM)
+    : TestSuite("lte-ue-measurements-piecewise-2", Type::SYSTEM)
 {
     std::vector<Time> expectedTime;
     std::vector<uint8_t> expectedRsrp;
@@ -977,7 +985,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With normal threshold
     config.threshold1.range = 58;
@@ -990,7 +998,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With hysteresis
     config.hysteresis = 6;
@@ -1003,7 +1011,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // With very high threshold
     config.threshold1.range = 97;
@@ -1015,7 +1023,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // === Event A2 (serving cell becomes worse than threshold) ===
 
@@ -1029,7 +1037,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With normal threshold
     config.threshold1.range = 58;
@@ -1042,7 +1050,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With hysteresis
     config.hysteresis = 6;
@@ -1055,7 +1063,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // With very high threshold
     config.threshold1.range = 97;
@@ -1069,7 +1077,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // === Event A3 (neighbour becomes offset better than PCell) ===
 
@@ -1086,7 +1094,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With zero offset
     config.a3Offset = 0;
@@ -1099,7 +1107,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // With short time-to-trigger
     config.timeToTrigger = 160;
@@ -1112,7 +1120,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With super time-to-trigger
     config.timeToTrigger = 320;
@@ -1125,7 +1133,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With hysteresis and reportOnLeave
     config.hysteresis = 6;
@@ -1140,7 +1148,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // With negative offset
     config.a3Offset = -7;
@@ -1155,7 +1163,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // === Event A4 (neighbour becomes better than threshold) ===
 
@@ -1172,7 +1180,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With normal threshold
     config.threshold1.range = 58;
@@ -1185,7 +1193,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With short time-to-trigger
     config.timeToTrigger = 160;
@@ -1198,7 +1206,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With super time-to-trigger
     config.timeToTrigger = 320;
@@ -1211,7 +1219,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With hysteresis
     config.hysteresis = 6;
@@ -1225,7 +1233,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // With very high threshold
     config.threshold1.range = 97;
@@ -1237,7 +1245,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // === Event A5 (PCell becomes worse than absolute threshold1 AND neighbour becomes better than
     // another absolute threshold2) ===
@@ -1253,7 +1261,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With low-normal threshold
     config.threshold2.range = 58;
@@ -1262,7 +1270,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With low-high threshold
     config.threshold2.range = 97;
@@ -1271,7 +1279,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With normal-low threshold
     config.threshold1.range = 58;
@@ -1285,7 +1293,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With normal-normal threshold
     config.threshold2.range = 58;
@@ -1298,7 +1306,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With short time-to-trigger
     config.timeToTrigger = 160;
@@ -1311,7 +1319,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With super time-to-trigger
     config.timeToTrigger = 320;
@@ -1324,7 +1332,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // With hysteresis
     config.hysteresis = 6;
@@ -1338,7 +1346,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                                                 config,
                                                 expectedTime,
                                                 expectedRsrp),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // With normal-high threshold
     config.threshold2.range = 97;
@@ -1350,7 +1358,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With high-low threshold
     config.threshold1.range = 97;
@@ -1364,7 +1372,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // With high-normal threshold
     config.threshold2.range = 58;
@@ -1377,7 +1385,7 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // With high-high threshold
     config.threshold2.range = 97;
@@ -1388,10 +1396,14 @@ LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2()
                     config,
                     expectedTime,
                     expectedRsrp),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
 } // end of LteUeMeasurementsPiecewiseTestSuite2::LteUeMeasurementsPiecewiseTestSuite2
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteUeMeasurementsPiecewiseTestSuite2 lteUeMeasurementsPiecewiseTestSuite2;
 
 /*
@@ -1490,7 +1502,7 @@ LteUeMeasurementsPiecewiseTestCase2::DoRun()
     lteHelper->Attach(ueDevs.Get(0), enbDevs.Get(0));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -1584,7 +1596,7 @@ LteUeMeasurementsPiecewiseTestCase2::RecvMeasurementReportCallback(
                  << " dB)");
 
         // verifying reported best cells
-        if (measResults.measResultListEutra.size() == 0)
+        if (measResults.measResultListEutra.empty())
         {
             NS_TEST_ASSERT_MSG_EQ(measResults.haveMeasResultNeighCells,
                                   false,
@@ -1595,8 +1607,7 @@ LteUeMeasurementsPiecewiseTestCase2::RecvMeasurementReportCallback(
             NS_TEST_ASSERT_MSG_EQ(measResults.haveMeasResultNeighCells,
                                   true,
                                   "Unexpected report content");
-            std::list<LteRrcSap::MeasResultEutra>::iterator it =
-                measResults.measResultListEutra.begin();
+            auto it = measResults.measResultListEutra.begin();
             NS_ASSERT(it != measResults.measResultListEutra.end());
             NS_ASSERT(it->physCellId == 2);
             NS_TEST_ASSERT_MSG_EQ(it->haveCgiInfo,
@@ -1684,7 +1695,7 @@ LteUeMeasurementsPiecewiseTestCase2::TeleportVeryFar()
  */
 
 LteUeMeasurementsPiecewiseTestSuite3::LteUeMeasurementsPiecewiseTestSuite3()
-    : TestSuite("lte-ue-measurements-piecewise-3", SYSTEM)
+    : TestSuite("lte-ue-measurements-piecewise-3", Type::SYSTEM)
 {
     std::vector<Time> expectedTime;
 
@@ -1713,9 +1724,13 @@ LteUeMeasurementsPiecewiseTestSuite3::LteUeMeasurementsPiecewiseTestSuite3()
     AddTestCase(new LteUeMeasurementsPiecewiseTestCase3("Piecewise test case 3 - Event A4",
                                                         config,
                                                         expectedTime),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 } // end of LteUeMeasurementsPiecewiseTestSuite3::LteUeMeasurementsPiecewiseTestSuite3
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteUeMeasurementsPiecewiseTestSuite3 lteUeMeasurementsPiecewiseTestSuite3;
 
 /*
@@ -1810,7 +1825,7 @@ LteUeMeasurementsPiecewiseTestCase3::DoRun()
     lteHelper->Attach(ueDevs.Get(0), enbDevs.Get(0));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs, bearer);
 
@@ -1873,7 +1888,7 @@ LteUeMeasurementsPiecewiseTestCase3::RecvMeasurementReportCallback(
                  << " dB)");
 
         // verifying reported best cells
-        if (measResults.measResultListEutra.size() == 0)
+        if (measResults.measResultListEutra.empty())
         {
             NS_TEST_ASSERT_MSG_EQ(measResults.haveMeasResultNeighCells,
                                   false,
@@ -1884,8 +1899,7 @@ LteUeMeasurementsPiecewiseTestCase3::RecvMeasurementReportCallback(
             NS_TEST_ASSERT_MSG_EQ(measResults.haveMeasResultNeighCells,
                                   true,
                                   "Unexpected report content");
-            std::list<LteRrcSap::MeasResultEutra>::iterator it =
-                measResults.measResultListEutra.begin();
+            auto it = measResults.measResultListEutra.begin();
             NS_ASSERT(it != measResults.measResultListEutra.end());
             for (const auto& it : measResults.measResultListEutra)
             {
@@ -1946,7 +1960,7 @@ LteUeMeasurementsPiecewiseTestCase3::TeleportEnbNear()
  */
 
 LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
-    : TestSuite("lte-ue-measurements-handover", SYSTEM)
+    : TestSuite("lte-ue-measurements-handover", Type::SYSTEM)
 {
     std::list<LteRrcSap::ReportConfigEutra> sourceConfigList;
     std::list<LteRrcSap::ReportConfigEutra> targetConfigList;
@@ -1987,7 +2001,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::TAKES_FOREVER);
+        TestCase::Duration::TAKES_FOREVER);
 
     // increasing report interval
     sourceConfigList.front().reportInterval = LteRrcSap::ReportConfigEutra::MS120;
@@ -2003,7 +2017,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // === Event difference ===
 
@@ -2029,7 +2043,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // Event A2 to Event A1
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
@@ -2042,7 +2056,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // Event A3 to Event A4
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A3;
@@ -2057,7 +2071,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // Event A4 to Event A3
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A4;
@@ -2072,7 +2086,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // Event A2 to Event A3
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
@@ -2087,7 +2101,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // Event A3 to Event A2
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A3;
@@ -2102,7 +2116,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // Event A4 to Event A5
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A4;
@@ -2117,7 +2131,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::TAKES_FOREVER);
+                TestCase::Duration::TAKES_FOREVER);
 
     // Event A5 to Event A4
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A5;
@@ -2132,7 +2146,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
     // === Threshold/offset difference ===
 
@@ -2153,7 +2167,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // Event A2
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A2;
@@ -2169,7 +2183,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // Event A3
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A3;
@@ -2187,7 +2201,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::QUICK);
+        TestCase::Duration::QUICK);
 
     // Event A4
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A4;
@@ -2203,7 +2217,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // Event A5
     sourceConfigList.front().eventId = LteRrcSap::ReportConfigEutra::EVENT_A5;
@@ -2219,7 +2233,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                               expectedTime,
                                               expectedRsrp,
                                               Seconds(2)),
-        TestCase::EXTENSIVE);
+        TestCase::Duration::EXTENSIVE);
 
     // === Time-to-trigger (TTT) difference ===
 
@@ -2245,7 +2259,7 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(2)),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // decreasing time-to-trigger (longer duration)
     sourceConfigList.front().timeToTrigger = 1024;
@@ -2260,10 +2274,14 @@ LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite()
                                                       expectedTime,
                                                       expectedRsrp,
                                                       Seconds(4.2)),
-                TestCase::EXTENSIVE);
+                TestCase::Duration::EXTENSIVE);
 
 } // end of LteUeMeasurementsHandoverTestSuite::LteUeMeasurementsHandoverTestSuite
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteUeMeasurementsHandoverTestSuite lteUeMeasurementsHandoverTestSuite;
 
 /*
@@ -2382,18 +2400,19 @@ LteUeMeasurementsHandoverTestCase::DoRun()
 
     // Setup UE measurement configuration in eNodeBs
     uint8_t measId;
-    std::list<LteRrcSap::ReportConfigEutra>::const_iterator itReportConfig;
     Ptr<LteEnbRrc> enbRrc1 = enbDevs.Get(0)->GetObject<LteEnbNetDevice>()->GetRrc();
     Ptr<LteEnbRrc> enbRrc2 = enbDevs.Get(1)->GetObject<LteEnbNetDevice>()->GetRrc();
 
-    for (itReportConfig = m_sourceConfigList.begin(); itReportConfig != m_sourceConfigList.end();
+    for (auto itReportConfig = m_sourceConfigList.begin();
+         itReportConfig != m_sourceConfigList.end();
          itReportConfig++)
     {
         measId = enbRrc1->AddUeMeasReportConfig(*itReportConfig).at(0);
         m_expectedSourceCellMeasId.insert(measId);
     }
 
-    for (itReportConfig = m_targetConfigList.begin(); itReportConfig != m_targetConfigList.end();
+    for (auto itReportConfig = m_targetConfigList.begin();
+         itReportConfig != m_targetConfigList.end();
          itReportConfig++)
     {
         measId = enbRrc2->AddUeMeasReportConfig(*itReportConfig).at(0);
@@ -2470,12 +2489,12 @@ LteUeMeasurementsHandoverTestCase::RecvMeasurementReportCallback(
     bool isCorrectMeasId;
     if (cellId == 1)
     {
-        std::set<uint8_t>::iterator itMeasId = m_expectedSourceCellMeasId.find(measId);
+        auto itMeasId = m_expectedSourceCellMeasId.find(measId);
         isCorrectMeasId = (itMeasId != m_expectedSourceCellMeasId.end());
     }
     else if (cellId == 2)
     {
-        std::set<uint8_t>::iterator itMeasId = m_expectedTargetCellMeasId.find(measId);
+        auto itMeasId = m_expectedTargetCellMeasId.find(measId);
         isCorrectMeasId = (itMeasId != m_expectedTargetCellMeasId.end());
     }
     else
@@ -2497,7 +2516,7 @@ LteUeMeasurementsHandoverTestCase::RecvMeasurementReportCallback(
                  << " dB)");
 
         // verifying reported best cells
-        if (measResults.measResultListEutra.size() == 0)
+        if (measResults.measResultListEutra.empty())
         {
             NS_TEST_ASSERT_MSG_EQ(measResults.haveMeasResultNeighCells,
                                   false,
@@ -2508,8 +2527,7 @@ LteUeMeasurementsHandoverTestCase::RecvMeasurementReportCallback(
             NS_TEST_ASSERT_MSG_EQ(measResults.haveMeasResultNeighCells,
                                   true,
                                   "Unexpected report content");
-            std::list<LteRrcSap::MeasResultEutra>::iterator it =
-                measResults.measResultListEutra.begin();
+            auto it = measResults.measResultListEutra.begin();
             NS_ASSERT(it != measResults.measResultListEutra.end());
             NS_ASSERT(it->physCellId != cellId);
             NS_ASSERT(it->physCellId <= 2);

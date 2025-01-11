@@ -19,7 +19,8 @@
 
 #include "wifi-net-device.h"
 
-#include "wifi-mac.h"
+#include "frame-exchange-manager.h"
+#include "sta-wifi-mac.h"
 #include "wifi-phy.h"
 
 #include "ns3/channel.h"
@@ -60,7 +61,8 @@ WifiNetDevice::GetTypeId()
                           MakePointerAccessor(&WifiNetDevice::GetChannel),
                           MakePointerChecker<Channel>(),
                           TypeId::DEPRECATED,
-                          "Use the Channel attribute of WifiPhy")
+                          "class WifiNetDevice; use the Channel "
+                          "attribute of WifiPhy")
             .AddAttribute("Phy",
                           "The PHY layer attached to this device.",
                           PointerValue(),
@@ -93,7 +95,7 @@ WifiNetDevice::GetTypeId()
                           ObjectVectorValue(),
                           MakeObjectVectorAccessor(&WifiNetDevice::GetRemoteStationManager,
                                                    &WifiNetDevice::GetNRemoteStationManagers),
-                          MakeObjectVectorChecker<WifiPhy>())
+                          MakeObjectVectorChecker<WifiRemoteStationManager>())
             .AddAttribute("HtConfiguration",
                           "The HtConfiguration object.",
                           PointerValue(),
@@ -252,6 +254,7 @@ WifiNetDevice::SetPhy(const Ptr<WifiPhy> phy)
 {
     m_phys.clear();
     m_phys.push_back(phy);
+    phy->SetPhyId(0);
     m_linkUp = true;
     CompleteConfig();
 }
@@ -262,6 +265,10 @@ WifiNetDevice::SetPhys(const std::vector<Ptr<WifiPhy>>& phys)
     NS_ABORT_MSG_IF(phys.size() > 1 && !m_ehtConfiguration,
                     "Multiple PHYs only allowed for 11be multi-link devices");
     m_phys = phys;
+    for (std::size_t id = 0; id < phys.size(); ++id)
+    {
+        m_phys.at(id)->SetPhyId(id);
+    }
     m_linkUp = true;
     CompleteConfig();
 }
@@ -374,6 +381,30 @@ WifiNetDevice::SetAddress(Address address)
 Address
 WifiNetDevice::GetAddress() const
 {
+    Ptr<StaWifiMac> staMac;
+    std::set<uint8_t> linkIds;
+
+    /**
+     * Normally, the MAC address that the network device has to advertise to upper layers is
+     * the MLD address, if this device is an MLD, or the unique MAC address, otherwise.
+     * Advertising the MAC address returned by WifiMac::GetAddress() is therefore the right
+     * thing to do in both cases. However, there is an exception: if this device is a non-AP MLD
+     * associated with a single link AP (hence, no ML setup was done), we need to advertise the
+     * MAC address of the link used to communicate with the AP. In fact, if we advertised the
+     * MLD address, the AP could not forward a frame to us because it would not recognize our
+     * MLD address as the MAC address of an associated station.
+     */
+
+    // Handle the exception first
+    if (m_mac->GetTypeOfStation() == STA &&
+        (staMac = StaticCast<StaWifiMac>(m_mac))->IsAssociated() && m_mac->GetNLinks() > 1 &&
+        (linkIds = staMac->GetSetupLinkIds()).size() == 1 &&
+        !m_mac->GetWifiRemoteStationManager(*linkIds.begin())
+             ->GetMldAddress(m_mac->GetBssid(*linkIds.begin())))
+    {
+        return m_mac->GetFrameExchangeManager(*linkIds.begin())->GetAddress();
+    }
+
     return m_mac->GetAddress();
 }
 
@@ -452,17 +483,7 @@ bool
 WifiNetDevice::Send(Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber)
 {
     NS_LOG_FUNCTION(this << packet << dest << protocolNumber);
-    NS_ASSERT(Mac48Address::IsMatchingType(dest));
-
-    Mac48Address realTo = Mac48Address::ConvertFrom(dest);
-
-    LlcSnapHeader llc;
-    llc.SetType(protocolNumber);
-    packet->AddHeader(llc);
-
-    m_mac->NotifyTx(packet);
-    m_mac->Enqueue(packet, realTo);
-    return true;
+    return DoSend(packet, std::nullopt, dest, protocolNumber);
 }
 
 Ptr<Node>
@@ -504,7 +525,7 @@ WifiNetDevice::ForwardUp(Ptr<const Packet> packet, Mac48Address from, Mac48Addre
     {
         type = NetDevice::PACKET_MULTICAST;
     }
-    else if (to == m_mac->GetAddress())
+    else if (to == GetAddress())
     {
         type = NetDevice::PACKET_HOST;
     }
@@ -553,18 +574,41 @@ WifiNetDevice::SendFrom(Ptr<Packet> packet,
                         uint16_t protocolNumber)
 {
     NS_LOG_FUNCTION(this << packet << source << dest << protocolNumber);
-    NS_ASSERT(Mac48Address::IsMatchingType(dest));
-    NS_ASSERT(Mac48Address::IsMatchingType(source));
+    return DoSend(packet, source, dest, protocolNumber);
+}
 
-    Mac48Address realTo = Mac48Address::ConvertFrom(dest);
-    Mac48Address realFrom = Mac48Address::ConvertFrom(source);
+bool
+WifiNetDevice::DoSend(Ptr<Packet> packet,
+                      std::optional<Address> source,
+                      const Address& dest,
+                      uint16_t protocolNumber)
+{
+    NS_LOG_FUNCTION(this << packet << dest << protocolNumber << source.value_or(Address()));
+
+    if (source)
+    {
+        NS_ASSERT_MSG(Mac48Address::IsMatchingType(*source),
+                      *source << " is not compatible with a Mac48Address");
+    }
+    NS_ASSERT_MSG(Mac48Address::IsMatchingType(dest),
+                  dest << " is not compatible with a Mac48Address");
+
+    auto realTo = Mac48Address::ConvertFrom(dest);
 
     LlcSnapHeader llc;
     llc.SetType(protocolNumber);
     packet->AddHeader(llc);
 
     m_mac->NotifyTx(packet);
-    m_mac->Enqueue(packet, realTo, realFrom);
+    if (source)
+    {
+        auto realFrom = Mac48Address::ConvertFrom(*source);
+        m_mac->Enqueue(packet, realTo, realFrom);
+    }
+    else
+    {
+        m_mac->Enqueue(packet, realTo);
+    }
 
     return true;
 }

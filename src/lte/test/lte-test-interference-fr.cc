@@ -15,9 +15,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Author: Piotr Gawlowicz <gawlowicz.p@gmail.com>
- * Based on lte-test-interference.{h,cc} by Manuel Requena <manuel.requena@cttc.es>
- *                                                                              Nicola Baldo
- * <nbaldo@cttc.es>
+ * Based on lte-test-interference.{h,cc} by:
+ *   Manuel Requena <manuel.requena@cttc.es>
+ *   Nicola Baldo <nbaldo@cttc.es>
  */
 
 #include "lte-test-interference-fr.h"
@@ -51,7 +51,7 @@ NS_LOG_COMPONENT_DEFINE("LteInterferenceFrTest");
  */
 
 LteInterferenceFrTestSuite::LteInterferenceFrTestSuite()
-    : TestSuite("lte-interference-fr", SYSTEM)
+    : TestSuite("lte-interference-fr", Type::SYSTEM)
 {
     //  LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_DEBUG);
     //  LogComponentEnable ("LteInterferenceFrTest", logLevel);
@@ -61,25 +61,25 @@ LteInterferenceFrTestSuite::LteInterferenceFrTestSuite()
                                                   20.000000,
                                                   356449.932732,
                                                   10803.280215),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteInterferenceHardFrTestCase("d1=50, d2=50",
                                                   50.000000,
                                                   50.000000,
                                                   356449.932732,
                                                   10803.280215),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteInterferenceHardFrTestCase("d1=50, d2=200",
                                                   50.000000,
                                                   200.000000,
                                                   356449.932732,
                                                   10803.280215),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteInterferenceHardFrTestCase("d1=50, d2=500",
                                                   50.000000,
                                                   500.000000,
                                                   356449.932732,
                                                   10803.280215),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     AddTestCase(new LteInterferenceStrictFrTestCase("d1=50, d2=20",
                                                     50.000000,
@@ -89,7 +89,7 @@ LteInterferenceFrTestSuite::LteInterferenceFrTestSuite()
                                                     356449.932732,
                                                     10803.280215,
                                                     18),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteInterferenceStrictFrTestCase("d1=50, d2=50",
                                                     50.000000,
                                                     50.000000,
@@ -98,7 +98,7 @@ LteInterferenceFrTestSuite::LteInterferenceFrTestSuite()
                                                     356449.932732,
                                                     10803.280215,
                                                     28),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteInterferenceStrictFrTestCase("d1=50, d2=200",
                                                     50.000000,
                                                     200.000000,
@@ -107,7 +107,7 @@ LteInterferenceFrTestSuite::LteInterferenceFrTestSuite()
                                                     356449.932732,
                                                     10803.280215,
                                                     30),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteInterferenceStrictFrTestCase("d1=50, d2=500",
                                                     50.000000,
                                                     500.000000,
@@ -116,9 +116,13 @@ LteInterferenceFrTestSuite::LteInterferenceFrTestSuite()
                                                     356449.932732,
                                                     10803.280215,
                                                     30),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteInterferenceFrTestSuite LteInterferenceFrTestSuite;
 
 /**
@@ -213,7 +217,7 @@ LteInterferenceHardFrTestCase::DoRun()
     lteHelper->Attach(ueDevs2, enbDevs.Get(1));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs1, bearer);
     lteHelper->ActivateDataRadioBearer(ueDevs2, bearer);
@@ -400,7 +404,7 @@ LteInterferenceStrictFrTestCase::DoRun()
     lteHelper->Attach(ueDevs2, enbDevs.Get(1));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs1, bearer);
     lteHelper->ActivateDataRadioBearer(ueDevs2, bearer);

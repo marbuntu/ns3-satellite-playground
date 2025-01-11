@@ -33,9 +33,9 @@ NS_LOG_COMPONENT_DEFINE("EpcGtpuTest");
  */
 
 EpsGtpuTestSuite::EpsGtpuTestSuite()
-    : TestSuite("epc-gtpu", SYSTEM)
+    : TestSuite("epc-gtpu", Type::SYSTEM)
 {
-    AddTestCase(new EpsGtpuHeaderTestCase(), TestCase::QUICK);
+    AddTestCase(new EpsGtpuHeaderTestCase(), TestCase::Duration::QUICK);
 }
 
 static EpsGtpuTestSuite epsGtpuTestSuite;
@@ -57,7 +57,7 @@ EpsGtpuHeaderTestCase::~EpsGtpuHeaderTestCase()
 void
 EpsGtpuHeaderTestCase::DoRun()
 {
-    LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_ALL);
+    auto logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_ALL);
 
     LogComponentEnable("EpcGtpuTest", logLevel);
     GtpuHeader h1;

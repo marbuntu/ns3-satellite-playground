@@ -35,9 +35,10 @@
 
 namespace ns3
 {
+namespace lrwpan
+{
 
 NS_LOG_COMPONENT_DEFINE("LrWpanNetDevice");
-
 NS_OBJECT_ENSURE_REGISTERED(LrWpanNetDevice);
 
 TypeId
@@ -68,15 +69,16 @@ LrWpanNetDevice::GetTypeId()
                           BooleanValue(true),
                           MakeBooleanAccessor(&LrWpanNetDevice::m_useAcks),
                           MakeBooleanChecker())
-            .AddAttribute("PseudoMacAddressMode",
-                          "Build the pseudo-MAC Address according to RFC 4944 or RFC 6282 "
-                          "(default: RFC 6282).",
-                          EnumValue(LrWpanNetDevice::RFC6282),
-                          MakeEnumAccessor(&LrWpanNetDevice::m_pseudoMacMode),
-                          MakeEnumChecker(LrWpanNetDevice::RFC6282,
-                                          "RFC 6282 (don't use PanId)",
-                                          LrWpanNetDevice::RFC4944,
-                                          "RFC 4944 (use PanId)"));
+            .AddAttribute(
+                "PseudoMacAddressMode",
+                "Build the pseudo-MAC Address according to RFC 4944 or RFC 6282 "
+                "(default: RFC 6282).",
+                EnumValue(LrWpanNetDevice::RFC6282),
+                MakeEnumAccessor<PseudoMacAddressMode_e>(&LrWpanNetDevice::m_pseudoMacMode),
+                MakeEnumChecker(LrWpanNetDevice::RFC6282,
+                                "RFC 6282 (don't use PanId)",
+                                LrWpanNetDevice::RFC4944,
+                                "RFC 4944 (use PanId)"));
     return tid;
 }
 
@@ -257,6 +259,10 @@ LrWpanNetDevice::SetAddress(Address address)
     {
         m_mac->SetShortAddress(Mac16Address::ConvertFrom(address));
     }
+    else if (Mac64Address::IsMatchingType(address))
+    {
+        m_mac->SetExtendedAddress(Mac64Address::ConvertFrom(address));
+    }
     else if (Mac48Address::IsMatchingType(address))
     {
         uint8_t buf[6];
@@ -290,6 +296,19 @@ LrWpanNetDevice::GetAddress() const
     Mac48Address pseudoAddress = BuildPseudoMacAddress(m_mac->GetPanId(), m_mac->GetShortAddress());
 
     return pseudoAddress;
+}
+
+void
+LrWpanNetDevice::SetPanAssociation(uint16_t panId,
+                                   Mac64Address coordExtAddr,
+                                   Mac16Address coordShortAddr,
+                                   Mac16Address assignedShortAddr)
+{
+    NS_LOG_FUNCTION(this);
+    m_mac->SetPanId(panId);
+    m_mac->SetAssociatedCoor(coordExtAddr);
+    m_mac->SetAssociatedCoor(coordShortAddr);
+    m_mac->SetShortAddress(assignedShortAddr);
 }
 
 bool
@@ -541,4 +560,5 @@ LrWpanNetDevice::AssignStreams(int64_t stream)
     return (streamIndex - stream);
 }
 
+} // namespace lrwpan
 } // namespace ns3

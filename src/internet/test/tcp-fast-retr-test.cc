@@ -21,7 +21,7 @@
 #include "ns3/log.h"
 #include "ns3/node.h"
 #include "ns3/simple-channel.h"
-#include "ns3/tcp-westwood.h"
+#include "ns3/tcp-westwood-plus.h"
 
 using namespace ns3;
 
@@ -29,7 +29,6 @@ NS_LOG_COMPONENT_DEFINE("TcpFastRetrTest");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Test the fast retransmission
  *
@@ -209,14 +208,10 @@ TcpFastRetrTest::Tx(const Ptr<const Packet> p, const TcpHeader& h, SocketWho who
             }
         }
 
-        if (m_sndNextExpSeq.GetValue() == 0)
+        // SYN or Pure ACK in three-way handshake, then we expect data
+        if ((m_sndNextExpSeq.GetValue() == 0) ||
+            (m_sndNextExpSeq.GetValue() == 1 && p->GetSize() == 32))
         {
-            // SYN
-            m_sndNextExpSeq = SequenceNumber32(1);
-        }
-        else if (m_sndNextExpSeq.GetValue() == 1 && p->GetSize() == 32)
-        {
-            // Pure ACK in three-way handshake, then we expect data
             m_sndNextExpSeq = SequenceNumber32(1);
         }
         else
@@ -291,7 +286,7 @@ TcpFastRetrTest::RcvAck(const Ptr<const TcpSocketState> tcb, const TcpHeader& h,
     {
         if (h.GetAckNumber().GetValue() < m_seqToKill)
         {
-            NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+            NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                                   TcpSocketState::CA_OPEN,
                                   "Not in OPEN state to respond to a loss");
             NS_TEST_ASSERT_MSG_EQ(GetDupAckCount(SENDER),
@@ -304,20 +299,20 @@ TcpFastRetrTest::RcvAck(const Ptr<const TcpSocketState> tcb, const TcpHeader& h,
 
             if (GetDupAckCount(SENDER) == 0 && GetDupAckCount(SENDER) < GetReTxThreshold(SENDER))
             {
-                NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+                NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                                       TcpSocketState::CA_OPEN,
                                       "Not in OPEN state for processing dupack");
             }
             else if (GetDupAckCount(SENDER) > 0 &&
                      GetDupAckCount(SENDER) < GetReTxThreshold(SENDER))
             {
-                NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+                NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                                       TcpSocketState::CA_DISORDER,
                                       "Not in DISORDER state after receiving dupacks");
             }
             else if (GetDupAckCount(SENDER) >= GetReTxThreshold(SENDER))
             {
-                NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+                NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                                       TcpSocketState::CA_RECOVERY,
                                       "Not in RECOVERY state after reaching retxthresh");
             }
@@ -325,7 +320,7 @@ TcpFastRetrTest::RcvAck(const Ptr<const TcpSocketState> tcb, const TcpHeader& h,
     }
     else if (who == RECEIVER)
     {
-        NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+        NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                               TcpSocketState::CA_OPEN,
                               "Receiver not in OPEN state");
     }
@@ -350,14 +345,14 @@ TcpFastRetrTest::ProcessedAck(const Ptr<const TcpSocketState> tcb,
 
             if (GetDupAckCount(SENDER) < GetReTxThreshold(SENDER))
             {
-                NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+                NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                                       TcpSocketState::CA_DISORDER,
                                       "DupAck less than ReTxThreshold but not "
                                       "in DISORDER state");
             }
             else
             {
-                NS_TEST_ASSERT_MSG_GT_OR_EQ(GetCongStateFrom(tcb),
+                NS_TEST_ASSERT_MSG_GT_OR_EQ(tcb->m_congState.Get(),
                                             TcpSocketState::CA_RECOVERY,
                                             "DupAck greater than ReTxThreshold but not "
                                             "in RECOVERY or LOSS state");
@@ -373,7 +368,7 @@ TcpFastRetrTest::ProcessedAck(const Ptr<const TcpSocketState> tcb,
     }
     else if (who == RECEIVER)
     {
-        NS_TEST_ASSERT_MSG_EQ(GetCongStateFrom(tcb),
+        NS_TEST_ASSERT_MSG_EQ(tcb->m_congState.Get(),
                               TcpSocketState::CA_OPEN,
                               "Different state than OPEN in the receiver");
     }
@@ -431,7 +426,6 @@ TcpFastRetrTest::FinalChecks()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief Testsuite for the fast retransmission
  */
@@ -439,16 +433,16 @@ class TcpFastRetrTestSuite : public TestSuite
 {
   public:
     TcpFastRetrTestSuite()
-        : TestSuite("tcp-fast-retr-test", UNIT)
+        : TestSuite("tcp-fast-retr-test", Type::UNIT)
     {
         std::list<TypeId> types;
-        types.insert(types.begin(), TcpWestwood::GetTypeId());
+        types.insert(types.begin(), TcpWestwoodPlus::GetTypeId());
         types.insert(types.begin(), TcpNewReno::GetTypeId());
 
-        for (std::list<TypeId>::iterator it = types.begin(); it != types.end(); ++it)
+        for (auto it = types.begin(); it != types.end(); ++it)
         {
             AddTestCase(new TcpFastRetrTest((*it), 5001, "Fast Retransmit testing"),
-                        TestCase::QUICK);
+                        TestCase::Duration::QUICK);
         }
     }
 };

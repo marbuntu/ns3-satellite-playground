@@ -30,6 +30,9 @@ namespace ns3
 
 class Packet;
 
+namespace lrwpan
+{
+
 /**
  * \ingroup lr-wpan
  *
@@ -38,11 +41,6 @@ class Packet;
 class LrWpanMacTrailer : public Trailer
 {
   public:
-    /**
-     * The length in octets of the IEEE 802.15.4 MAC FCS field
-     */
-    static const uint16_t LR_WPAN_MAC_FCS_LENGTH;
-
     /**
      * Get the type ID.
      *
@@ -99,7 +97,7 @@ class LrWpanMacTrailer : public Trailer
      *
      * \return true, if FCS calculation is enabled, false otherwise.
      */
-    bool IsFcsEnabled();
+    bool IsFcsEnabled() const;
 
   private:
     /**
@@ -125,6 +123,7 @@ class LrWpanMacTrailer : public Trailer
     bool m_calcFcs;
 };
 
+} // namespace lrwpan
 } // namespace ns3
 
 #endif /* LR_WPAN_MAC_TRAILER_H */

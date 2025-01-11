@@ -29,7 +29,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 AddressHelper Test
  */
@@ -170,7 +169,6 @@ IpAddressHelperTestCasev6::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv6 AddressHelper TestSuite
  */
@@ -181,9 +179,9 @@ class Ipv6AddressHelperTestSuite : public TestSuite
 };
 
 Ipv6AddressHelperTestSuite::Ipv6AddressHelperTestSuite()
-    : TestSuite("ipv6-address-helper", UNIT)
+    : TestSuite("ipv6-address-helper", Type::UNIT)
 {
-    AddTestCase(new IpAddressHelperTestCasev6, TestCase::QUICK);
+    AddTestCase(new IpAddressHelperTestCasev6, TestCase::Duration::QUICK);
 }
 
 static Ipv6AddressHelperTestSuite

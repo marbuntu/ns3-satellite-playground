@@ -22,15 +22,57 @@
 
 #include "block-ack-type.h"
 
+#include "ns3/fatal-error.h"
+#include "ns3/nstime.h"
 #include "ns3/ptr.h"
 
 #include <list>
+#include <map>
+#include <set>
 
 namespace ns3
 {
 
 class WifiMacHeader;
 class Packet;
+
+/**
+ * Wifi direction. Values are those defined for the TID-to-Link Mapping Control Direction
+ * field in IEEE 802.11be D3.1 Figure 9-1002ap
+ */
+enum class WifiDirection : uint8_t
+{
+    DOWNLINK = 0,
+    UPLINK = 1,
+    BOTH_DIRECTIONS = 2,
+};
+
+/**
+ * \brief Stream insertion operator.
+ *
+ * \param os the stream
+ * \param direction the direction
+ * \returns a reference to the stream
+ */
+inline std::ostream&
+operator<<(std::ostream& os, const WifiDirection& direction)
+{
+    switch (direction)
+    {
+    case WifiDirection::DOWNLINK:
+        return (os << "DOWNLINK");
+    case WifiDirection::UPLINK:
+        return (os << "UPLINK");
+    case WifiDirection::BOTH_DIRECTIONS:
+        return (os << "BOTH_DIRECTIONS");
+    default:
+        NS_FATAL_ERROR("Invalid direction");
+        return (os << "INVALID");
+    }
+}
+
+/// @brief TID-indexed map of the link set to which the TID is mapped
+using WifiTidLinkMapping = std::map<uint8_t, std::set<uint8_t>>;
 
 /**
  * Convert from dBm to Watts.
@@ -129,6 +171,17 @@ void AddWifiMacTrailer(Ptr<Packet> packet);
  */
 uint32_t GetSize(Ptr<const Packet> packet, const WifiMacHeader* hdr, bool isAmpdu);
 
+/**
+ * Check if the given TID-to-Link Mappings are valid for a negotiation type of 1. Specifically,
+ * it is checked whether all TIDs are mapped to the same set of links.
+ *
+ * \param dlLinkMapping the given TID-to-Link Mapping for Downlink
+ * \param ulLinkMapping the given TID-to-Link Mapping for Uplink
+ * \return whether the given TID-to-Link Mappings are valid for a negotiation type of 1
+ */
+bool TidToLinkMappingValidForNegType1(const WifiTidLinkMapping& dlLinkMapping,
+                                      const WifiTidLinkMapping& ulLinkMapping);
+
 /// Size of the space of sequence numbers
 static constexpr uint16_t SEQNO_SPACE_SIZE = 4096;
 
@@ -141,6 +194,13 @@ static constexpr uint8_t SINGLE_LINK_OP_ID = 0;
 
 /// Invalid link identifier
 static constexpr uint8_t WIFI_LINKID_UNDEFINED = 0xff;
+
+/// Wi-Fi Time Unit value in microseconds (see IEEE 802.11-2020 sec. 3.1)
+/// Used to initialize WIFI_TU
+constexpr int WIFI_TU_US = 1024;
+
+/// Wi-Fi Time Unit (see IEEE 802.11-2020 sec. 3.1)
+extern const Time WIFI_TU;
 
 } // namespace ns3
 

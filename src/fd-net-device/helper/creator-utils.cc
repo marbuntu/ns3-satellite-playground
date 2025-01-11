@@ -39,7 +39,7 @@ namespace ns3
 {
 
 /// Flag to enable / disable verbose log mode
-int gVerbose = 0;
+bool gVerbose = false;
 
 /**
  * \brief Send the file descriptor back to the code that invoked the creation.
@@ -113,7 +113,7 @@ SendSocket(const char* path, int fd, const int magic_number)
     // an "ancillary element" but the msghdr uses the control message termimology
     // so we call it "control."
     //
-    size_t msg_size = sizeof(int);
+    constexpr size_t msg_size = sizeof(int);
     char control[CMSG_SPACE(msg_size)];
 
     //

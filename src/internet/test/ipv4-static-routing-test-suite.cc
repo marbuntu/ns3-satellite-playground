@@ -39,7 +39,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 StaticRouting /32 Test
  */
@@ -210,7 +209,6 @@ Ipv4StaticRoutingSlash32TestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 StaticRouting /32 TestSuite
  */
@@ -221,9 +219,9 @@ class Ipv4StaticRoutingTestSuite : public TestSuite
 };
 
 Ipv4StaticRoutingTestSuite::Ipv4StaticRoutingTestSuite()
-    : TestSuite("ipv4-static-routing", UNIT)
+    : TestSuite("ipv4-static-routing", Type::UNIT)
 {
-    AddTestCase(new Ipv4StaticRoutingSlash32TestCase, TestCase::QUICK);
+    AddTestCase(new Ipv4StaticRoutingSlash32TestCase, TestCase::Duration::QUICK);
 }
 
 static Ipv4StaticRoutingTestSuite

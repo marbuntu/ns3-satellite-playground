@@ -25,9 +25,19 @@
 #include "ns3/nstime.h"
 #include "ns3/object.h"
 #include "ns3/traced-value.h"
+#include "ns3/uniform-random-bit-generator.h"
 
+#include <map>
 #include <memory>
 #include <vector>
+
+#define WIFI_TXOP_NS_LOG_APPEND_CONTEXT                                                            \
+    if (m_mac)                                                                                     \
+    {                                                                                              \
+        std::clog << "[mac=" << m_mac->GetAddress() << "] ";                                       \
+    }
+
+class EmlsrUlTxopTest;
 
 namespace ns3
 {
@@ -41,6 +51,7 @@ class WifiMpdu;
 class UniformRandomVariable;
 class CtrlBAckResponseHeader;
 class WifiMac;
+enum AcIndex : uint8_t;           // opaque enum declaration
 enum WifiMacDropReason : uint8_t; // opaque enum declaration
 
 /**
@@ -71,14 +82,6 @@ class Txop : public Object
 {
   public:
     Txop();
-
-    /**
-     * Constructor
-     *
-     * \param queue the wifi MAC queue
-     */
-    Txop(Ptr<WifiMacQueue> queue);
-
     ~Txop() override;
 
     /**
@@ -143,14 +146,16 @@ class Txop : public Object
     void SetMinCw(uint32_t minCw);
     /**
      * Set the minimum contention window size for each link.
-     * Note that the size of <i>minCws</i> must match the number
+     * Note that an empty <i>minCws</i> is ignored, otherwise its size must match the number
      * of links.
      *
-     * \param minCws the minimum contention window size values.
+     * \param minCws the minimum contention window size for each link (links are sorted in
+     *               increasing order of link ID).
      */
-    void SetMinCws(std::vector<uint32_t> minCws);
+    void SetMinCws(const std::vector<uint32_t>& minCws);
     /**
-     * Set the minimum contention window size for the given link.
+     * Set the minimum contention window size for the given link. Note that this function can
+     * only be called after that links have been created.
      *
      * \param minCw the minimum contention window size.
      * \param linkId the ID of the given link
@@ -165,14 +170,16 @@ class Txop : public Object
     void SetMaxCw(uint32_t maxCw);
     /**
      * Set the maximum contention window size for each link.
-     * Note that the size of <i>maxCws</i> must match the number
+     * Note that an empty <i>maxCws</i> is ignored, otherwise its size must match the number
      * of links.
      *
-     * \param maxCws the maximum contention window size values.
+     * \param maxCws the maximum contention window size for each link (links are sorted in
+     *               increasing order of link ID).
      */
-    void SetMaxCws(std::vector<uint32_t> maxCws);
+    void SetMaxCws(const std::vector<uint32_t>& maxCws);
     /**
-     * Set the maximum contention window size for the given link.
+     * Set the maximum contention window size for the given link. Note that this function can
+     * only be called after that links have been created.
      *
      * \param maxCw the maximum contention window size.
      * \param linkId the ID of the given link
@@ -187,14 +194,16 @@ class Txop : public Object
     void SetAifsn(uint8_t aifsn);
     /**
      * Set the number of slots that make up an AIFS for each link.
-     * Note that the size of <i>aifsns</i> must match the number
+     * Note that an empty <i>aifsns</i> is ignored, otherwise its size must match the number
      * of links.
      *
-     * \param aifsns the number of slots that make up an AIFS for each link.
+     * \param aifsns the number of slots that make up an AIFS for each link (links are sorted in
+     *               increasing order of link ID).
      */
-    void SetAifsns(std::vector<uint8_t> aifsns);
+    void SetAifsns(const std::vector<uint8_t>& aifsns);
     /**
-     * Set the number of slots that make up an AIFS for the given link.
+     * Set the number of slots that make up an AIFS for the given link. Note that this function
+     * can only be called after that links have been created.
      *
      * \param aifsn the number of slots that make up an AIFS.
      * \param linkId the ID of the given link
@@ -209,17 +218,18 @@ class Txop : public Object
     void SetTxopLimit(Time txopLimit);
     /**
      * Set the TXOP limit for each link.
-     * Note that the size of <i>txopLimits</i> must match the number
+     * Note that an empty <i>txopLimits</i> is ignored, otherwise its size must match the number
      * of links.
      *
-     * \param txopLimits the TXOP limit for each link.
+     * \param txopLimits the TXOP limit for each link (links are sorted in increasing order of
+     *                   link ID).
      */
     void SetTxopLimits(const std::vector<Time>& txopLimits);
     /**
-     * Set the TXOP limit for the given link.
+     * Set the TXOP limit for the given link. Note that this function can only be called after
+     * that links have been created.
      *
-     * \param txopLimit the TXOP limit.
-     *        Value zero corresponds to default Txop.
+     * \param txopLimit the TXOP limit (must not be negative)
      * \param linkId the ID of the given link
      */
     void SetTxopLimit(Time txopLimit, uint8_t linkId);
@@ -344,14 +354,6 @@ class Txop : public Object
 
     /* Event handlers */
     /**
-     * \param packet packet to send.
-     * \param hdr header of packet to send.
-     *
-     * Store the packet in the internal queue until it
-     * can be sent safely.
-     */
-    virtual void Queue(Ptr<Packet> packet, const WifiMacHeader& hdr);
-    /**
      * \param mpdu the given MPDU
      *
      * Store the given MPDU in the internal queue until it
@@ -393,6 +395,32 @@ class Txop : public Object
     virtual ChannelAccessStatus GetAccessStatus(uint8_t linkId) const;
 
     /**
+     * Request channel access on the given link after the occurrence of an event that possibly
+     * requires to generate a new backoff value. Examples of such an event are: a packet has been
+     * enqueued by the upper layer; the given link has been unblocked after being blocked for some
+     * reason (e.g., wait for ADDBA Response, wait for TX on another EMLSR link to finish, etc.);
+     * the PHY operating on the given link just woke up from sleep mode. The <i>checkMediumBusy</i>
+     * argument is forwarded to the NeedBackoffUponAccess method of the ChannelAccessManager.
+     *
+     * \param linkId the ID of the given link
+     * \param hadFramesToTransmit whether packets available for transmission were queued just
+     *                            before the occurrence of the event causing this channel access
+     *                            request
+     * \param checkMediumBusy whether generation of backoff (also) depends on the busy/idle state
+     *                        of the medium
+     */
+    void StartAccessAfterEvent(uint8_t linkId, bool hadFramesToTransmit, bool checkMediumBusy);
+
+    static constexpr bool HAD_FRAMES_TO_TRANSMIT =
+        true; //!< packets available for transmission were in the queue
+    static constexpr bool DIDNT_HAVE_FRAMES_TO_TRANSMIT =
+        false; //!< no packet available for transmission was in the queue
+    static constexpr bool CHECK_MEDIUM_BUSY =
+        true; //!< generation of backoff (also) depends on the busy/idle state of the medium
+    static constexpr bool DONT_CHECK_MEDIUM_BUSY =
+        false; //!< generation of backoff is independent of the busy/idle state of the medium
+
+    /**
      * \param nSlots the number of slots of the backoff.
      * \param linkId the ID of the given link
      *
@@ -401,12 +429,56 @@ class Txop : public Object
      */
     void StartBackoffNow(uint32_t nSlots, uint8_t linkId);
 
+    /**
+     * Check if the Txop has frames to transmit over the given link
+     * \param linkId the ID of the given link.
+     * \return true if the Txop has frames to transmit.
+     */
+    virtual bool HasFramesToTransmit(uint8_t linkId);
+
+    /**
+     * Swap the links based on the information included in the given map. This method
+     * is normally called by the WifiMac of a non-AP MLD upon completing ML setup to have
+     * its link IDs match AP MLD's link IDs.
+     *
+     * \param links a set of pairs (from, to) each mapping a current link ID to the
+     *              link ID it has to become (i.e., link 'from' becomes link 'to')
+     */
+    void SwapLinks(std::map<uint8_t, uint8_t> links);
+
+    /**
+     * DCF/EDCA access parameters for all the links provided by users via this class' attributes
+     * or the corresponding setter methods. For each access parameter, values are sorted in
+     * increasing order of link ID. If user provides access parameters, they are used by WifiMac
+     * instead of the default values specified by Table 9-155 of 802.11-2020.
+     */
+    struct UserDefinedAccessParams
+    {
+        std::vector<uint32_t> cwMins; //!< the minimum contention window values for all the links
+        std::vector<uint32_t> cwMaxs; //!< the maximum contention window values for all the links
+        std::vector<uint8_t> aifsns;  //!< the AIFSN values for all the links
+        std::vector<Time> txopLimits; //!< TXOP limit values for all the links
+    };
+
+    /**
+     * \return a const reference to user-provided access parameters
+     */
+    const UserDefinedAccessParams& GetUserAccessParams() const;
+
   protected:
     ///< ChannelAccessManager associated class
     friend class ChannelAccessManager;
+    friend class ::EmlsrUlTxopTest;
 
     void DoDispose() override;
     void DoInitialize() override;
+
+    /**
+     * Create a wifi MAC queue containing packets of the given AC
+     *
+     * \param aci the index of the given AC
+     */
+    virtual void CreateQueue(AcIndex aci);
 
     /* Txop notifications forwarded here */
     /**
@@ -417,23 +489,11 @@ class Txop : public Object
     virtual void NotifyAccessRequested(uint8_t linkId);
 
     /**
-     * Check if the Txop has frames to transmit over the given link
-     * \param linkId the ID of the given link.
-     * \return true if the Txop has frames to transmit.
-     */
-    virtual bool HasFramesToTransmit(uint8_t linkId);
-    /**
      * Generate a new backoff for the given link now.
      *
      * \param linkId the ID of the given link
      */
     virtual void GenerateBackoff(uint8_t linkId);
-    /**
-     * Request access from Txop on the given link if needed.
-     *
-     * \param linkId the ID of the given link
-     */
-    virtual void StartAccessIfNeeded(uint8_t linkId);
     /**
      * Request access to the ChannelAccessManager associated with the given link
      *
@@ -482,7 +542,6 @@ class Txop : public Object
         /// Destructor (a virtual method is needed to make this struct polymorphic)
         virtual ~LinkEntity() = default;
 
-        uint8_t id{0};                             //!< Link ID (starting at 0)
         uint32_t backoffSlots{0};                  //!< the number of backoff slots
         Time backoffStart{0};                      /**< the backoffStart variable is used to keep
                                                         track of the time at which a backoff was
@@ -494,6 +553,12 @@ class Txop : public Object
         uint8_t aifsn{0};                          //!< the AIFSN
         Time txopLimit{0};                         //!< the TXOP limit time
         ChannelAccessStatus access{NOT_REQUESTED}; //!< channel access status
+
+        mutable class
+        {
+            friend void Txop::Queue(Ptr<WifiMpdu>);
+            EventId event;
+        } accessRequest; //!< access request event, to be used by Txop::Queue() only
     };
 
     /**
@@ -503,18 +568,18 @@ class Txop : public Object
      * \return a reference to the link associated with the given ID
      */
     LinkEntity& GetLink(uint8_t linkId) const;
-    /**
-     * Get the number of links.
-     *
-     * \return the number of links
-     */
-    uint8_t GetNLinks() const;
 
-    DroppedMpdu m_droppedMpduCallback; //!< the dropped MPDU callback
-    Ptr<WifiMacQueue> m_queue;         //!< the wifi MAC queue
-    Ptr<MacTxMiddle> m_txMiddle;       //!< the MacTxMiddle
-    Ptr<WifiMac> m_mac;                //!< the wifi MAC
-    Ptr<UniformRandomVariable> m_rng;  //!< the random stream
+    /**
+     * \return a const reference to the map of link entities
+     */
+    const std::map<uint8_t, std::unique_ptr<LinkEntity>>& GetLinks() const;
+
+    DroppedMpdu m_droppedMpduCallback;             //!< the dropped MPDU callback
+    Ptr<WifiMacQueue> m_queue;                     //!< the wifi MAC queue
+    Ptr<MacTxMiddle> m_txMiddle;                   //!< the MacTxMiddle
+    Ptr<WifiMac> m_mac;                            //!< the wifi MAC
+    Ptr<UniformRandomVariable> m_rng;              //!< the random stream
+    UniformRandomBitGenerator m_shuffleLinkIdsGen; //!< random number generator to shuffle link IDs
 
     /// TracedCallback for backoff trace value typedef
     typedef TracedCallback<uint32_t /* value */, uint8_t /* linkId */> BackoffValueTracedCallback;
@@ -532,7 +597,10 @@ class Txop : public Object
      */
     virtual std::unique_ptr<LinkEntity> CreateLinkEntity() const;
 
-    std::vector<std::unique_ptr<LinkEntity>> m_links; //!< vector of LinkEntity objects
+    std::map<uint8_t, std::unique_ptr<LinkEntity>>
+        m_links; //!< ID-indexed map of LinkEntity objects
+
+    UserDefinedAccessParams m_userAccessParams; //!< user-defined DCF/EDCA access parameters
 };
 
 } // namespace ns3

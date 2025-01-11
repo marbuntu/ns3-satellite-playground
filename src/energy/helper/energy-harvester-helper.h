@@ -21,10 +21,11 @@
 #ifndef ENERGY_HARVESTER_HELPER_H
 #define ENERGY_HARVESTER_HELPER_H
 
+#include "energy-harvester-container.h"
+#include "energy-source-container.h"
+
 #include "ns3/attribute.h"
-#include "ns3/energy-harvester-container.h"
 #include "ns3/energy-harvester.h"
-#include "ns3/energy-source-container.h"
 #include "ns3/energy-source.h"
 #include "ns3/node-container.h"
 #include "ns3/object-factory.h"
@@ -59,7 +60,7 @@ class EnergyHarvesterHelper
      *
      * This function installs an EnergyHarvester onto an energy source.
      */
-    EnergyHarvesterContainer Install(Ptr<EnergySource> source) const;
+    energy::EnergyHarvesterContainer Install(Ptr<energy::EnergySource> source) const;
 
     /**
      * \param sourceContainer List of nodes where EnergyHarvester will be installed.
@@ -67,7 +68,7 @@ class EnergyHarvesterHelper
      *
      * This function installs an EnergyHarvester onto a list of energy sources.
      */
-    EnergyHarvesterContainer Install(EnergySourceContainer sourceContainer) const;
+    energy::EnergyHarvesterContainer Install(energy::EnergySourceContainer sourceContainer) const;
 
     /**
      * \param sourceName Name of node where EnergyHarvester will be installed.
@@ -75,7 +76,7 @@ class EnergyHarvesterHelper
      *
      * This function installs an EnergyHarvester onto a node.
      */
-    EnergyHarvesterContainer Install(std::string sourceName) const;
+    energy::EnergyHarvesterContainer Install(std::string sourceName) const;
 
   private:
     /**
@@ -87,7 +88,7 @@ class EnergyHarvesterHelper
      * the installation process (eg. installing EnergyHarvester on set of nodes) is
      * implemented in the EnergyHarvesterHelper base class.
      */
-    virtual Ptr<EnergyHarvester> DoInstall(Ptr<EnergySource> source) const = 0;
+    virtual Ptr<energy::EnergyHarvester> DoInstall(Ptr<energy::EnergySource> source) const = 0;
 };
 
 } // namespace ns3

@@ -24,7 +24,6 @@ using namespace ns3;
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 network allocator helper Test
  */
@@ -78,7 +77,6 @@ NetworkAllocatorHelperTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 address allocator helper Test
  */
@@ -132,7 +130,6 @@ AddressAllocatorHelperTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 reset allocator helper Test
  */
@@ -201,7 +198,6 @@ ResetAllocatorHelperTestCase::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 address helper Test
  */
@@ -281,7 +277,6 @@ IpAddressHelperTestCasev4::DoTeardown()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 Address Helper TestSuite
  */
@@ -294,12 +289,12 @@ class Ipv4AddressHelperTestSuite : public TestSuite
 };
 
 Ipv4AddressHelperTestSuite::Ipv4AddressHelperTestSuite()
-    : TestSuite("ipv4-address-helper", UNIT)
+    : TestSuite("ipv4-address-helper", Type::UNIT)
 {
-    AddTestCase(new NetworkAllocatorHelperTestCase(), TestCase::QUICK);
-    AddTestCase(new AddressAllocatorHelperTestCase(), TestCase::QUICK);
-    AddTestCase(new ResetAllocatorHelperTestCase(), TestCase::QUICK);
-    AddTestCase(new IpAddressHelperTestCasev4(), TestCase::QUICK);
+    AddTestCase(new NetworkAllocatorHelperTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new AddressAllocatorHelperTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new ResetAllocatorHelperTestCase(), TestCase::Duration::QUICK);
+    AddTestCase(new IpAddressHelperTestCasev4(), TestCase::Duration::QUICK);
 }
 
 static Ipv4AddressHelperTestSuite

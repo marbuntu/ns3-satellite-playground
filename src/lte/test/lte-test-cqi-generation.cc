@@ -89,61 +89,65 @@ LteTestUlSchedulingCallback2(LteCqiGenerationDlPowerControlTestCase* testcase,
  */
 
 LteCqiGenerationTestSuite::LteCqiGenerationTestSuite()
-    : TestSuite("lte-cqi-generation", SYSTEM)
+    : TestSuite("lte-cqi-generation", Type::SYSTEM)
 {
     //  LogLevel logLevel = (LogLevel)(LOG_PREFIX_FUNC | LOG_PREFIX_TIME | LOG_LEVEL_DEBUG);
     //  LogComponentEnable ("LteCqiGenerationTest", logLevel);
     NS_LOG_INFO("Creating LteCqiGenerationTestSuite");
 
     AddTestCase(new LteCqiGenerationTestCase("UsePdcchForCqiGeneration", false, 4, 2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationTestCase("UsePdschForCqiGeneration", true, 28, 2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB0,
                                                            LteRrcSap::PdschConfigDedicated::dB0,
                                                            4,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB0,
                                                            LteRrcSap::PdschConfigDedicated::dB_3,
                                                            8,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB0,
                                                            LteRrcSap::PdschConfigDedicated::dB_6,
                                                            10,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB1,
                                                            LteRrcSap::PdschConfigDedicated::dB_6,
                                                            12,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB2,
                                                            LteRrcSap::PdschConfigDedicated::dB_6,
                                                            14,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB3,
                                                            LteRrcSap::PdschConfigDedicated::dB_6,
                                                            14,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
     AddTestCase(new LteCqiGenerationDlPowerControlTestCase("CqiGenerationWithDlPowerControl",
                                                            LteRrcSap::PdschConfigDedicated::dB3,
                                                            LteRrcSap::PdschConfigDedicated::dB0,
                                                            8,
                                                            2),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteCqiGenerationTestSuite lteCqiGenerationTestSuite;
 
 LteCqiGenerationTestCase::LteCqiGenerationTestCase(std::string name,
@@ -263,7 +267,7 @@ LteCqiGenerationTestCase::DoRun()
     lteHelper->Attach(ueDevs2, enbDevs.Get(1));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs1, bearer);
     lteHelper->ActivateDataRadioBearer(ueDevs2, bearer);
@@ -413,7 +417,7 @@ LteCqiGenerationDlPowerControlTestCase::DoRun()
     lteHelper->Attach(ueDevs2, enbDevs.Get(1));
 
     // Activate an EPS bearer
-    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
     EpsBearer bearer(q);
     lteHelper->ActivateDataRadioBearer(ueDevs1, bearer);
     lteHelper->ActivateDataRadioBearer(ueDevs2, bearer);

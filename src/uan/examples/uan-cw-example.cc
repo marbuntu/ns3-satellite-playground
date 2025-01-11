@@ -103,10 +103,10 @@ Experiment::IncrementCw(uint32_t cw)
 }
 
 void
-Experiment::UpdatePositions(NodeContainer& nodes)
+Experiment::UpdatePositions(NodeContainer& nodes) const
 {
     NS_LOG_DEBUG(Now().As(Time::S) << " Updating positions");
-    NodeContainer::Iterator it = nodes.Begin();
+    auto it = nodes.Begin();
     Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable>();
     for (; it != nodes.End(); it++)
     {
@@ -227,7 +227,7 @@ Experiment::Run(UanHelper& uan)
         {
             NS_FATAL_ERROR("Could not open ascii trace file: " << m_asciitracefile);
         }
-        uan.EnableAsciiAll(ascii);
+        UanHelper::EnableAsciiAll(ascii);
 
         Simulator::Run();
         sinkNode = nullptr;
@@ -330,4 +330,6 @@ main(int argc, char** argv)
 
     per = nullptr;
     sinr = nullptr;
+
+    return 0;
 }

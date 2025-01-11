@@ -37,7 +37,6 @@
 #include "ns3/simulator.h"
 #include "ns3/string.h"
 #include "ns3/uinteger.h"
-#include "ns3/v4ping-helper.h"
 #include "ns3/yans-wifi-helper.h"
 
 #include <sstream>
@@ -164,7 +163,7 @@ Bug772ChainTest::CreateDevices()
     NetDeviceContainer devices = wifi.Install(wifiPhy, wifiMac, *m_nodes);
 
     // Assign fixed stream numbers to wifi and channel random variables
-    streamsUsed += wifi.AssignStreams(devices, streamsUsed);
+    streamsUsed += WifiHelper::AssignStreams(devices, streamsUsed);
     // Assign 6 streams per device
     NS_TEST_ASSERT_MSG_EQ(streamsUsed, (devices.GetN() * 2), "Stream assignment mismatch");
     streamsUsed += wifiChannel.AssignStreams(chan, streamsUsed);

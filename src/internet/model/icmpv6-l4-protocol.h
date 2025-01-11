@@ -28,6 +28,7 @@
 
 #include "ns3/ipv6-address.h"
 #include "ns3/random-variable-stream.h"
+#include "ns3/traced-callback.h"
 
 #include <list>
 
@@ -328,9 +329,9 @@ class Icmpv6L4Protocol : public IpL4Protocol
      * \param interface the interface from which the packet is coming
      * \returns the receive status
      */
-    enum IpL4Protocol::RxStatus Receive(Ptr<Packet> p,
-                                        const Ipv4Header& header,
-                                        Ptr<Ipv4Interface> interface) override;
+    IpL4Protocol::RxStatus Receive(Ptr<Packet> p,
+                                   const Ipv4Header& header,
+                                   Ptr<Ipv4Interface> interface) override;
 
     /**
      * \brief Receive method.
@@ -339,9 +340,9 @@ class Icmpv6L4Protocol : public IpL4Protocol
      * \param interface the interface from which the packet is coming
      * \returns the receive status
      */
-    enum IpL4Protocol::RxStatus Receive(Ptr<Packet> p,
-                                        const Ipv6Header& header,
-                                        Ptr<Ipv6Interface> interface) override;
+    IpL4Protocol::RxStatus Receive(Ptr<Packet> p,
+                                   const Ipv6Header& header,
+                                   Ptr<Ipv6Interface> interface) override;
 
     /**
      * \brief Function called when DAD timeout.
@@ -395,7 +396,7 @@ class Icmpv6L4Protocol : public IpL4Protocol
 
     /**
      * \brief Create a neighbor cache.
-     * \param device thet NetDevice
+     * \param device the NetDevice
      * \param interface the IPv6 interface
      * \return a smart pointer of NdCache or 0 if problem
      */
@@ -642,7 +643,7 @@ class Icmpv6L4Protocol : public IpL4Protocol
     /**
      * \brief Multicast RS retransmissions counter [\RFC{7559}].
      *
-     * Zero indicate a first transmission, greater than zero means retranmsisisons.
+     * Zero indicate a first transmission, greater than zero means retransmissions.
      */
     uint32_t m_rsRetransmissionCount{0};
 
@@ -697,6 +698,12 @@ class Icmpv6L4Protocol : public IpL4Protocol
     EventId m_handleRsTimeoutEvent;
 
     IpL4Protocol::DownTargetCallback6 m_downTarget; //!< callback to Ipv6::Send
+
+    /**
+     * The trace fired when a DAD fails, changing the address state to INVALID.
+     * Includes the address whose state has been changed.
+     */
+    ns3::TracedCallback<const Ipv6Address&> m_failedDadAddressTrace;
 };
 
 } /* namespace ns3 */

@@ -199,7 +199,7 @@ class DsrReceivedRreqEntry
 
     // \}
   private:
-    Ipv4Address m_destination; //!< IPv4 address of the destinaton
+    Ipv4Address m_destination; //!< IPv4 address of the destination
     Ipv4Address m_source;      //!< IPv4 address of the source
     uint16_t m_identification; //!< Route request identification
     Time m_expire;             //!< Route request expire time
@@ -373,7 +373,7 @@ class DsrRreqTable : public Object
     Time MaxRequestPeriod;
     /// The original request period
     Time RequestPeriod;
-    /// The non-propagaton request timeout
+    /// The non-propagation request timeout
     Time NonpropRequestTimeout;
     /// The source route entry expire time
     Time m_rreqEntryExpire;
@@ -408,7 +408,7 @@ class DsrRreqTable : public Object
          * \param b BlackList entry
          * \return true if expired, false otherwise
          */
-        bool operator()(const struct BlackList& b) const
+        bool operator()(const BlackList& b) const
         {
             return (b.m_expireTime < Simulator::Now());
         }

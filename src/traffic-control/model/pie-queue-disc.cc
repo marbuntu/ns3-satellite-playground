@@ -297,15 +297,9 @@ PieQueueDisc::DropEarly(Ptr<QueueDiscItem> item, uint32_t qSize)
     }
 
     // Safeguard PIE to be work conserving (Section 4.1 of RFC 8033)
-    if ((m_qDelayOld.GetSeconds() < (0.5 * m_qDelayRef.GetSeconds())) && (m_dropProb < 0.2))
-    {
-        return false;
-    }
-    else if (GetMaxSize().GetUnit() == QueueSizeUnit::BYTES && qSize <= 2 * m_meanPktSize)
-    {
-        return false;
-    }
-    else if (GetMaxSize().GetUnit() == QueueSizeUnit::PACKETS && qSize <= 2)
+    if ((m_qDelayOld.GetSeconds() < (0.5 * m_qDelayRef.GetSeconds()) && m_dropProb < 0.2) ||
+        (GetMaxSize().GetUnit() == QueueSizeUnit::BYTES && qSize <= 2 * m_meanPktSize) ||
+        (GetMaxSize().GetUnit() == QueueSizeUnit::PACKETS && qSize <= 2))
     {
         return false;
     }
@@ -328,12 +322,7 @@ PieQueueDisc::DropEarly(Ptr<QueueDiscItem> item, uint32_t qSize)
     }
 
     double u = m_uv->GetValue();
-    if (u > p)
-    {
-        return false;
-    }
-
-    return true;
+    return u <= p;
 }
 
 void
@@ -442,7 +431,7 @@ PieQueueDisc::CalculateP()
         m_burstAllowance -= m_tUpdate;
     }
 
-    uint32_t burstResetLimit = static_cast<uint32_t>(BURST_RESET_TIMEOUT / m_tUpdate.GetSeconds());
+    auto burstResetLimit = static_cast<uint32_t>(BURST_RESET_TIMEOUT / m_tUpdate.GetSeconds());
     if ((qDelay.GetSeconds() < 0.5 * m_qDelayRef.GetSeconds()) &&
         (m_qDelayOld.GetSeconds() < (0.5 * m_qDelayRef.GetSeconds())) && (m_dropProb == 0) &&
         !missingInitFlag)

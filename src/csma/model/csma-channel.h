@@ -65,7 +65,7 @@ class CsmaDeviceRec
      * \return If the net device pointed to by the devicePtr is active
      * and ready to RX/TX.
      */
-    bool IsActive();
+    bool IsActive() const;
 };
 
 /**
@@ -325,7 +325,7 @@ class CsmaChannel : public Channel
      * packet to have been transmitted on the channel if the channel is
      * free.)
      */
-    Ptr<Packet> m_currentPkt;
+    Ptr<const Packet> m_currentPkt;
 
     /**
      * Device Id of the source that is currently transmitting on the

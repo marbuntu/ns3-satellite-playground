@@ -118,7 +118,6 @@ NS_LOG_COMPONENT_DEFINE("Ipv4GlobalRoutingTestSuite");
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting Link test
  */
@@ -203,7 +202,6 @@ LinkTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting LAN test
  */
@@ -285,7 +283,6 @@ LanTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting Two Link test
  */
@@ -405,7 +402,6 @@ TwoLinkTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting Two LAN test
  */
@@ -506,7 +502,6 @@ TwoLanTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting Bridge test
  */
@@ -690,7 +685,6 @@ BridgeTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting Two bridges test
  */
@@ -848,7 +842,6 @@ TwoBridgeTest::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 Dynamic GlobalRouting test
  */
@@ -901,9 +894,7 @@ Ipv4DynamicGlobalRoutingTestCase::Ipv4DynamicGlobalRoutingTestCase()
 
 Ipv4DynamicGlobalRoutingTestCase::~Ipv4DynamicGlobalRoutingTestCase()
 {
-    std::vector<std::pair<Ptr<Socket>, bool>>::iterator iter;
-
-    for (iter = m_sendSocks.begin(); iter != m_sendSocks.end(); iter++)
+    for (auto iter = m_sendSocks.begin(); iter != m_sendSocks.end(); iter++)
     {
         if (iter->second)
         {
@@ -947,7 +938,7 @@ Ipv4DynamicGlobalRoutingTestCase::HandleRead(Ptr<Socket> socket)
 void
 Ipv4DynamicGlobalRoutingTestCase::SendData(uint8_t index)
 {
-    if (m_sendSocks[index].second == false)
+    if (!m_sendSocks[index].second)
     {
         return;
     }
@@ -1159,7 +1150,6 @@ Ipv4DynamicGlobalRoutingTestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 Dynamic GlobalRouting /32 test
  */
@@ -1323,7 +1313,6 @@ Ipv4GlobalRoutingSlash32TestCase::DoRun()
 
 /**
  * \ingroup internet-test
- * \ingroup tests
  *
  * \brief IPv4 GlobalRouting TestSuite
  */
@@ -1334,16 +1323,16 @@ class Ipv4GlobalRoutingTestSuite : public TestSuite
 };
 
 Ipv4GlobalRoutingTestSuite::Ipv4GlobalRoutingTestSuite()
-    : TestSuite("ipv4-global-routing", UNIT)
+    : TestSuite("ipv4-global-routing", Type::UNIT)
 {
-    AddTestCase(new LinkTest, TestCase::QUICK);
-    AddTestCase(new LanTest, TestCase::QUICK);
-    AddTestCase(new TwoLinkTest, TestCase::QUICK);
-    AddTestCase(new TwoLanTest, TestCase::QUICK);
-    AddTestCase(new BridgeTest, TestCase::QUICK);
-    AddTestCase(new TwoBridgeTest, TestCase::QUICK);
-    AddTestCase(new Ipv4DynamicGlobalRoutingTestCase, TestCase::QUICK);
-    AddTestCase(new Ipv4GlobalRoutingSlash32TestCase, TestCase::QUICK);
+    AddTestCase(new LinkTest, TestCase::Duration::QUICK);
+    AddTestCase(new LanTest, TestCase::Duration::QUICK);
+    AddTestCase(new TwoLinkTest, TestCase::Duration::QUICK);
+    AddTestCase(new TwoLanTest, TestCase::Duration::QUICK);
+    AddTestCase(new BridgeTest, TestCase::Duration::QUICK);
+    AddTestCase(new TwoBridgeTest, TestCase::Duration::QUICK);
+    AddTestCase(new Ipv4DynamicGlobalRoutingTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new Ipv4GlobalRoutingSlash32TestCase, TestCase::Duration::QUICK);
 }
 
 static Ipv4GlobalRoutingTestSuite

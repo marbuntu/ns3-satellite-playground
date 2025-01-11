@@ -14,12 +14,11 @@
  *
  * Author: John Abraham <john.abraham@gatech.edu>
  * Contributions: Eugene Kalishenko <ydginster@gmail.com> (Open Source and Linux Laboratory
- * http://dev.osll.ru/)
+ * http://wiki.osll.ru/doku.php/start)
  */
 
 #include "unistd.h"
 
-#include "ns3/applications-module.h"
 #include "ns3/basic-energy-source.h"
 #include "ns3/core-module.h"
 #include "ns3/internet-module.h"
@@ -28,19 +27,21 @@
 #include "ns3/point-to-point-layout-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/simple-device-energy-model.h"
+#include "ns3/udp-echo-helper.h"
 
 #include <iostream>
 
 using namespace ns3;
+using namespace ns3::energy;
 
 /**
  * \ingroup netanim
+ * \ingroup tests
  * \defgroup netanim-test animation module tests
  */
 
 /**
  * \ingroup netanim-test
- * \ingroup tests
  *
  * \brief Abstract Animation Interface Test Case
  */
@@ -112,7 +113,6 @@ AbstractAnimationInterfaceTestCase::CheckFileExistence()
 
 /**
  * \ingroup netanim-test
- * \ingroup tests
  *
  * \brief Animation Interface Test Case
  */
@@ -181,7 +181,6 @@ AnimationInterfaceTestCase::CheckLogic()
 
 /**
  * \ingroup netanim-test
- * \ingroup tests
  *
  * \brief Animation Remaining Energy Test Case
  */
@@ -243,7 +242,6 @@ AnimationRemainingEnergyTestCase::CheckLogic()
 
 /**
  * \ingroup netanim-test
- * \ingroup tests
  *
  * \brief Animation Interface Test Suite
  */
@@ -251,9 +249,9 @@ static class AnimationInterfaceTestSuite : public TestSuite
 {
   public:
     AnimationInterfaceTestSuite()
-        : TestSuite("animation-interface", UNIT)
+        : TestSuite("animation-interface", Type::UNIT)
     {
-        AddTestCase(new AnimationInterfaceTestCase(), TestCase::QUICK);
-        AddTestCase(new AnimationRemainingEnergyTestCase(), TestCase::QUICK);
+        AddTestCase(new AnimationInterfaceTestCase(), TestCase::Duration::QUICK);
+        AddTestCase(new AnimationRemainingEnergyTestCase(), TestCase::Duration::QUICK);
     }
 } g_animationInterfaceTestSuite; ///< the test suite

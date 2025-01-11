@@ -70,38 +70,6 @@ ConvertGuardIntervalToNanoSeconds(WifiMode mode, bool htShortGuardInterval, Time
     return gi;
 }
 
-uint16_t
-GetChannelWidthForTransmission(WifiMode mode, uint16_t maxAllowedChannelWidth)
-{
-    WifiModulationClass modulationClass = mode.GetModulationClass();
-    if (maxAllowedChannelWidth > 20 &&
-        (modulationClass == WifiModulationClass::WIFI_MOD_CLASS_OFDM // all non-HT OFDM control and
-                                                                     // management frames
-         || modulationClass ==
-                WifiModulationClass::WIFI_MOD_CLASS_ERP_OFDM)) // special case of beacons at 2.4 GHz
-    {
-        return 20;
-    }
-    // at 2.4 GHz basic rate can be non-ERP DSSS
-    if (modulationClass == WifiModulationClass::WIFI_MOD_CLASS_DSSS ||
-        modulationClass == WifiModulationClass::WIFI_MOD_CLASS_HR_DSSS)
-    {
-        return 22;
-    }
-    return maxAllowedChannelWidth;
-}
-
-uint16_t
-GetChannelWidthForTransmission(WifiMode mode,
-                               uint16_t operatingChannelWidth,
-                               uint16_t maxSupportedChannelWidth)
-{
-    return GetChannelWidthForTransmission(mode,
-                                          (operatingChannelWidth < maxSupportedChannelWidth)
-                                              ? operatingChannelWidth
-                                              : maxSupportedChannelWidth);
-}
-
 WifiPreamble
 GetPreambleForTransmission(WifiModulationClass modulation, bool useShortPreamble)
 {
@@ -143,6 +111,30 @@ GetPreambleForTransmission(WifiModulationClass modulation, bool useShortPreamble
     {
         return WIFI_PREAMBLE_LONG;
     }
+}
+
+WifiModulationClass
+GetModulationClassForPreamble(WifiPreamble preamble)
+{
+    switch (preamble)
+    {
+    case WIFI_PREAMBLE_HT_MF:
+        return WIFI_MOD_CLASS_HT;
+    case WIFI_PREAMBLE_VHT_SU:
+    case WIFI_PREAMBLE_VHT_MU:
+        return WIFI_MOD_CLASS_VHT;
+    case WIFI_PREAMBLE_HE_SU:
+    case WIFI_PREAMBLE_HE_ER_SU:
+    case WIFI_PREAMBLE_HE_MU:
+    case WIFI_PREAMBLE_HE_TB:
+        return WIFI_MOD_CLASS_HE;
+    case WIFI_PREAMBLE_EHT_MU:
+    case WIFI_PREAMBLE_EHT_TB:
+        return WIFI_MOD_CLASS_EHT;
+    default:
+        NS_ABORT_MSG("Unsupported preamble type: " << preamble);
+    }
+    return WIFI_MOD_CLASS_UNKNOWN;
 }
 
 bool
@@ -226,7 +218,10 @@ GetModulationClassForStandard(WifiStandard standard)
         modulationClass = WIFI_MOD_CLASS_OFDM;
         break;
     case WIFI_STANDARD_80211b:
-        modulationClass = WIFI_MOD_CLASS_DSSS;
+        // Although two modulation classes are supported in 802.11b, return the
+        // numerically greater one defined in the WifiModulationClass enum.
+        // See issue #1095 for more explanation.
+        modulationClass = WIFI_MOD_CLASS_HR_DSSS;
         break;
     case WIFI_STANDARD_80211g:
         modulationClass = WIFI_MOD_CLASS_ERP_OFDM;
@@ -250,6 +245,67 @@ GetModulationClassForStandard(WifiStandard standard)
         break;
     }
     return modulationClass;
+}
+
+ChannelWidthMhz
+GetMaximumChannelWidth(WifiModulationClass modulation)
+{
+    switch (modulation)
+    {
+    case WIFI_MOD_CLASS_DSSS:
+    case WIFI_MOD_CLASS_HR_DSSS:
+        return 22;
+    case WIFI_MOD_CLASS_OFDM:
+    case WIFI_MOD_CLASS_ERP_OFDM:
+        return 20;
+    case WIFI_MOD_CLASS_HT:
+        return 40;
+    // NOLINTBEGIN(bugprone-branch-clone)
+    case WIFI_MOD_CLASS_VHT:
+    case WIFI_MOD_CLASS_HE:
+        return 160;
+    case WIFI_MOD_CLASS_EHT:
+        return 160; // TODO update when 320 MHz channels are supported and remove clang-tidy guards
+    // NOLINTEND(bugprone-branch-clone)
+    default:
+        NS_ABORT_MSG("Unknown modulation class: " << modulation);
+        return 0;
+    }
+}
+
+ChannelWidthMhz
+GetChannelWidthInMhz(WifiChannelWidthType width)
+{
+    switch (width)
+    {
+    case WifiChannelWidthType::UNKNOWN:
+        return 0;
+    case WifiChannelWidthType::CW_20MHZ:
+        return 20;
+    case WifiChannelWidthType::CW_22MHZ:
+        return 22;
+    case WifiChannelWidthType::CW_5MHZ:
+        return 5;
+    case WifiChannelWidthType::CW_10MHZ:
+        return 10;
+    case WifiChannelWidthType::CW_40MHZ:
+        return 40;
+    case WifiChannelWidthType::CW_80MHZ:
+        return 80;
+    case WifiChannelWidthType::CW_160MHZ:
+        return 160;
+    case WifiChannelWidthType::CW_2160MHZ:
+        return 2160;
+    default:
+        NS_FATAL_ERROR("Unknown wifi channel width type " << width);
+        return 0;
+    }
+}
+
+bool
+IsEht(WifiPreamble preamble)
+{
+    return ((preamble == WIFI_PREAMBLE_EHT_MU) || (preamble == WIFI_PREAMBLE_EHT_TB));
 }
 
 } // namespace ns3

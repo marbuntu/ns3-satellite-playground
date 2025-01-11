@@ -39,7 +39,6 @@ NS_LOG_COMPONENT_DEFINE("LteSecondaryCellHandoverTest");
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief Test measurement-based handover to secondary cell.
  */
@@ -196,7 +195,6 @@ LteSecondaryCellHandoverTestCase::DoTeardown()
 
 /**
  * \ingroup lte-test
- * \ingroup tests
  *
  * \brief LTE measurement-based handover to secondary cell test suite.
  */
@@ -207,10 +205,14 @@ class LteSecondaryCellHandoverTestSuite : public TestSuite
 };
 
 LteSecondaryCellHandoverTestSuite::LteSecondaryCellHandoverTestSuite()
-    : TestSuite{"lte-secondary-cell-handover", SYSTEM}
+    : TestSuite{"lte-secondary-cell-handover", Type::SYSTEM}
 {
-    AddTestCase(new LteSecondaryCellHandoverTestCase("Ideal RRC", true), TestCase::QUICK);
-    AddTestCase(new LteSecondaryCellHandoverTestCase("Real RRC", false), TestCase::QUICK);
+    AddTestCase(new LteSecondaryCellHandoverTestCase("Ideal RRC", true), TestCase::Duration::QUICK);
+    AddTestCase(new LteSecondaryCellHandoverTestCase("Real RRC", false), TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteSecondaryCellHandoverTestSuite g_lteSecondaryCellHandoverTestSuiteInstance;

@@ -369,7 +369,7 @@ PfifoFastQueueDiscNoPriority::DoRun()
                           2,
                           "unexpected queue depth");
     p = Create<Packet>(100);
-    uint8_t* buf = new uint8_t[100];
+    auto buf = new uint8_t[100];
     uint8_t counter = 0;
     for (uint32_t i = 0; i < 100; i++)
     {
@@ -397,12 +397,12 @@ class PfifoFastQueueDiscTestSuite : public TestSuite
 };
 
 PfifoFastQueueDiscTestSuite::PfifoFastQueueDiscTestSuite()
-    : TestSuite("pfifo-fast-queue-disc", UNIT)
+    : TestSuite("pfifo-fast-queue-disc", Type::UNIT)
 {
-    AddTestCase(new PfifoFastQueueDiscTosPrioritization, TestCase::QUICK);
-    AddTestCase(new PfifoFastQueueDiscDscpPrioritization, TestCase::QUICK);
-    AddTestCase(new PfifoFastQueueDiscOverflow, TestCase::QUICK);
-    AddTestCase(new PfifoFastQueueDiscNoPriority, TestCase::QUICK);
+    AddTestCase(new PfifoFastQueueDiscTosPrioritization, TestCase::Duration::QUICK);
+    AddTestCase(new PfifoFastQueueDiscDscpPrioritization, TestCase::Duration::QUICK);
+    AddTestCase(new PfifoFastQueueDiscOverflow, TestCase::Duration::QUICK);
+    AddTestCase(new PfifoFastQueueDiscNoPriority, TestCase::Duration::QUICK);
 }
 
 /// Do not forget to allocate an instance of this TestSuite.

@@ -35,7 +35,6 @@ using namespace ns3;
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Test whether course change notifications occur regardless of calls
  * to Update() position (which are triggered by calls to GetPosition())
@@ -113,7 +112,6 @@ WaypointLazyNotifyFalse::DoRun()
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Waypoint Lazy Notify True
  */
@@ -188,7 +186,6 @@ WaypointLazyNotifyTrue::DoRun()
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Waypoint Initial Position Is Waypoint Test
  */
@@ -382,7 +379,6 @@ WaypointInitialPositionIsWaypoint::DoRun()
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Waypoint Mobility Model Via Helper Test
  */
@@ -478,7 +474,6 @@ WaypointMobilityModelViaHelper::DoRun()
 
 /**
  * \ingroup mobility-test
- * \ingroup tests
  *
  * \brief Mobility Test Suite
  */
@@ -489,12 +484,16 @@ class MobilityTestSuite : public TestSuite
 };
 
 MobilityTestSuite::MobilityTestSuite()
-    : TestSuite("mobility", UNIT)
+    : TestSuite("mobility", Type::UNIT)
 {
-    AddTestCase(new WaypointLazyNotifyFalse, TestCase::QUICK);
-    AddTestCase(new WaypointLazyNotifyTrue, TestCase::QUICK);
-    AddTestCase(new WaypointInitialPositionIsWaypoint, TestCase::QUICK);
-    AddTestCase(new WaypointMobilityModelViaHelper, TestCase::QUICK);
+    AddTestCase(new WaypointLazyNotifyFalse, TestCase::Duration::QUICK);
+    AddTestCase(new WaypointLazyNotifyTrue, TestCase::Duration::QUICK);
+    AddTestCase(new WaypointInitialPositionIsWaypoint, TestCase::Duration::QUICK);
+    AddTestCase(new WaypointMobilityModelViaHelper, TestCase::Duration::QUICK);
 }
 
-static MobilityTestSuite mobilityTestSuite; ///< the test suite
+/**
+ * \ingroup mobility-test
+ * Static variable for test initialization
+ */
+static MobilityTestSuite mobilityTestSuite;

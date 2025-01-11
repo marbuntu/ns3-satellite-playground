@@ -63,8 +63,8 @@ Ns3WimaxFragmentationTestCase::DoRun()
     GenericMacHeader hdr;
 
     Cid cid;
-    WimaxConnection* connectionTx = new WimaxConnection(cid, Cid::TRANSPORT);
-    WimaxConnection* connectionRx = new WimaxConnection(cid, Cid::TRANSPORT);
+    auto connectionTx = new WimaxConnection(cid, Cid::TRANSPORT);
+    auto connectionRx = new WimaxConnection(cid, Cid::TRANSPORT);
 
     // A Packet of 1000 bytes has been created.
     // It will be fragmentated into 4 fragments and then defragmentated into fullPacket.
@@ -127,9 +127,7 @@ Ns3WimaxFragmentationTestCase::DoRun()
             WimaxConnection::FragmentsQueue fragmentsQueue = connectionRx->GetFragmentsQueue();
 
             // DEFRAGMENTATION
-            for (std::list<Ptr<const Packet>>::const_iterator iter = fragmentsQueue.begin();
-                 iter != fragmentsQueue.end();
-                 ++iter)
+            for (auto iter = fragmentsQueue.begin(); iter != fragmentsQueue.end(); ++iter)
             {
                 // Create the whole Packet
                 fullPacket->AddAtEnd(*iter);
@@ -157,9 +155,9 @@ class Ns3WimaxFragmentationTestSuite : public TestSuite
 };
 
 Ns3WimaxFragmentationTestSuite::Ns3WimaxFragmentationTestSuite()
-    : TestSuite("wimax-fragmentation", UNIT)
+    : TestSuite("wimax-fragmentation", Type::UNIT)
 {
-    AddTestCase(new Ns3WimaxFragmentationTestCase, TestCase::QUICK);
+    AddTestCase(new Ns3WimaxFragmentationTestCase, TestCase::Duration::QUICK);
 }
 
 static Ns3WimaxFragmentationTestSuite ns3WimaxFragmentationTestSuite; ///< the test suite

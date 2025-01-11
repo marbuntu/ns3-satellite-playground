@@ -399,7 +399,7 @@ void
 IcmpV6EchoReplyTestCase::SendData(Ptr<Socket> socket, Ipv6Address dst)
 {
     Ptr<Packet> p = Create<Packet>();
-    Icmpv6Echo echo(1);
+    Icmpv6Echo echo(true);
     echo.SetSeq(1);
     echo.SetId(0XB1ED);
     p->AddHeader(echo);
@@ -537,7 +537,7 @@ void
 IcmpV6TimeExceedTestCase::SendData(Ptr<Socket> socket, Ipv6Address dst)
 {
     Ptr<Packet> p = Create<Packet>();
-    Icmpv6Echo echo(1);
+    Icmpv6Echo echo(true);
     echo.SetSeq(1);
     echo.SetId(0XB1ED);
     p->AddHeader(echo);
@@ -664,12 +664,12 @@ class IcmpTestSuite : public TestSuite
 };
 
 IcmpTestSuite::IcmpTestSuite()
-    : TestSuite("icmp", UNIT)
+    : TestSuite("icmp", Type::UNIT)
 {
-    AddTestCase(new IcmpEchoReplyTestCase, TestCase::QUICK);
-    AddTestCase(new IcmpTimeExceedTestCase, TestCase::QUICK);
-    AddTestCase(new IcmpV6EchoReplyTestCase, TestCase::QUICK);
-    AddTestCase(new IcmpV6TimeExceedTestCase, TestCase::QUICK);
+    AddTestCase(new IcmpEchoReplyTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new IcmpTimeExceedTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new IcmpV6EchoReplyTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new IcmpV6TimeExceedTestCase, TestCase::Duration::QUICK);
 }
 
 static IcmpTestSuite icmpTestSuite; //!< Static variable for test initialization

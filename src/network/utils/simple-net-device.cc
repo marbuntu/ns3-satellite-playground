@@ -18,15 +18,15 @@
  */
 #include "simple-net-device.h"
 
+#include "error-model.h"
+#include "queue.h"
 #include "simple-channel.h"
 
 #include "ns3/boolean.h"
-#include "ns3/error-model.h"
 #include "ns3/log.h"
 #include "ns3/node.h"
 #include "ns3/packet.h"
 #include "ns3/pointer.h"
-#include "ns3/queue.h"
 #include "ns3/simulator.h"
 #include "ns3/string.h"
 #include "ns3/tag.h"
@@ -373,29 +373,21 @@ bool
 SimpleNetDevice::IsBroadcast() const
 {
     NS_LOG_FUNCTION(this);
-    if (m_pointToPointMode)
-    {
-        return false;
-    }
-    return true;
+    return !m_pointToPointMode;
 }
 
 Address
 SimpleNetDevice::GetBroadcast() const
 {
     NS_LOG_FUNCTION(this);
-    return Mac48Address("ff:ff:ff:ff:ff:ff");
+    return Mac48Address::GetBroadcast();
 }
 
 bool
 SimpleNetDevice::IsMulticast() const
 {
     NS_LOG_FUNCTION(this);
-    if (m_pointToPointMode)
-    {
-        return false;
-    }
-    return true;
+    return !m_pointToPointMode;
 }
 
 Address
@@ -416,11 +408,7 @@ bool
 SimpleNetDevice::IsPointToPoint() const
 {
     NS_LOG_FUNCTION(this);
-    if (m_pointToPointMode)
-    {
-        return true;
-    }
-    return false;
+    return m_pointToPointMode;
 }
 
 bool
@@ -462,7 +450,7 @@ SimpleNetDevice::SendFrom(Ptr<Packet> p,
 
     if (m_queue->Enqueue(p))
     {
-        if (m_queue->GetNPackets() == 1 && !FinishTransmissionEvent.IsRunning())
+        if (m_queue->GetNPackets() == 1 && !FinishTransmissionEvent.IsPending())
         {
             StartTransmission();
         }
@@ -479,7 +467,7 @@ SimpleNetDevice::StartTransmission()
     {
         return;
     }
-    NS_ASSERT_MSG(!FinishTransmissionEvent.IsRunning(),
+    NS_ASSERT_MSG(!FinishTransmissionEvent.IsPending(),
                   "Tried to transmit a packet while another transmission was in progress");
     Ptr<Packet> packet = m_queue->Dequeue();
 
@@ -538,11 +526,7 @@ bool
 SimpleNetDevice::NeedsArp() const
 {
     NS_LOG_FUNCTION(this);
-    if (m_pointToPointMode)
-    {
-        return false;
-    }
-    return true;
+    return !m_pointToPointMode;
 }
 
 void
@@ -560,7 +544,7 @@ SimpleNetDevice::DoDispose()
     m_node = nullptr;
     m_receiveErrorModel = nullptr;
     m_queue->Dispose();
-    if (FinishTransmissionEvent.IsRunning())
+    if (FinishTransmissionEvent.IsPending())
     {
         FinishTransmissionEvent.Cancel();
     }

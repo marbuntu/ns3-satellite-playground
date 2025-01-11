@@ -60,7 +60,7 @@ NS_LOG_COMPONENT_DEFINE("LteCellSelectionTest");
  */
 
 LteCellSelectionTestSuite::LteCellSelectionTestSuite()
-    : TestSuite("lte-cell-selection", SYSTEM)
+    : TestSuite("lte-cell-selection", Type::SYSTEM)
 {
     std::vector<LteCellSelectionTestCase::UeSetup_t> w;
 
@@ -77,7 +77,7 @@ LteCellSelectionTestSuite::LteCellSelectionTestSuite()
     };
 
     AddTestCase(new LteCellSelectionTestCase("EPC, real RRC", true, false, 60.0 /* isd */, w),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
     // IDEAL RRC PROTOCOL
 
@@ -92,10 +92,14 @@ LteCellSelectionTestSuite::LteCellSelectionTestSuite()
     };
 
     AddTestCase(new LteCellSelectionTestCase("EPC, ideal RRC", true, true, 60.0 /* isd */, w),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 
 } // end of LteCellSelectionTestSuite::LteCellSelectionTestSuite ()
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteCellSelectionTestSuite g_lteCellSelectionTestSuite;
 
 /*
@@ -181,7 +185,7 @@ LteCellSelectionTestCase::DoRun()
     NodeContainer enbNodes;
     enbNodes.Create(4);
     NodeContainer ueNodes;
-    uint16_t nUe = static_cast<uint16_t>(m_ueSetupList.size());
+    auto nUe = static_cast<uint16_t>(m_ueSetupList.size());
     ueNodes.Create(nUe);
 
     // Assign nodes to position

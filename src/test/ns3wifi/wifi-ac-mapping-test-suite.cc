@@ -206,9 +206,9 @@ WifiAcMappingTest::DoRun()
 
     // The packet source is an on-off application on the AP device
     InetSocketAddress dest(staNodeInterface.GetAddress(0), udpPort);
-    dest.SetTos(m_tos);
     OnOffHelper onoff("ns3::UdpSocketFactory", dest);
     onoff.SetConstantRate(DataRate("5kbps"), 500);
+    onoff.SetAttribute("Tos", UintegerValue(m_tos));
     ApplicationContainer sourceApp = onoff.Install(ap.Get(0));
     sourceApp.Start(Seconds(1.0));
     sourceApp.Stop(Seconds(4.0));
@@ -227,9 +227,12 @@ WifiAcMappingTest::DoRun()
     // Get the four child queue discs and connect their Enqueue trace to the
     // PacketEnqueuedInQueueDisc method, which counts how many packets with the given ToS value have
     // been enqueued
+    // NOTE the purpose of the unary + operation in +m_QueueDiscCount is to decay the array type
+    // to a pointer type, so that the type of that argument matches the type of the second
+    // parameter of the PacketEnqueuedInQueueDisc function
     root->GetQueueDiscClass(0)->GetQueueDisc()->TraceConnectWithoutContext(
         "Enqueue",
-        MakeBoundCallback(&WifiAcMappingTest::PacketEnqueuedInQueueDisc, m_tos, m_QueueDiscCount));
+        MakeBoundCallback(&WifiAcMappingTest::PacketEnqueuedInQueueDisc, m_tos, +m_QueueDiscCount));
 
     root->GetQueueDiscClass(1)->GetQueueDisc()->TraceConnectWithoutContext(
         "Enqueue",
@@ -254,12 +257,15 @@ WifiAcMappingTest::DoRun()
     // Get the four wifi mac queues and connect their Enqueue trace to the
     // PacketEnqueuedInWifiMacQueue method, which counts how many packets with the given ToS value
     // have been enqueued
+    // NOTE the purpose of the unary + operation in +m_WifiMacQueueCount is to decay the array type
+    // to a pointer type, so that the type of that argument matches the type of the second
+    // parameter of the PacketEnqueuedInWifiMacQueue function
     apMac->GetAttribute("BE_Txop", ptr);
     ptr.Get<QosTxop>()->GetWifiMacQueue()->TraceConnectWithoutContext(
         "Enqueue",
         MakeBoundCallback(&WifiAcMappingTest::PacketEnqueuedInWifiMacQueue,
                           m_tos,
-                          m_WifiMacQueueCount));
+                          +m_WifiMacQueueCount));
 
     apMac->GetAttribute("BK_Txop", ptr);
     ptr.Get<QosTxop>()->GetWifiMacQueue()->TraceConnectWithoutContext(
@@ -327,12 +333,12 @@ class WifiAcMappingTestSuite : public TestSuite
 };
 
 WifiAcMappingTestSuite::WifiAcMappingTestSuite()
-    : TestSuite("wifi-ac-mapping", SYSTEM)
+    : TestSuite("wifi-ac-mapping", Type::SYSTEM)
 {
-    AddTestCase(new WifiAcMappingTest(0xb8, 2), TestCase::QUICK); // EF in AC_VI
-    AddTestCase(new WifiAcMappingTest(0x28, 1), TestCase::QUICK); // AF11 in AC_BK
-    AddTestCase(new WifiAcMappingTest(0x70, 0), TestCase::QUICK); // AF32 in AC_BE
-    AddTestCase(new WifiAcMappingTest(0xc0, 3), TestCase::QUICK); // CS7 in AC_VO
+    AddTestCase(new WifiAcMappingTest(0xb8, 2), TestCase::Duration::QUICK); // EF in AC_VI
+    AddTestCase(new WifiAcMappingTest(0x28, 1), TestCase::Duration::QUICK); // AF11 in AC_BK
+    AddTestCase(new WifiAcMappingTest(0x70, 0), TestCase::Duration::QUICK); // AF32 in AC_BE
+    AddTestCase(new WifiAcMappingTest(0xc0, 3), TestCase::Duration::QUICK); // CS7 in AC_VO
 }
 
 static WifiAcMappingTestSuite wifiAcMappingTestSuite;

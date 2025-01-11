@@ -19,13 +19,14 @@
 
 #include "acoustic-modem-energy-model.h"
 
+#include "uan-net-device.h"
+#include "uan-phy.h"
+
 #include "ns3/double.h"
 #include "ns3/energy-source.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/trace-source-accessor.h"
-#include "ns3/uan-net-device.h"
-#include "ns3/uan-phy.h"
 
 namespace ns3
 {
@@ -39,7 +40,7 @@ AcousticModemEnergyModel::GetTypeId()
 {
     static TypeId tid =
         TypeId("ns3::AcousticModemEnergyModel")
-            .SetParent<DeviceEnergyModel>()
+            .SetParent<energy::DeviceEnergyModel>()
             .AddConstructor<AcousticModemEnergyModel>()
             .AddAttribute("TxPowerW",
                           "The modem Tx power in Watts",
@@ -102,7 +103,7 @@ AcousticModemEnergyModel::GetNode() const
 }
 
 void
-AcousticModemEnergyModel::SetEnergySource(Ptr<EnergySource> source)
+AcousticModemEnergyModel::SetEnergySource(Ptr<energy::EnergySource> source)
 {
     NS_LOG_FUNCTION(this << source);
     NS_ASSERT(source);

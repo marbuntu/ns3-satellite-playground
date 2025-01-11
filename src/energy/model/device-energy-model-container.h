@@ -22,12 +22,14 @@
 #ifndef DEVICE_ENERGY_MODEL_CONTAINER_H
 #define DEVICE_ENERGY_MODEL_CONTAINER_H
 
-#include "ns3/device-energy-model.h"
+#include "device-energy-model.h"
 
 #include <stdint.h>
 #include <vector>
 
 namespace ns3
+{
+namespace energy
 {
 
 /**
@@ -173,6 +175,7 @@ class DeviceEnergyModelContainer
     std::vector<Ptr<DeviceEnergyModel>> m_models; //!< Container of Energy models
 };
 
+} // namespace energy
 } // namespace ns3
 
 #endif /* DEVICE_ENERGY_MODEL_CONTAINER_H */

@@ -28,6 +28,20 @@
 
 #include "ns3/error-model.h"
 
+#include <limits>
+
+#define WIFI_PHY_NS_LOG_APPEND_CONTEXT(phy)                                                        \
+    {                                                                                              \
+        if (DynamicCast<const WifiPhy>(phy))                                                       \
+        {                                                                                          \
+            std::clog << "[index=" << +phy->GetPhyId() << "][channel="                             \
+                      << (phy->GetOperatingChannel().IsSet()                                       \
+                              ? std::to_string(+phy->GetOperatingChannel().GetNumber())            \
+                              : "UNKNOWN")                                                         \
+                      << "][band=" << phy->GetPhyBand() << "] ";                                   \
+        }                                                                                          \
+    }
+
 namespace ns3
 {
 
@@ -84,14 +98,14 @@ class WifiPhy : public Object
      * Add the input listener to the list of objects to be notified of
      * PHY-level events.
      */
-    void RegisterListener(WifiPhyListener* listener);
+    void RegisterListener(const std::shared_ptr<WifiPhyListener>& listener);
     /**
      * \param listener the listener to be unregistered
      *
      * Remove the input listener from the list of objects to be notified of
      * PHY-level events.
      */
-    void UnregisterListener(WifiPhyListener* listener);
+    void UnregisterListener(const std::shared_ptr<WifiPhyListener>& listener);
 
     /**
      * \param callback the callback to invoke when PHY capabilities have changed.
@@ -108,6 +122,11 @@ class WifiPhy : public Object
     void StartReceivePreamble(Ptr<const WifiPpdu> ppdu,
                               RxPowerWattPerChannelBand& rxPowersW,
                               Time rxDuration);
+
+    /**
+     * \return whether the PHY is busy decoding the PHY header fields of a PPDU
+     */
+    bool IsReceivingPhyHeader() const;
 
     /**
      * For HE receptions only, check and possibly modify the transmit power restriction state at
@@ -151,9 +170,8 @@ class WifiPhy : public Object
 
     /**
      * \param ppdu the PPDU to send
-     * \param txVector the TXVECTOR to use to send the PPDU
      */
-    virtual void StartTx(Ptr<const WifiPpdu> ppdu, const WifiTxVector& txVector) = 0;
+    virtual void StartTx(Ptr<const WifiPpdu> ppdu) = 0;
 
     /**
      * Put in sleep mode.
@@ -500,10 +518,26 @@ class WifiPhy : public Object
 
     /**
      * Configure the PHY-level parameters for different Wi-Fi standard.
+     * Note that, in case a Spectrum PHY is used, this method must be called after adding
+     * a spectrum channel covering the operating channel bandwidth.
      *
      * \param standard the Wi-Fi standard
      */
     virtual void ConfigureStandard(WifiStandard standard);
+
+    /**
+     * Set the maximum modulation class that has to be supported by this PHY object.
+     * The maximum modulation class supported will be the minimum between the given modulation
+     * class and the maximum modulation class supported based on the configured standard.
+     *
+     * \param modClass the given modulation class
+     */
+    void SetMaxModulationClassSupported(WifiModulationClass modClass);
+
+    /**
+     * \return the maximum modulation class that has to be supported by this PHY object.
+     */
+    WifiModulationClass GetMaxModulationClassSupported() const;
 
     /**
      * Get the configured Wi-Fi standard
@@ -574,11 +608,25 @@ class WifiPhy : public Object
      * Public method used to fire a PhyRxDrop trace.
      * Implemented for encapsulation purposes.
      *
+     * \note This method is called also by NotifyRxPpduDrop and is left
+     * in the public API for backward compatibility reasons.  Do not
+     * call both this method and the newer NotifyRxPpduDrop().  Instead,
+     * call NotifyRxPpduDrop() and it will call this method also.
+     *
      * \param psdu the PSDU being transmitted
      * \param reason the reason the packet was dropped
      */
     void NotifyRxDrop(Ptr<const WifiPsdu> psdu, WifiPhyRxfailureReason reason);
 
+    /**
+     * Public method used to fire a PhyRxPpduDrop trace.
+     * Implemented for encapsulation purposes.  This method also
+     * calls the PhyRxDrop trace.
+     *
+     * \param ppdu the PSDU being transmitted
+     * \param reason the reason the packet was dropped
+     */
+    void NotifyRxPpduDrop(Ptr<const WifiPpdu> ppdu, WifiPhyRxfailureReason reason);
     /**
      * Public method used to fire a MonitorSniffer trace for a wifi PSDU being received.
      * Implemented for encapsulation purposes.
@@ -710,6 +758,15 @@ class WifiPhy : public Object
     typedef void (*PhyRxPayloadBeginTracedCallback)(WifiTxVector txVector, Time psduDuration);
 
     /**
+     * TracedCallback signature for start of PSDU reception events.
+     *
+     * \param txVector the TXVECTOR decoded from the PHY header
+     * \param psduDuration the duration of the PSDU
+     */
+    typedef void (*PhyRxPpduDropTracedCallback)(Ptr<const WifiPpdu> ppdu,
+                                                WifiPhyRxfailureReason reason);
+
+    /**
      * Assign a fixed random variable stream number to the random variables
      * used by this model. Return the number of streams (possibly zero) that
      * have been assigned.
@@ -833,7 +890,7 @@ class WifiPhy : public Object
      *
      * \param device the device this PHY is associated with
      */
-    void SetDevice(const Ptr<WifiNetDevice> device);
+    virtual void SetDevice(const Ptr<WifiNetDevice> device);
     /**
      * Return the device this PHY is associated with
      *
@@ -864,8 +921,8 @@ class WifiPhy : public Object
 
     using ChannelTuple =
         std::tuple<uint8_t /* channel number */,
-                   uint16_t /* channel width */,
-                   int /* WifiPhyBand */,
+                   ChannelWidthMhz /* channel width */,
+                   WifiPhyBand /* WifiPhyBand */,
                    uint8_t /* primary20 index*/>; //!< Tuple identifying an operating channel
 
     /**
@@ -875,9 +932,27 @@ class WifiPhy : public Object
      * Otherwise, set the operating channel based on the given channel settings and
      * call ConfigureStandard if the PHY band has changed.
      *
+     * Note that, in case a Spectrum PHY is used, a spectrum channel covering the
+     * operating channel bandwidth must have been already added when actually setting
+     * the operating channel.
+     *
      * \param channelTuple the given channel settings
      */
     void SetOperatingChannel(const ChannelTuple& channelTuple);
+    /**
+     * If the standard for this object has not been set yet, store the channel settings
+     * corresponding to the given operating channel. Otherwise, check if a channel switch
+     * can be performed now. If not, schedule another call to this method when channel switch
+     * can be performed. Otherwise, set the given operating channel and call ConfigureStandard
+     * if the PHY band has changed.
+     *
+     * Note that, in case a Spectrum PHY is used, a spectrum channel covering the
+     * operating channel bandwidth must have been already added when actually setting
+     * the operating channel.
+     *
+     * \param channel the given operating channel
+     */
+    void SetOperatingChannel(const WifiPhyOperatingChannel& channel);
     /**
      * Configure whether it is prohibited to change PHY band after initialization.
      *
@@ -897,6 +972,18 @@ class WifiPhy : public Object
      * \return the index of the primary 20 MHz channel
      */
     uint8_t GetPrimary20Index() const;
+    /**
+     * Get the bandwidth for a transmission occurring on the current operating channel and
+     * using the given WifiMode, subject to the constraint that the TX bandwidth cannot exceed
+     * the given maximum allowed value.
+     *
+     * \param mode the given WifiMode
+     * \param maxAllowedBandWidth the maximum allowed TX bandwidth
+     * \return the bandwidth for the transmission
+     */
+    ChannelWidthMhz GetTxBandwidth(
+        WifiMode mode,
+        ChannelWidthMhz maxAllowedBandWidth = std::numeric_limits<ChannelWidthMhz>::max()) const;
     /**
      * \param antennas the number of antennas on this node.
      */
@@ -933,6 +1020,20 @@ class WifiPhy : public Object
      * \returns if short PHY preamble is supported or not
      */
     bool GetShortPhyPreambleSupported() const;
+
+    /**
+     * Set the index allocated to this PHY
+     *
+     * \param phyId the ID allocated to this PHY
+     */
+    void SetPhyId(uint8_t phyId);
+
+    /**
+     * Get the index allocated to this PHY
+     *
+     * \return the ID allocated to this PHY
+     */
+    uint8_t GetPhyId() const;
 
     /**
      * Sets the interference helper.
@@ -981,7 +1082,7 @@ class WifiPhy : public Object
     /**
      * \return the channel width in MHz
      */
-    uint16_t GetChannelWidth() const;
+    ChannelWidthMhz GetChannelWidth() const;
 
     /**
      * Get the power of the given power level in dBm.
@@ -1021,20 +1122,13 @@ class WifiPhy : public Object
     void NotifyChannelAccessRequested();
 
     /**
-     * \param bandWidth the width (MHz) of the band used for the OFDMA transmission. Must be
-     *                  a multiple of 20 MHz
-     * \param guardBandwidth width of the guard band (MHz)
-     * \param range the subcarrier range of the HE RU
-     * \param bandIndex the index (starting at 0) of the band within the operating channel
-     * \return the converted subcarriers
+     * This is a helper function to convert start and stop indices to start and stop frequencies.
      *
-     * This is a helper function to convert HE RU subcarriers, which are relative to the center
-     * frequency subcarrier, to the indexes used by the Spectrum model.
+     * \param indices the start/stop indices to convert
+     * \return the converted frequencies
      */
-    virtual WifiSpectrumBand ConvertHeRuSubcarriers(uint16_t bandWidth,
-                                                    uint16_t guardBandwidth,
-                                                    HeRu::SubcarrierRange range,
-                                                    uint8_t bandIndex = 0) const;
+    virtual WifiSpectrumBandFrequencies ConvertIndicesToFrequencies(
+        const WifiSpectrumBandIndices& indices) const = 0;
 
     /**
      * Add the PHY entity to the map of __implemented__ PHY entities for the
@@ -1058,6 +1152,19 @@ class WifiPhy : public Object
     static const Ptr<const PhyEntity> GetStaticPhyEntity(WifiModulationClass modulation);
 
     /**
+     * Get the supported PHY entity to use for a received PPDU.
+     * This typically returns the entity corresponding to the modulation class used to transmit the
+     * PPDU. If the modulation class used to transmit the PPDU is not supported by the PHY, the
+     * latest PHY entity corresponding to the configured standard is returned. If the modulation
+     * used to transmit the PPDU is non-HT (duplicate), the latest PHY entity corresponding to the
+     * configured standard is also returned.
+     *
+     * \param ppdu the received PPDU
+     * \return the pointer to the supported PHY entity
+     */
+    Ptr<PhyEntity> GetPhyEntityForPpdu(const Ptr<const WifiPpdu> ppdu) const;
+
+    /**
      * Get the supported PHY entity corresponding to the modulation class.
      *
      * \param modulation the modulation class
@@ -1071,11 +1178,29 @@ class WifiPhy : public Object
      * \return the pointer to the supported PHY entity
      */
     Ptr<PhyEntity> GetPhyEntity(WifiStandard standard) const;
+    /**
+     * Get the latest PHY entity supported by this PHY instance.
+     *
+     * \return the latest PHY entity supported by this PHY instance
+     */
+    Ptr<PhyEntity> GetLatestPhyEntity() const;
 
     /**
      * \return the UID of the previously received PPDU (reset to UINT64_MAX upon transmission)
      */
     uint64_t GetPreviouslyRxPpduUid() const;
+
+    /**
+     * Set the UID of the previously received PPDU.
+     *
+     * \param uid the value for the UID of the previously received PPDU
+     *
+     * \note This method shall only be used in exceptional circumstances, such as when a PHY
+     * transmits a response to a Trigger Frame that was received by another PHY. This is the
+     * case, e.g., when an aux PHY of an EMLSR client receives an ICF but it is the main PHY
+     * that switches channel and transmits the response to the ICF.
+     */
+    void SetPreviouslyRxPpduUid(uint64_t uid);
 
     /**
      * \param currentChannelWidth channel width of the current transmission (MHz)
@@ -1090,7 +1215,7 @@ class WifiPhy : public Object
      *
      * This method is only relevant for SpectrumWifiPhy.
      */
-    virtual uint16_t GetGuardBandwidth(uint16_t currentChannelWidth) const = 0;
+    virtual ChannelWidthMhz GetGuardBandwidth(ChannelWidthMhz currentChannelWidth) const = 0;
     /**
      * \return a tuple containing the minimum rejection (in dBr) for the inner band,
      *                            the minimum rejection (in dBr) for the outer band, and
@@ -1107,19 +1232,41 @@ class WifiPhy : public Object
      *
      * \return channel number of the primary channel
      */
-    uint8_t GetPrimaryChannelNumber(uint16_t primaryChannelWidth) const;
+    uint8_t GetPrimaryChannelNumber(ChannelWidthMhz primaryChannelWidth) const;
 
     /**
-     * Get the start band index and the stop band index for a given band
+     * Get the info of a given band
      *
      * \param bandWidth the width of the band to be returned (MHz)
      * \param bandIndex the index of the band to be returned
      *
-     * \return a pair of start and stop indexes that defines the band
+     * \return the info that defines the band
      */
-    virtual WifiSpectrumBand GetBand(uint16_t bandWidth, uint8_t bandIndex = 0);
+    virtual WifiSpectrumBandInfo GetBand(ChannelWidthMhz bandWidth, uint8_t bandIndex = 0) = 0;
+
+    /**
+     * Get the frequency range of the current RF interface.
+     *
+     * \return the frequency range of the current RF interface
+     */
+    virtual FrequencyRange GetCurrentFrequencyRange() const = 0;
+
+    /**
+     * \return the subcarrier spacing corresponding to the configure standard (Hz)
+     */
+    uint32_t GetSubcarrierSpacing() const;
+
+    /**
+     * Callback invoked when the PHY model starts to transmit a signal
+     *
+     * \param ppdu The PPDU being transmitted
+     * \param txVector txVector used for transmitting the PPDU
+     */
+    typedef void (*SignalTransmissionCallback)(Ptr<const WifiPpdu> ppdu,
+                                               const WifiTxVector& txVector);
 
   protected:
+    void DoInitialize() override;
     void DoDispose() override;
 
     /**
@@ -1131,12 +1278,10 @@ class WifiPhy : public Object
      * Perform any actions necessary when user changes operating channel after
      * initialization.
      *
-     * \return zero if the PHY can immediately switch channel, a positive value
-     *         indicating the amount of time to wait until the channel switch can
-     *         be performed or a negative value indicating that channel switch is
-     *         currently not possible (i.e., the radio is in sleep mode)
+     * \return the amount of time to wait until the channel switch can be performed or
+     * std::nullopt if channel switch is currently not possible (i.e., the radio is in sleep mode)
      */
-    Time GetDelayUntilChannelSwitch();
+    std::optional<Time> GetDelayUntilChannelSwitch();
     /**
      * Actually switch channel based on the stored channel settings.
      */
@@ -1148,7 +1293,7 @@ class WifiPhy : public Object
      *
      * \param ppdu the incoming PPDU or nullptr for any signal
      */
-    void SwitchMaybeToCcaBusy(const Ptr<const WifiPpdu> ppdu);
+    void SwitchMaybeToCcaBusy(const Ptr<const WifiPpdu> ppdu = nullptr);
     /**
      * Notify PHY state helper to switch to CCA busy state,
      *
@@ -1168,6 +1313,8 @@ class WifiPhy : public Object
      * \param phyEntity the PHY entity
      */
     void AddPhyEntity(WifiModulationClass modulation, Ptr<PhyEntity> phyEntity);
+
+    uint8_t m_phyId; //!< the index of the PHY in the vector of PHYs held by the WifiNetDevice
 
     Ptr<InterferenceHelper>
         m_interference; //!< Pointer to a helper responsible for interference computations
@@ -1209,6 +1356,9 @@ class WifiPhy : public Object
      * WifiMode::IsMandatory() is true.
      */
     std::map<WifiModulationClass, Ptr<PhyEntity>> m_phyEntities;
+
+    TracedCallback<Ptr<const WifiPpdu>, const WifiTxVector&>
+        m_signalTransmissionCb; //!< Signal Transmission callback
 
   private:
     /**
@@ -1273,6 +1423,12 @@ class WifiPhy : public Object
      *
      */
     void AbortCurrentReception(WifiPhyRxfailureReason reason);
+
+    /**
+     * Callback function when a transmission is completed
+     * \param psdus the PSDUs that have been sent
+     */
+    void TxDone(const WifiConstPsduMap& psdus);
 
     /**
      * Get the PSDU addressed to that PHY in a PPDU (useful for MU PPDU).
@@ -1353,6 +1509,11 @@ class WifiPhy : public Object
     TracedCallback<Ptr<const Packet>, WifiPhyRxfailureReason> m_phyRxDropTrace;
 
     /**
+     * The trace source fired when the PHY layer drops a packet it has received.
+     */
+    TracedCallback<Ptr<const WifiPpdu>, WifiPhyRxfailureReason> m_phyRxPpduDropTrace;
+
+    /**
      * A trace source that emulates a Wi-Fi device in monitor mode
      * sniffing a packet being received.
      *
@@ -1400,8 +1561,9 @@ class WifiPhy : public Object
      */
     static std::map<WifiModulationClass, Ptr<PhyEntity>>& GetStaticPhyEntities();
 
-    WifiStandard m_standard;        //!< WifiStandard
-    WifiPhyBand m_band;             //!< WifiPhyBand
+    WifiStandard m_standard;                    //!< WifiStandard
+    WifiModulationClass m_maxModClassSupported; //!< max modulation class supported
+    WifiPhyBand m_band;                         //!< WifiPhyBand
     ChannelTuple m_channelSettings; //!< Store operating channel settings until initialization
     WifiPhyOperatingChannel m_operatingChannel; //!< Operating channel
     bool m_fixedPhyBand; //!< True to prohibit changing PHY band after initialization
@@ -1412,7 +1574,7 @@ class WifiPhy : public Object
     Time m_ackTxTime;      //!< estimated Ack TX time
     Time m_blockAckTxTime; //!< estimated BlockAck TX time
 
-    double m_rxSensitivityW;  //!< Receive sensitivity threshold in watts
+    double m_rxSensitivityDbm; //!< Receive sensitivity threshold in dBm
     double m_ccaEdThresholdW; //!< Clear channel assessment (CCA) energy detection (ED) threshold in
                               //!< watts
     double m_ccaSensitivityThresholdW; //!< Clear channel assessment (CCA) modulation and coding

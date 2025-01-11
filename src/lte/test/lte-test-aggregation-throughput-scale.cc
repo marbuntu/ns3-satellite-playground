@@ -48,12 +48,16 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE("LteAggregationThroughputScaleTest");
 
 LteAggregationThroughputScaleTestSuite::LteAggregationThroughputScaleTestSuite()
-    : TestSuite("lte-aggregation-throughput-scale", SYSTEM)
+    : TestSuite("lte-aggregation-throughput-scale", Type::SYSTEM)
 {
     AddTestCase(new LteAggregationThroughputScaleTestCase("Carrier aggregation throughput scale"),
-                TestCase::QUICK);
+                TestCase::Duration::QUICK);
 }
 
+/**
+ * \ingroup lte-test
+ * Static variable for test initialization
+ */
 static LteAggregationThroughputScaleTestSuite g_lteAggregationThroughputScaleTestSuite;
 
 LteAggregationThroughputScaleTestCase::LteAggregationThroughputScaleTestCase(std::string name)

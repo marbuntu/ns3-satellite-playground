@@ -106,7 +106,7 @@ TcpRateLinux::GenerateSample(uint32_t delivered,
 
     /* Normally we expect m_interval >= minRtt.
      * Note that rate may still be over-estimated when a spuriously
-     * retransmistted skb was first (s)acked because "interval_us"
+     * retransmitted skb was first (s)acked because "interval_us"
      * is under-estimated (up to an RTT). However continuously
      * measuring the delivery rate during loss recovery is crucial
      * for connections suffer heavy or prolonged losses.
@@ -183,7 +183,7 @@ TcpRateLinux::SkbDelivered(TcpTxItem* skb)
 
     if (m_rateSample.m_priorDelivered == 0 || skbInfo.m_delivered > m_rateSample.m_priorDelivered)
     {
-        m_rateSample.m_ackElapsed = Simulator::Now() - m_rateSample.m_priorTime;
+        m_rateSample.m_ackElapsed = Simulator::Now() - skbInfo.m_deliveredTime;
         m_rateSample.m_priorDelivered = skbInfo.m_delivered;
         m_rateSample.m_priorTime = skbInfo.m_deliveredTime;
         m_rateSample.m_isAppLimited = skbInfo.m_isAppLimited;
@@ -238,7 +238,7 @@ TcpRateLinux::SkbSent(TcpTxItem* skb, bool isStartOfTransmission)
 }
 
 std::ostream&
-operator<<(std::ostream& os, const TcpRateLinux::TcpRateConnection& rate)
+operator<<(std::ostream& os, const TcpRateOps::TcpRateConnection& rate)
 {
     os << "m_delivered      = " << rate.m_delivered << std::endl;
     os << "m_deliveredTime  = " << rate.m_deliveredTime << std::endl;
@@ -252,7 +252,7 @@ operator<<(std::ostream& os, const TcpRateLinux::TcpRateConnection& rate)
 }
 
 std::ostream&
-operator<<(std::ostream& os, const TcpRateLinux::TcpRateSample& sample)
+operator<<(std::ostream& os, const TcpRateOps::TcpRateSample& sample)
 {
     os << "m_deliveryRate  = " << sample.m_deliveryRate << std::endl;
     os << " m_isAppLimited = " << sample.m_isAppLimited << std::endl;

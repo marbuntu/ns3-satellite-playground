@@ -96,7 +96,7 @@ TrickleTimerTestCase::TrickleTimerTestCase()
 void
 TrickleTimerTestCase::ExpireTimer()
 {
-    if (m_enableDataCollection == false)
+    if (!m_enableDataCollection)
     {
         return;
     }
@@ -141,6 +141,8 @@ TrickleTimerTestCase::TestSteadyState(Time unit)
                              m_expiredTimes.end(),
                              expirationFrequency.begin());
     expirationFrequency.erase(expirationFrequency.begin());
+
+    NS_TEST_ASSERT_MSG_EQ(expirationFrequency.empty(), false, "No expiration frequency");
 
     int64x64_t min =
         (*std::min_element(expirationFrequency.begin(), expirationFrequency.end())) / unit;

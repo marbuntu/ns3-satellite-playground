@@ -32,6 +32,9 @@
 
 #include <array>
 
+#undef NS_LOG_APPEND_CONTEXT
+#define NS_LOG_APPEND_CONTEXT WIFI_PHY_NS_LOG_APPEND_CONTEXT(m_wifiPhy)
+
 namespace ns3
 {
 
@@ -49,7 +52,7 @@ const PhyEntity::PpduFormats DsssPhy::m_dsssPpduFormats {
                              WIFI_PPDU_FIELD_DATA } },
     { WIFI_PREAMBLE_SHORT, { WIFI_PPDU_FIELD_PREAMBLE,      // Short PHY preamble
                              WIFI_PPDU_FIELD_NON_HT_HEADER, // Short PHY header
-                             WIFI_PPDU_FIELD_DATA } }
+                             WIFI_PPDU_FIELD_DATA } },
 };
 
 const PhyEntity::ModulationLookupTable DsssPhy::m_dsssModulationLookupTable {
@@ -57,7 +60,7 @@ const PhyEntity::ModulationLookupTable DsssPhy::m_dsssModulationLookupTable {
   { "DsssRate1Mbps",   { WIFI_CODE_RATE_UNDEFINED, 2 } },
   { "DsssRate2Mbps",   { WIFI_CODE_RATE_UNDEFINED, 4 } },
   { "DsssRate5_5Mbps", { WIFI_CODE_RATE_UNDEFINED, 16 } },
-  { "DsssRate11Mbps",  { WIFI_CODE_RATE_UNDEFINED, 256 } }
+  { "DsssRate11Mbps",  { WIFI_CODE_RATE_UNDEFINED, 256 } },
 };
 
 // clang-format on
@@ -74,7 +77,7 @@ const std::array<uint64_t, 4>&
 GetDsssRatesBpsList()
 {
     return s_dsssRatesBpsList;
-};
+}
 
 DsssPhy::DsssPhy()
 {
@@ -200,8 +203,7 @@ DsssPhy::BuildPpdu(const WifiConstPsduMap& psdus, const WifiTxVector& txVector, 
     NS_LOG_FUNCTION(this << psdus << txVector << ppduDuration);
     return Create<DsssPpdu>(psdus.begin()->second,
                             txVector,
-                            m_wifiPhy->GetOperatingChannel().GetPrimaryChannelCenterFrequency(
-                                txVector.GetChannelWidth()),
+                            m_wifiPhy->GetOperatingChannel(),
                             ppduDuration,
                             ObtainNextUid(txVector));
 }
@@ -242,7 +244,7 @@ DsssPhy::EndReceiveHeader(Ptr<Event> event)
     return status;
 }
 
-uint16_t
+ChannelWidthMhz
 DsssPhy::GetRxChannelWidth(const WifiTxVector& txVector) const
 {
     if (m_wifiPhy->GetChannelWidth() > 20)
@@ -258,23 +260,23 @@ DsssPhy::GetRxChannelWidth(const WifiTxVector& txVector) const
     return PhyEntity::GetRxChannelWidth(txVector);
 }
 
-uint16_t
+ChannelWidthMhz
 DsssPhy::GetMeasurementChannelWidth(const Ptr<const WifiPpdu> ppdu) const
 {
     return ppdu ? GetRxChannelWidth(ppdu->GetTxVector()) : 22;
 }
 
 Ptr<SpectrumValue>
-DsssPhy::GetTxPowerSpectralDensity(double txPowerW,
-                                   Ptr<const WifiPpdu> /* ppdu */,
-                                   const WifiTxVector& txVector) const
+DsssPhy::GetTxPowerSpectralDensity(double txPowerW, Ptr<const WifiPpdu> ppdu) const
 {
-    uint16_t centerFrequency = GetCenterFrequencyForChannelWidth(txVector);
-    uint16_t channelWidth = txVector.GetChannelWidth();
-    NS_LOG_FUNCTION(this << centerFrequency << channelWidth << txPowerW);
+    const auto& centerFrequencies = ppdu->GetTxCenterFreqs();
+    NS_ASSERT(centerFrequencies.size() == 1);
+    const auto& txVector = ppdu->GetTxVector();
+    const auto channelWidth = txVector.GetChannelWidth();
+    NS_LOG_FUNCTION(this << centerFrequencies.front() << channelWidth << txPowerW);
     NS_ABORT_MSG_IF(channelWidth != 22, "Invalid channel width for DSSS");
     Ptr<SpectrumValue> v =
-        WifiSpectrumValueHelper::CreateDsssTxPowerSpectralDensity(centerFrequency,
+        WifiSpectrumValueHelper::CreateDsssTxPowerSpectralDensity(centerFrequencies.front(),
                                                                   txPowerW,
                                                                   GetGuardBandwidth(channelWidth));
     return v;
@@ -313,7 +315,7 @@ DsssPhy::GetDsssRate(uint64_t rate)
     {                                                                                              \
         static WifiMode mode = CreateDsssMode(#x, WIFI_MOD_CLASS_##m);                             \
         return mode;                                                                               \
-    };
+    }
 
 // Clause 15 rates (DSSS)
 GET_DSSS_MODE(DsssRate1Mbps, DSSS)
@@ -382,7 +384,7 @@ DsssPhy::GetDataRate(const std::string& name, WifiModulationClass modClass)
         NS_FATAL_ERROR("Incorrect modulation class, must specify either WIFI_MOD_CLASS_DSSS or "
                        "WIFI_MOD_CLASS_HR_DSSS!");
     }
-    uint16_t numberOfBitsPerSubcarrier = static_cast<uint16_t>(log2(constellationSize));
+    auto numberOfBitsPerSubcarrier = static_cast<uint16_t>(log2(constellationSize));
     uint64_t dataRate = ((11000000 / divisor) * numberOfBitsPerSubcarrier);
     return dataRate;
 }

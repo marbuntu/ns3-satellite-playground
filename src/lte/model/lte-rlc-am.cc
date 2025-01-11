@@ -18,12 +18,13 @@
  *         Nicola Baldo <nbaldo@cttc.es>
  */
 
-#include "ns3/lte-rlc-am.h"
+#include "lte-rlc-am.h"
+
+#include "lte-rlc-am-header.h"
+#include "lte-rlc-sdu-status-tag.h"
+#include "lte-rlc-tag.h"
 
 #include "ns3/log.h"
-#include "ns3/lte-rlc-am-header.h"
-#include "ns3/lte-rlc-sdu-status-tag.h"
-#include "ns3/lte-rlc-tag.h"
 #include "ns3/simulator.h"
 
 namespace ns3
@@ -211,7 +212,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
         return;
     }
 
-    if (m_statusPduRequested && !m_statusProhibitTimer.IsRunning())
+    if (m_statusPduRequested && !m_statusProhibitTimer.IsPending())
     {
         if (txOpParams.bytes < m_statusPduBufferSize)
         {
@@ -237,7 +238,6 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
                                                    << m_vrMs.GetValue());
         SequenceNumber10 sn;
         sn.SetModulusBase(m_vrR);
-        std::map<uint16_t, PduBuffer>::iterator pduIt;
         for (sn = m_vrR; sn < m_vrMs; sn++)
         {
             NS_LOG_LOGIC("SN = " << sn);
@@ -246,7 +246,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
                 NS_LOG_LOGIC("Can't fit more NACKs in STATUS PDU");
                 break;
             }
-            pduIt = m_rxonBuffer.find(sn.GetValue());
+            auto pduIt = m_rxonBuffer.find(sn.GetValue());
             if (pduIt == m_rxonBuffer.end() || (!(pduIt->second.m_pduComplete)))
             {
                 NS_LOG_LOGIC("adding NACK_SN " << sn.GetValue());
@@ -257,7 +257,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
         // 3GPP TS 36.322 section 6.2.2.1.4 ACK SN
         // find the  SN of the next not received RLC Data PDU
         // which is not reported as missing in the STATUS PDU.
-        pduIt = m_rxonBuffer.find(sn.GetValue());
+        auto pduIt = m_rxonBuffer.find(sn.GetValue());
         while ((sn < m_vrMs) && (pduIt != m_rxonBuffer.end()) && (pduIt->second.m_pduComplete))
         {
             NS_LOG_LOGIC("SN = " << sn << " < " << m_vrMs << " = " << (sn < m_vrMs));
@@ -340,7 +340,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
                         m_pollSn = m_vtS - 1;
                         NS_LOG_LOGIC("New POLL_SN = " << m_pollSn);
 
-                        if (!m_pollRetransmitTimer.IsRunning())
+                        if (!m_pollRetransmitTimer.IsPending())
                         {
                             NS_LOG_LOGIC("Start PollRetransmit timer");
 
@@ -469,7 +469,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
 
     // Remove the first packet from the transmission buffer.
     // If only a segment of the packet is taken, then the remaining is given back later
-    if (m_txonBuffer.size() == 0)
+    if (m_txonBuffer.empty())
     {
         NS_LOG_LOGIC("No data pending");
         return;
@@ -578,7 +578,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
             // (NO more segments) ? exit
             // break;
         }
-        else if ((nextSegmentSize - firstSegment->GetSize() <= 2) || (m_txonBuffer.size() == 0))
+        else if ((nextSegmentSize - firstSegment->GetSize() <= 2) || m_txonBuffer.empty())
         {
             NS_LOG_LOGIC(
                 "    IF nextSegmentSize - firstSegment->GetSize () <= 2 || txonBuffer.size == 0");
@@ -597,7 +597,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
             nextSegmentId++;
 
             NS_LOG_LOGIC("        SDUs in TxBuffer  = " << m_txonBuffer.size());
-            if (m_txonBuffer.size() > 0)
+            if (!m_txonBuffer.empty())
             {
                 NS_LOG_LOGIC("        First SDU buffer  = " << m_txonBuffer.begin()->m_pdu);
                 NS_LOG_LOGIC(
@@ -627,7 +627,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
             nextSegmentId++;
 
             NS_LOG_LOGIC("        SDUs in TxBuffer  = " << m_txonBuffer.size());
-            if (m_txonBuffer.size() > 0)
+            if (!m_txonBuffer.empty())
             {
                 NS_LOG_LOGIC("        First SDU buffer  = " << m_txonBuffer.begin()->m_pdu);
                 NS_LOG_LOGIC(
@@ -659,8 +659,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
 
     // Calculate FramingInfo flag according the status of the SDUs in the DataField
     uint8_t framingInfo = 0;
-    std::vector<Ptr<Packet>>::iterator it;
-    it = dataField.begin();
+    auto it = dataField.begin();
 
     // FIRST SEGMENT
     LteRlcSduStatusTag tag;
@@ -729,7 +728,7 @@ LteRlcAm::DoNotifyTxOpportunity(LteMacSapUser::TxOpportunityParameters txOpParam
         m_pollSn = m_vtS - 1;
         NS_LOG_LOGIC("New POLL_SN = " << m_pollSn);
 
-        if (!m_pollRetransmitTimer.IsRunning())
+        if (!m_pollRetransmitTimer.IsPending())
         {
             NS_LOG_LOGIC("Start PollRetransmit timer");
 
@@ -885,7 +884,7 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
             m_statusPduRequested = true;
             m_statusPduBufferSize = 4;
 
-            if (!m_statusProhibitTimer.IsRunning())
+            if (!m_statusProhibitTimer.IsPending())
             {
                 DoReportBufferStatus();
             }
@@ -925,10 +924,10 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
             //         - discard the duplicate byte segments.
             // note: re-segmentation of AMD PDU is currently not supported,
             // so we just check that the segment was not received before
-            std::map<uint16_t, PduBuffer>::iterator it = m_rxonBuffer.find(seqNumber.GetValue());
+            auto it = m_rxonBuffer.find(seqNumber.GetValue());
             if (it != m_rxonBuffer.end())
             {
-                NS_ASSERT(it->second.m_byteSegments.size() > 0);
+                NS_ASSERT(!it->second.m_byteSegments.empty());
                 NS_ASSERT_MSG(it->second.m_byteSegments.size() == 1,
                               "re-segmentation not supported");
                 NS_LOG_LOGIC("PDU segment already received, discarded");
@@ -958,7 +957,7 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
         //     - update VR(MS) to the SN of the first AMD PDU with SN > current VR(MS) for
         //       which not all byte segments have been received;
 
-        std::map<uint16_t, PduBuffer>::iterator it = m_rxonBuffer.find(m_vrMs.GetValue());
+        auto it = m_rxonBuffer.find(m_vrMs.GetValue());
         if (it != m_rxonBuffer.end() && it->second.m_pduComplete)
         {
             int firstVrMs = m_vrMs.GetValue();
@@ -985,7 +984,7 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
 
         if (seqNumber == m_vrR)
         {
-            std::map<uint16_t, PduBuffer>::iterator it = m_rxonBuffer.find(seqNumber.GetValue());
+            auto it = m_rxonBuffer.find(seqNumber.GetValue());
             if (it != m_rxonBuffer.end() && it->second.m_pduComplete)
             {
                 it = m_rxonBuffer.find(m_vrR.GetValue());
@@ -1019,7 +1018,7 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
         //     - if VR(X) falls outside of the receiving window and VR(X) is not equal to VR(MR):
         //         - stop and reset t-Reordering;
 
-        if (m_reorderingTimer.IsRunning())
+        if (m_reorderingTimer.IsPending())
         {
             NS_LOG_LOGIC("Reordering timer is running");
             if ((m_vrX == m_vrR) || ((!IsInsideReceivingWindow(m_vrX)) && (m_vrX != m_vrMr)))
@@ -1036,7 +1035,7 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
         //         - start t-Reordering;
         //         - set VR(X) to VR(H).
 
-        if (!m_reorderingTimer.IsRunning())
+        if (!m_reorderingTimer.IsPending())
         {
             NS_LOG_LOGIC("Reordering timer is not running");
             if (m_vrH > m_vrR)
@@ -1077,7 +1076,7 @@ LteRlcAm::DoReceivePdu(LteMacSapUser::ReceivePduParameters rxPduParams)
 
             uint16_t seqNumberValue = sn.GetValue();
 
-            if (m_pollRetransmitTimer.IsRunning() && (seqNumberValue == m_pollSn.GetValue()))
+            if (m_pollRetransmitTimer.IsPending() && (seqNumberValue == m_pollSn.GetValue()))
             {
                 m_pollRetransmitTimer.Cancel();
             }
@@ -1242,15 +1241,19 @@ LteRlcAm::ReassembleAndDeliver(Ptr<Packet> packet)
         }
     } while (extensionBit == 1);
 
-    std::list<Ptr<Packet>>::iterator it;
-
     // Current reassembling state
     if (m_reassemblingState == WAITING_S0_FULL)
+    {
         NS_LOG_LOGIC("Reassembling State = 'WAITING_S0_FULL'");
+    }
     else if (m_reassemblingState == WAITING_SI_SF)
+    {
         NS_LOG_LOGIC("Reassembling State = 'WAITING_SI_SF'");
+    }
     else
+    {
         NS_LOG_LOGIC("Reassembling State = Unknown state");
+    }
 
     // Received framing Info
     NS_LOG_LOGIC("Framing Info = " << (uint16_t)framingInfo);
@@ -1270,7 +1273,7 @@ LteRlcAm::ReassembleAndDeliver(Ptr<Packet> packet)
                 /**
                  * Deliver one or multiple PDUs
                  */
-                for (it = m_sdusBuffer.begin(); it != m_sdusBuffer.end(); it++)
+                for (auto it = m_sdusBuffer.begin(); it != m_sdusBuffer.end(); it++)
                 {
                     m_rlcSapUser->ReceivePdcpPdu(*it);
                 }
@@ -1400,7 +1403,7 @@ LteRlcAm::ReassembleAndDeliver(Ptr<Packet> packet)
                 /**
                  * Deliver one or multiple PDUs
                  */
-                for (it = m_sdusBuffer.begin(); it != m_sdusBuffer.end(); it++)
+                for (auto it = m_sdusBuffer.begin(); it != m_sdusBuffer.end(); it++)
                 {
                     m_rlcSapUser->ReceivePdcpPdu(*it);
                 }
@@ -1459,7 +1462,7 @@ LteRlcAm::ReassembleAndDeliver(Ptr<Packet> packet)
                  */
                 m_sdusBuffer.pop_front();
 
-                if (m_sdusBuffer.size() > 0)
+                if (!m_sdusBuffer.empty())
                 {
                     /**
                      * Deliver zero, one or multiple PDUs
@@ -1577,7 +1580,7 @@ LteRlcAm::ReassembleAndDeliver(Ptr<Packet> packet)
                  */
                 m_sdusBuffer.pop_front();
 
-                if (m_sdusBuffer.size() > 0)
+                if (!m_sdusBuffer.empty())
                 {
                     /**
                      * Deliver zero, one or multiple PDUs
@@ -1662,7 +1665,7 @@ LteRlcAm::DoReportBufferStatus()
     r.retxQueueSize = m_retxBufferSize + m_txedBufferSize;
     r.retxQueueHolDelay = retxQueueHolDelay.GetMilliSeconds();
 
-    if (m_statusPduRequested && !m_statusProhibitTimer.IsRunning())
+    if (m_statusPduRequested && !m_statusProhibitTimer.IsPending())
     {
         r.statusPduSize = m_statusPduBufferSize;
     }
@@ -1701,7 +1704,7 @@ LteRlcAm::ExpireReorderingTimer()
 
     m_vrMs = m_vrX;
     int firstVrMs = m_vrMs.GetValue();
-    std::map<uint16_t, PduBuffer>::iterator it = m_rxonBuffer.find(m_vrMs.GetValue());
+    auto it = m_rxonBuffer.find(m_vrMs.GetValue());
     while (it != m_rxonBuffer.end() && it->second.m_pduComplete)
     {
         m_vrMs++;

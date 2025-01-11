@@ -21,10 +21,11 @@
 #ifndef MESH_WIFI_INTERFACE_MAC_H
 #define MESH_WIFI_INTERFACE_MAC_H
 
+#include "mesh-wifi-interface-mac-plugin.h"
+
 #include "ns3/callback.h"
 #include "ns3/event-id.h"
 #include "ns3/mac48-address.h"
-#include "ns3/mesh-wifi-interface-mac-plugin.h"
 #include "ns3/mgt-headers.h"
 #include "ns3/nstime.h"
 #include "ns3/packet.h"
@@ -64,8 +65,6 @@ class MeshWifiInterfaceMac : public WifiMac
     ~MeshWifiInterfaceMac() override;
 
     // Inherited from WifiMac
-    void Enqueue(Ptr<Packet> packet, Mac48Address to, Mac48Address from) override;
-    void Enqueue(Ptr<Packet> packet, Mac48Address to) override;
     bool SupportsSendFrom() const override;
     void SetLinkUpCallback(Callback<void> linkUp) override;
     bool CanForwardPacketsTo(Mac48Address to) const override;
@@ -163,13 +162,13 @@ class MeshWifiInterfaceMac : public WifiMac
      * \param rates Rates.
      * \return true if rates are supported
      */
-    bool CheckSupportedRates(SupportedRates rates) const;
+    bool CheckSupportedRates(AllSupportedRates rates) const;
 
     /**
      * Get supported rates.
      * \return list of supported bitrates
      */
-    SupportedRates GetSupportedRates() const;
+    AllSupportedRates GetSupportedRates() const;
 
     /// \name Metric Calculation routines:
     ///@{
@@ -204,12 +203,6 @@ class MeshWifiInterfaceMac : public WifiMac
      */
     void SetBeaconGeneration(bool enable);
     /**
-     * Finish configuration based on the WifiStandard being provided
-     *
-     * \param standard the WifiStandard being configured
-     */
-    void ConfigureStandard(enum WifiStandard standard) override;
-    /**
      * \param cwMin the minimum contention window size
      * \param cwMax the maximum contention window size
      *
@@ -226,9 +219,11 @@ class MeshWifiInterfaceMac : public WifiMac
      * \param stream first stream index to use
      * \return the number of stream indices assigned by this model
      */
-    int64_t AssignStreams(int64_t stream);
+    int64_t AssignStreams(int64_t stream) override;
 
   private:
+    void DoCompleteConfig() override;
+
     /**
      * Frame receive handler
      *
@@ -236,14 +231,6 @@ class MeshWifiInterfaceMac : public WifiMac
      * \param linkId the ID of the link the frame was received over
      */
     void Receive(Ptr<const WifiMpdu> mpdu, uint8_t linkId) override;
-    /**
-     * Send frame. Frame is supposed to be tagged by routing information.
-     *
-     * \param packet the packet to forward
-     * \param from the from address
-     * \param to the to address
-     */
-    void ForwardDown(Ptr<Packet> packet, Mac48Address from, Mac48Address to);
     /**
      * Send beacon.
      */
@@ -267,6 +254,7 @@ class MeshWifiInterfaceMac : public WifiMac
     typedef std::vector<Ptr<MeshWifiInterfaceMacPlugin>> PluginList; ///< PluginList typedef
 
     void DoInitialize() override;
+    void Enqueue(Ptr<WifiMpdu> mpdu, Mac48Address to, Mac48Address from) override;
 
     /// \name Mesh timing intervals
     ///@{
@@ -311,9 +299,6 @@ class MeshWifiInterfaceMac : public WifiMac
     };
 
     Statistics m_stats; ///< statistics
-
-    /// Current standard: needed to configure metric
-    WifiStandard m_standard;
 
     /// Add randomness to beacon generation
     Ptr<UniformRandomVariable> m_coefficient;

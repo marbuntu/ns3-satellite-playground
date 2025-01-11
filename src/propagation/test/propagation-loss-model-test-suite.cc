@@ -53,13 +53,13 @@ class FriisPropagationLossModelTestCase : public TestCase
     void DoRun() override;
 
     /// Test vector
-    typedef struct
+    struct TestVector
     {
         Vector m_position;  //!< Test node position
         double m_pt;        //!< Tx power [dBm]
         double m_pr;        //!< Rx power [W]
         double m_tolerance; //!< Tolerance
-    } TestVector;
+    };
 
     /// Test vectors
     TestVectors<TestVector> m_testVectors;
@@ -164,13 +164,13 @@ class TwoRayGroundPropagationLossModelTestCase : public TestCase
     void DoRun() override;
 
     /// Test vector
-    typedef struct
+    struct TestVector
     {
         Vector m_position;  //!< Test node position
         double m_pt;        //!< Tx power [dBm]
         double m_pr;        //!< Rx power [W]
         double m_tolerance; //!< Tolerance
-    } TestVector;
+    };
 
     /// Test vectors
     TestVectors<TestVector> m_testVectors;
@@ -304,13 +304,13 @@ class LogDistancePropagationLossModelTestCase : public TestCase
     void DoRun() override;
 
     /// Test vector
-    typedef struct
+    struct TestVector
     {
         Vector m_position;  //!< Test node position
         double m_pt;        //!< Tx power [dBm]
         double m_pr;        //!< Rx power [W]
         double m_tolerance; //!< Tolerance
-    } TestVector;
+    };
 
     /// Test vectors
     TestVectors<TestVector> m_testVectors;
@@ -508,13 +508,13 @@ class PropagationLossModelsTestSuite : public TestSuite
 };
 
 PropagationLossModelsTestSuite::PropagationLossModelsTestSuite()
-    : TestSuite("propagation-loss-model", UNIT)
+    : TestSuite("propagation-loss-model", Type::UNIT)
 {
-    AddTestCase(new FriisPropagationLossModelTestCase, TestCase::QUICK);
-    AddTestCase(new TwoRayGroundPropagationLossModelTestCase, TestCase::QUICK);
-    AddTestCase(new LogDistancePropagationLossModelTestCase, TestCase::QUICK);
-    AddTestCase(new MatrixPropagationLossModelTestCase, TestCase::QUICK);
-    AddTestCase(new RangePropagationLossModelTestCase, TestCase::QUICK);
+    AddTestCase(new FriisPropagationLossModelTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new TwoRayGroundPropagationLossModelTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new LogDistancePropagationLossModelTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new MatrixPropagationLossModelTestCase, TestCase::Duration::QUICK);
+    AddTestCase(new RangePropagationLossModelTestCase, TestCase::Duration::QUICK);
 }
 
 /// Static variable for test initialization

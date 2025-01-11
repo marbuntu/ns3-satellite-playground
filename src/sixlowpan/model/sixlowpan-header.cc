@@ -144,8 +144,6 @@ SixLowPanHc1::GetSerializedSize() const
         serializedSize += 16;
         break;
     case HC1_PIIC:
-        serializedSize += 8;
-        break;
     case HC1_PCII:
         serializedSize += 8;
         break;
@@ -158,8 +156,6 @@ SixLowPanHc1::GetSerializedSize() const
         serializedSize += 16;
         break;
     case HC1_PIIC:
-        serializedSize += 8;
-        break;
     case HC1_PCII:
         serializedSize += 8;
         break;
@@ -167,7 +163,7 @@ SixLowPanHc1::GetSerializedSize() const
         break;
     }
 
-    if (m_tcflCompression == false)
+    if (!m_tcflCompression)
     {
         serializedSize += 4;
     }
@@ -253,7 +249,7 @@ SixLowPanHc1::Serialize(Buffer::Iterator start) const
         break;
     }
 
-    if (m_tcflCompression == false)
+    if (!m_tcflCompression)
     {
         i.WriteU8(m_trafficClass);
         uint8_t temp[3];
@@ -347,7 +343,7 @@ SixLowPanHc1::Deserialize(Buffer::Iterator start)
         break;
     }
 
-    if (m_tcflCompression == false)
+    if (!m_tcflCompression)
     {
         m_trafficClass = i.ReadU8();
         uint8_t temp[3];
@@ -938,7 +934,7 @@ SixLowPanIphc::GetSerializedSize() const
     default:
         break;
     }
-    if (GetNh() == false)
+    if (!GetNh())
     {
         serializedSize++;
     }
@@ -949,7 +945,7 @@ SixLowPanIphc::GetSerializedSize() const
     switch (GetSam())
     {
     case HC_INLINE:
-        if (GetSac() == false)
+        if (!GetSac())
         {
             serializedSize += 16;
         }
@@ -964,12 +960,12 @@ SixLowPanIphc::GetSerializedSize() const
     default:
         break;
     }
-    if (GetM() == false)
+    if (!GetM())
     {
         switch (GetDam())
         {
         case HC_INLINE:
-            if (GetDac() == false)
+            if (!GetDac())
             {
                 serializedSize += 16;
             }
@@ -990,7 +986,7 @@ SixLowPanIphc::GetSerializedSize() const
         switch (GetDam())
         {
         case HC_INLINE:
-            if (GetDac() == false)
+            if (!GetDac())
             {
                 serializedSize += 16;
             }
@@ -1000,20 +996,20 @@ SixLowPanIphc::GetSerializedSize() const
             }
             break;
         case HC_COMPR_64:
-            if (GetDac() == false)
+            if (!GetDac())
             {
                 serializedSize += 6;
             }
             break;
         case HC_COMPR_16:
-            if (GetDac() == false)
+            if (!GetDac())
             {
                 serializedSize += 4;
             }
             break;
         case HC_COMPR_0:
         default:
-            if (GetDac() == false)
+            if (!GetDac())
             {
                 serializedSize++;
             }
@@ -1065,7 +1061,7 @@ SixLowPanIphc::Serialize(Buffer::Iterator start) const
         break;
     }
     // Next Header
-    if (GetNh() == false)
+    if (!GetNh())
     {
         i.WriteU8(m_nextHeader);
     }
@@ -1078,7 +1074,7 @@ SixLowPanIphc::Serialize(Buffer::Iterator start) const
     switch (GetSam())
     {
     case HC_INLINE:
-        if (GetSac() == false)
+        if (!GetSac())
         {
             i.Write(m_srcInlinePart, 16);
         }
@@ -1094,7 +1090,7 @@ SixLowPanIphc::Serialize(Buffer::Iterator start) const
         break;
     }
     // Destination Address
-    if (GetM() == false)
+    if (!GetM())
     {
         // unicast
         switch (GetDam())
@@ -1184,7 +1180,7 @@ SixLowPanIphc::Deserialize(Buffer::Iterator start)
         break;
     }
     // Next Header
-    if (GetNh() == false)
+    if (!GetNh())
     {
         m_nextHeader = i.ReadU8();
     }
@@ -1210,7 +1206,7 @@ SixLowPanIphc::Deserialize(Buffer::Iterator start)
     switch (GetSam())
     {
     case HC_INLINE:
-        if (GetSac() == false)
+        if (!GetSac())
         {
             i.Read(m_srcInlinePart, 16);
         }
@@ -1228,7 +1224,7 @@ SixLowPanIphc::Deserialize(Buffer::Iterator start)
 
     // Destination Address
     memset(m_dstInlinePart, 0x00, sizeof(m_dstInlinePart));
-    if (GetM() == false)
+    if (!GetM())
     {
         // unicast
         switch (GetDam())
@@ -1552,7 +1548,7 @@ uint32_t
 SixLowPanNhcExtension::GetSerializedSize() const
 {
     uint32_t serializedSize = 2;
-    if (GetNh() == false)
+    if (!GetNh())
     {
         serializedSize++;
     }
@@ -1564,7 +1560,7 @@ SixLowPanNhcExtension::Serialize(Buffer::Iterator start) const
 {
     Buffer::Iterator i = start;
     i.WriteU8(m_nhcExtensionHeader);
-    if (GetNh() == false)
+    if (!GetNh())
     {
         i.WriteU8(m_nhcNextHeader);
     }
@@ -1577,7 +1573,7 @@ SixLowPanNhcExtension::Deserialize(Buffer::Iterator start)
 {
     Buffer::Iterator i = start;
     m_nhcExtensionHeader = i.ReadU8();
-    if (GetNh() == false)
+    if (!GetNh())
     {
         m_nhcNextHeader = i.ReadU8();
     }

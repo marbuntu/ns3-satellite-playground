@@ -31,12 +31,12 @@ using namespace ns3;
 
 /**
  * \ingroup traffic-control
+ * \ingroup tests
  * \defgroup traffic-control-test traffic-control module tests
  */
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Ared Queue Disc Test Item
  */
@@ -83,7 +83,6 @@ AredQueueDiscTestItem::Mark()
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Ared Queue Disc Test Case
  */
@@ -413,7 +412,6 @@ AredQueueDiscTestCase::DoRun()
 
 /**
  * \ingroup traffic-control-test
- * \ingroup tests
  *
  * \brief Ared Queue Disc Test Suite
  */
@@ -421,8 +419,8 @@ static class AredQueueDiscTestSuite : public TestSuite
 {
   public:
     AredQueueDiscTestSuite()
-        : TestSuite("adaptive-red-queue-disc", UNIT)
+        : TestSuite("adaptive-red-queue-disc", Type::UNIT)
     {
-        AddTestCase(new AredQueueDiscTestCase(), TestCase::QUICK);
+        AddTestCase(new AredQueueDiscTestCase(), TestCase::Duration::QUICK);
     }
 } g_aredQueueDiscTestSuite; ///< the test suite
